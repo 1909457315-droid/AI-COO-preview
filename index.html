@@ -91,6 +91,7 @@
       align-items: center;
       gap: 10px;
       transition: background .14s ease, color .14s ease;
+      overflow: hidden;
     }
 
     .nav-item:hover {
@@ -120,6 +121,13 @@
     .nav-item.active .nav-icon {
       background: rgba(255,255,255,.55);
       color: #174ea6;
+    }
+
+    .nav-label {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .content {
@@ -869,7 +877,7 @@
       .nav-item {
         width: 100%;
         min-width: 0;
-        min-height: 62px;
+        min-height: 54px;
         padding: 7px 3px;
         flex-direction: column;
         justify-content: center;
@@ -880,6 +888,7 @@
         border-radius: 16px;
       }
       .nav-icon { width: 24px; height: 24px; border-radius: 8px; }
+      .nav-label { display: none; }
       .state-pill { display: none; }
       .home-layout, .detail-grid { grid-template-columns: 1fr; }
       .summary-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -903,10 +912,10 @@
           <h1>AI COO</h1>
         </div>
         <nav class="sidebar-nav" aria-label="AI COO 主要页面">
-          <button class="nav-item active" type="button" data-open="home"><span class="nav-icon">D</span><span>数据决策</span></button>
-          <button class="nav-item" type="button" data-open="initiate"><span class="nav-icon">N</span><span>主动发起</span></button>
-          <button class="nav-item" type="button" data-open="action"><span class="nav-icon">A</span><span>Action Hub</span></button>
-          <button class="nav-item" type="button" data-open="research"><span class="nav-icon">R</span><span>Research Center</span></button>
+          <button class="nav-item active" type="button" data-open="home" aria-label="数据决策" title="数据决策"><span class="nav-icon">D</span><span class="nav-label">数据决策</span></button>
+          <button class="nav-item" type="button" data-open="initiate" aria-label="主动发起" title="主动发起"><span class="nav-icon">N</span><span class="nav-label">主动发起</span></button>
+          <button class="nav-item" type="button" data-open="action" aria-label="Action Hub" title="Action Hub"><span class="nav-icon">A</span><span class="nav-label">Action Hub</span></button>
+          <button class="nav-item" type="button" data-open="research" aria-label="Research Center" title="Research Center"><span class="nav-icon">R</span><span class="nav-label">Research Center</span></button>
         </nav>
         <div class="state-pill"><span class="dot"></span><span id="saveState">本地状态：已载入</span></div>
       </aside>
