@@ -471,7 +471,7 @@
     }
 
     .home-grid {
-      grid-template-columns: repeat(2, minmax(520px, 1fr));
+      grid-template-columns: 1fr;
     }
 
     .detail-card {
@@ -1288,11 +1288,6 @@
       .state-pill { width: 100%; justify-content: center; }
     }
 
-    @media (min-width: 921px) and (max-width: 1280px) {
-      .home-grid {
-        grid-template-columns: 1fr;
-      }
-    }
   </style>
 </head>
 <body>
@@ -1343,7 +1338,7 @@
             </section>
           </div>
         </article>
-        <article class="detail-card">
+        <article class="detail-card wide">
           <h3>IAA：D7 回收判断</h3>
           <div class="metric-row" id="iaaMetricRow"></div>
           <div class="business-workspace">
@@ -1357,7 +1352,7 @@
             </section>
           </div>
         </article>
-        <article class="detail-card">
+        <article class="detail-card wide">
           <h3>IAP：D90+ 订阅质量</h3>
           <div class="metric-row" id="iapMetricRow"></div>
           <div class="business-workspace">
