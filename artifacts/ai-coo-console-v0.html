@@ -1350,7 +1350,10 @@
             <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','Unity')"><strong>Unity 细表</strong><span>计划 / 素材 / sites</span></button>
             <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','MTJ')"><strong>MTJ 细表</strong><span>计划 / 素材 / sites</span></button>
             <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','Apply')"><strong>Apply 细表</strong><span>计划 / 创意</span></button>
-            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','TikTok')"><strong>快 / FB / TT / Google</strong><span>计划 / 广告组 / 素材</span></button>
+            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','快渠道')"><strong>快渠道细表</strong><span>计划 / 广告组 / 素材</span></button>
+            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','Facebook')"><strong>Facebook 细表</strong><span>计划 / 广告组 / 素材</span></button>
+            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','TikTok')"><strong>TikTok 细表</strong><span>计划 / 广告组 / 素材</span></button>
+            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','Google')"><strong>Google 细表</strong><span>计划 / 广告组 / 素材</span></button>
           </div>
           <p class="dimension-note">L3 只能从 L2 的某个产品 + 渠道组合进入，不在 L2 页面直接展开。</p>
         </article>
@@ -1377,7 +1380,10 @@
             <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','Unity')"><strong>Unity 细表</strong><span>计划 / 素材 / sites</span></button>
             <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','MTJ')"><strong>MTJ 细表</strong><span>计划 / 素材 / sites</span></button>
             <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','Apply')"><strong>Apply 细表</strong><span>计划 / 创意</span></button>
-            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','TikTok')"><strong>快 / FB / TT / Google</strong><span>计划 / 广告组 / 素材</span></button>
+            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','快渠道')"><strong>快渠道细表</strong><span>计划 / 广告组 / 素材</span></button>
+            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','Facebook')"><strong>Facebook 细表</strong><span>计划 / 广告组 / 素材</span></button>
+            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','TikTok')"><strong>TikTok 细表</strong><span>计划 / 广告组 / 素材</span></button>
+            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','Google')"><strong>Google 细表</strong><span>计划 / 广告组 / 素材</span></button>
           </div>
           <p class="dimension-note">L3 只能从 L2 的某个产品 + 渠道组合进入，不在 L2 页面直接展开。</p>
         </article>
@@ -2633,6 +2639,18 @@
       openChannelDrilldown(business, channel || "Unity");
     }
 
+    function adsGroupChannelNodes(channel, sample) {
+      return [
+        ["一维：计划", `${sample.plan} ROI ${sample.roi}。只看 ${channel} 的计划整体质量，不混入其他渠道。`],
+        ["一维：广告组", `${sample.adGroup} CPI ${sample.cpi}。看 ${channel} 广告组人群、出价或学习状态。`],
+        ["一维：素材", `${sample.creative} CTR ${sample.ctr}，CLR ${sample.clr}。看 ${channel} 素材吸引力和转化链路。`],
+        ["二维：计划 x 广告组", `${sample.plan} x ${sample.adGroup} ROI ${sample.comboRoi}。定位 ${channel} 单计划内的广告组异常。`],
+        ["二维：广告组 x 素材", `${sample.adGroup} x ${sample.creative} ROI ${sample.creativeRoi}。看素材在该广告组人群里的表现。`],
+        ["三维：国家 x 计划 x 素材", `${sample.country} x ${sample.plan} x ${sample.creative} 毛利 ${sample.margin}。定位 ${channel} 素材级排查。`],
+        ["注意", `${channel} 使用独立细表；即使结构类似，也不和 Facebook / TikTok / Google / 快渠道混在同一入口。`]
+      ];
+    }
+
     function channelNodes(channel) {
       const schemas = {
         Unity: [
@@ -2661,15 +2679,58 @@
           ["三维：国家 x 计划 x 创意", "US x AP-US-01 x Creative-A 毛利 -$1.2k。定位创意级排查。"],
           ["注意", "当前不单独设 sites / 子渠道分支。"]
         ],
-        TikTok: [
-          ["一维：计划", "TT-US-Scale-21 ROI 79%。看计划整体质量。"],
-          ["一维：广告组", "AdGroup-3 CPI +22%。看广告组人群或出价问题。"],
-          ["一维：素材", "Video-11 CTR 0.31%，CLR 下降。看素材吸引力。"],
-          ["二维：计划 x 广告组", "TT-US-Scale-21 x AdGroup-3 ROI 67%。看计划内哪个广告组异常。"],
-          ["二维：广告组 x 素材", "AdGroup-3 x Video-11 ROI 61%。看素材在人群里的表现。"],
-          ["三维：国家 x 计划 x 素材", "US x TT-US-Scale-21 x Video-11 毛利 -$1.7k。定位素材级排查。"],
-          ["注意", "这一类渠道按计划、广告组、素材继续拆。"]
-        ]
+        "快渠道": adsGroupChannelNodes("快渠道", {
+          plan: "K-US-Scale-09",
+          adGroup: "AdGroup-K3",
+          creative: "Video-K11",
+          country: "US",
+          roi: "77%",
+          cpi: "+19%",
+          ctr: "0.34%",
+          clr: "下降",
+          comboRoi: "66%",
+          creativeRoi: "62%",
+          margin: "-$1.5k"
+        }),
+        Facebook: adsGroupChannelNodes("Facebook", {
+          plan: "FB-US-AEO-14",
+          adGroup: "AdSet-5",
+          creative: "Video-F08",
+          country: "US",
+          roi: "81%",
+          cpi: "+15%",
+          ctr: "0.39%",
+          clr: "下降",
+          comboRoi: "70%",
+          creativeRoi: "65%",
+          margin: "-$1.3k"
+        }),
+        TikTok: adsGroupChannelNodes("TikTok", {
+          plan: "TT-US-Scale-21",
+          adGroup: "AdGroup-3",
+          creative: "Video-11",
+          country: "US",
+          roi: "79%",
+          cpi: "+22%",
+          ctr: "0.31%",
+          clr: "下降",
+          comboRoi: "67%",
+          creativeRoi: "61%",
+          margin: "-$1.7k"
+        }),
+        Google: adsGroupChannelNodes("Google", {
+          plan: "G-US-UAC-18",
+          adGroup: "AssetGroup-2",
+          creative: "Asset-G06",
+          country: "US",
+          roi: "83%",
+          cpi: "+12%",
+          ctr: "0.36%",
+          clr: "偏低",
+          comboRoi: "72%",
+          creativeRoi: "68%",
+          margin: "-$1.1k"
+        })
       };
       return schemas[channel] || schemas.TikTok;
     }
