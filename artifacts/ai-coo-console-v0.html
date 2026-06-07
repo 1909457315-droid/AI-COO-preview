@@ -1282,15 +1282,15 @@
           </div>
         </article>
         <article class="detail-card wide">
-          <h3>IAA 回收可拆维度</h3>
+          <h3>L2 回收二级概况</h3>
           <div class="formula-path">
-            <div class="formula-node"><strong>推荐路径</strong><span>国家 -> 产品 -> 渠道 -> 账户 -> 广告计划 -> 素材。账户只在渠道存在账户层时出现。</span></div>
-            <div class="formula-node"><strong>自由维度</strong><span>国家 / 产品 / 渠道 / 账户 / 广告计划 / 素材 / 优化师。</span></div>
-            <div class="formula-node"><strong>交叉维度</strong><span>国家 x 产品、国家 x 渠道、产品 x 渠道、渠道 x 账户、账户 x 计划、计划 x 素材、优化师 x 计划。</span></div>
+            <div class="formula-node"><strong>核心组合</strong><span>产品 x 渠道 x 国家。</span></div>
+            <div class="formula-node"><strong>这一层看什么</strong><span>D7 预估毛利、D7 ROI 达成率、投放成本、D0 回收、相对上个周期变化。</span></div>
+            <div class="formula-node"><strong>这一层不做什么</strong><span>不直接展开账户、计划、广告组、素材；这些放到 L3 单渠道细表。</span></div>
           </div>
         </article>
         <article class="detail-card wide">
-          <h3>跨渠道概览</h3>
+          <h3>L2 组合入口</h3>
           <div class="dimension-grid">
             <div class="dimension-pill">产品 x 渠道</div>
             <div class="dimension-pill">产品 x 国家</div>
@@ -1300,13 +1300,20 @@
           <p class="dimension-note">先用这一层找影响 D7 回收和预估毛利最大的组合，再进入单渠道细表。</p>
         </article>
         <article class="detail-card wide">
-          <h3>单渠道深挖表</h3>
+          <h3>L3 单渠道深挖表</h3>
           <div class="formula-path">
             <div class="formula-node"><strong>TikTok / 快渠道 / Google / Facebook</strong><span>计划 -> 广告组 -> 素材。部分渠道再叠加广告账户。</span></div>
             <div class="formula-node"><strong>Mintegral / Unity</strong><span>计划 -> 国家 / 子渠道 / 素材。没有广告组维度，单计划下可能覆盖多个国家。</span></div>
-            <div class="formula-node"><strong>Apple Ads / AppLovin</strong><span>按实际报表字段加载 Campaign、Ad Group、Ads / Keywords、traffic source、creative 等维度。</span></div>
+            <div class="formula-node"><strong>Apple Ads / AppLovin / 其他渠道</strong><span>按实际报表字段加载 Campaign、Ad Group、Ads / Keywords、traffic source、creative、size 等渠道特有维度。</span></div>
           </div>
           <p class="dimension-note">每个渠道是一张独立细表，按该渠道算法机制和真实字段加载入口。</p>
+        </article>
+        <article class="detail-card wide">
+          <h3>L4 执行建议层</h3>
+          <div class="formula-path">
+            <div class="formula-node"><strong>进入条件</strong><span>从 L2 选中某产品 + 某渠道，并在 L3 拿到渠道专属证据链。</span></div>
+            <div class="formula-node"><strong>输出内容</strong><span>根因候选、支持证据、反证、风险判断、Action 草案、Workflow 候选。</span></div>
+          </div>
         </article>
         <article class="detail-card">
           <h3>支持证据</h3>
@@ -1346,15 +1353,15 @@
           </div>
         </article>
         <article class="detail-card wide">
-          <h3>IAP 回收可拆维度</h3>
+          <h3>L2 回收二级概况</h3>
           <div class="formula-path">
-            <div class="formula-node"><strong>推荐路径</strong><span>国家 -> 产品 -> 渠道 -> 账户 -> 广告计划 -> SKU / 支付页 -> 订阅漏斗。账户只在渠道存在账户层时出现。</span></div>
-            <div class="formula-node"><strong>自由维度</strong><span>国家 / 产品 / 渠道 / 账户 / 广告计划 / SKU / 支付页 / 素材 / 优化师。</span></div>
-            <div class="formula-node"><strong>交叉维度</strong><span>国家 x 产品、国家 x 渠道、渠道 x SKU、渠道 x 账户、SKU x 取消率、SKU x Billing Retry、优化师 x 计划。</span></div>
+            <div class="formula-node"><strong>核心组合</strong><span>产品 x 渠道 x 国家。</span></div>
+            <div class="formula-node"><strong>这一层看什么</strong><span>D90+ 预估毛利、D90+ ROI、三日有效订阅成本、付费结构、取消率、Billing Retry 风险。</span></div>
+            <div class="formula-node"><strong>这一层不做什么</strong><span>不直接展开账户、计划、广告组、素材、SKU / 支付页细节；这些放到 L3 单渠道细表。</span></div>
           </div>
         </article>
         <article class="detail-card wide">
-          <h3>跨渠道概览</h3>
+          <h3>L2 组合入口</h3>
           <div class="dimension-grid">
             <div class="dimension-pill">产品 x 渠道</div>
             <div class="dimension-pill">产品 x 国家</div>
@@ -1364,13 +1371,20 @@
           <p class="dimension-note">先用这一层找影响 D90+ 回收、订阅质量和预估毛利最大的组合，再进入单渠道细表。</p>
         </article>
         <article class="detail-card wide">
-          <h3>单渠道深挖表</h3>
+          <h3>L3 单渠道深挖表</h3>
           <div class="formula-path">
             <div class="formula-node"><strong>TikTok / 快渠道 / Google / Facebook</strong><span>计划 -> 广告组 -> 素材。订阅质量继续叠加 SKU、支付页和取消率。</span></div>
             <div class="formula-node"><strong>Mintegral / Unity</strong><span>计划 -> 国家 / 子渠道 / 素材。没有广告组维度，重点看子渠道与订阅质量交叉。</span></div>
-            <div class="formula-node"><strong>Apple Ads / AppLovin</strong><span>按实际报表字段加载 Campaign、Ad Group、Ads / Keywords、traffic source、creative 等维度。</span></div>
+            <div class="formula-node"><strong>Apple Ads / AppLovin / 其他渠道</strong><span>按实际报表字段加载 Campaign、Ad Group、Ads / Keywords、traffic source、creative、size 等渠道特有维度。</span></div>
           </div>
           <p class="dimension-note">每个渠道是一张独立细表，IAP 还要把渠道字段和订阅漏斗字段交叉。</p>
+        </article>
+        <article class="detail-card wide">
+          <h3>L4 执行建议层</h3>
+          <div class="formula-path">
+            <div class="formula-node"><strong>进入条件</strong><span>从 L2 选中某产品 + 某渠道，并在 L3 拿到渠道专属证据链和订阅质量证据。</span></div>
+            <div class="formula-node"><strong>输出内容</strong><span>根因候选、支持证据、反证、观察 / Action 草案、IAP Triage / UA / Product Iteration 候选。</span></div>
+          </div>
         </article>
         <article class="detail-card">
           <h3>当前判断</h3>
