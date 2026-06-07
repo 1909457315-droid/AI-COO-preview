@@ -645,7 +645,7 @@
       z-index: 10;
       top: 48px;
       right: 0;
-      width: min(340px, calc(100vw - 48px));
+      width: min(380px, calc(100vw - 48px));
       padding: 12px;
       border: 0;
       border-radius: 18px;
@@ -674,6 +674,39 @@
 
     .calendar-title {
       font-weight: 720;
+      color: var(--ink);
+    }
+
+    .calendar-selectors {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .calendar-select {
+      height: 34px;
+      padding: 0 28px 0 10px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--surface-soft);
+      color: var(--ink);
+      font-weight: 720;
+      cursor: pointer;
+    }
+
+    .calendar-nav {
+      width: 34px;
+      height: 34px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .calendar-nav:hover {
+      background: var(--surface-soft);
       color: var(--ink);
     }
 
@@ -709,6 +742,17 @@
     .calendar-day.active {
       color: var(--blue-strong);
       background: var(--surface-blue);
+    }
+
+    .calendar-day.range-start,
+    .calendar-day.range-end {
+      color: #fff;
+      background: var(--blue);
+    }
+
+    .calendar-day.in-range {
+      color: var(--blue-strong);
+      background: #edf4ff;
     }
 
     .section-title {
@@ -1035,7 +1079,11 @@
       }
       .state-pill { display: none; }
       .calendar-popover {
-        width: min(300px, calc(100vw - 40px));
+        width: min(340px, calc(100vw - 40px));
+      }
+      .calendar-select {
+        max-width: 104px;
+        padding-right: 20px;
       }
       .home-layout, .detail-grid { grid-template-columns: 1fr; }
       .summary-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1079,7 +1127,7 @@
               <button class="calendar-trigger" type="button" id="dataCalendarToggle" aria-label="选择数据日期" title="选择数据日期"></button>
               <div class="calendar-popover" id="dataCalendarPopover">
                 <div class="period-strip" id="dataPeriodStrip"></div>
-                <div class="calendar-head"><span class="calendar-title">2026 年 6 月</span></div>
+                <div class="calendar-head" id="dataCalendarHead"></div>
                 <div class="calendar-grid" id="dataDateGrid"></div>
               </div>
             </div>
@@ -1348,7 +1396,7 @@
           <div class="calendar-filter">
             <button class="calendar-trigger" type="button" id="actionCalendarToggle" aria-label="选择日期" title="选择日期"></button>
             <div class="calendar-popover" id="actionCalendarPopover">
-              <div class="calendar-head"><span class="calendar-title">2026 年 6 月</span></div>
+              <div class="calendar-head" id="actionCalendarHead"></div>
               <div class="calendar-grid" id="actionDateGrid"></div>
             </div>
           </div>
@@ -1473,6 +1521,12 @@
       screen: "home",
       selectedActionDate: "2026-06-07",
       selectedDataPeriod: "yesterday",
+      dataCalendarYear: 2026,
+      dataCalendarMonth: 5,
+      dataRangeStart: "",
+      dataRangeEnd: "",
+      actionCalendarYear: 2026,
+      actionCalendarMonth: 5,
       watch: {
         "iap-us-direct-pay": "到期复查",
         "iap-billing-retry": "到期复查",
@@ -1971,7 +2025,37 @@
     }
 
     function getSelectedDataPeriod() {
+      if (state.selectedDataPeriod?.startsWith("range:")) return buildRangePeriod(state.selectedDataPeriod);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(state.selectedDataPeriod)) return buildSingleDatePeriod(state.selectedDataPeriod);
       return data.dataPeriods.find(item => item.id === state.selectedDataPeriod) || data.dataPeriods[0];
+    }
+
+    function buildSingleDatePeriod(date) {
+      const known = data.dataPeriods.find(item => item.date === date);
+      if (known) return known;
+      return {
+        ...structuredClone(data.dataPeriods.find(item => item.id === "yesterday") || data.dataPeriods[0]),
+        id: date,
+        label: "自选日期",
+        date,
+        compareLabel: "比前一天"
+      };
+    }
+
+    function buildRangePeriod(id) {
+      const [, start, end] = id.split(":");
+      const days = Math.max(1, Math.round((new Date(end) - new Date(start)) / 86400000) + 1);
+      const base = days <= 3 ? data.dataPeriods.find(item => item.id === "last3") :
+        days <= 7 ? data.dataPeriods.find(item => item.id === "last7") :
+        days <= 14 ? data.dataPeriods.find(item => item.id === "last14") :
+        data.dataPeriods.find(item => item.id === "last30");
+      return {
+        ...structuredClone(base || data.dataPeriods[0]),
+        id,
+        label: "自选范围",
+        date: `${start} - ${end}`,
+        compareLabel: `比上 ${days} 天`
+      };
     }
 
     function renderDataPeriodStrip() {
@@ -1979,9 +2063,14 @@
       document.getElementById("dataPeriodStrip").innerHTML = data.dataPeriods.filter(item => !item.id.includes("-")).map(item => `
         <button class="period-button ${item.id === selected.id ? "active" : ""}" type="button" onclick="selectDataPeriod('${item.id}')">${item.label}</button>
       `).join("");
-      document.getElementById("dataCalendarToggle").innerHTML = selected.id.includes("-") ? `${calendarIcon()}<span>${selected.date}</span>` : calendarIcon();
+      document.getElementById("dataCalendarToggle").innerHTML = selected.id.includes("-") || selected.id.startsWith("range:") ? `${calendarIcon()}<span>${selected.date}</span>` : calendarIcon();
+      document.getElementById("dataCalendarHead").innerHTML = renderCalendarHeader("data", state.dataCalendarYear, state.dataCalendarMonth);
       document.getElementById("dataDateGrid").innerHTML = renderMonthCalendar({
-        selectedDate: selected.date,
+        year: state.dataCalendarYear,
+        month: state.dataCalendarMonth,
+        selectedDate: selected.id.includes("-") && !selected.id.startsWith("range:") ? selected.date : "",
+        rangeStart: state.dataRangeStart,
+        rangeEnd: state.dataRangeEnd,
         enabledDates: data.dataPeriods.filter(item => item.id.includes("-") || item.id === "today" || item.id === "yesterday").map(item => item.date),
         onSelect: "selectDataDate"
       });
@@ -1989,6 +2078,8 @@
 
     function selectDataPeriod(id) {
       state.selectedDataPeriod = id;
+      state.dataRangeStart = "";
+      state.dataRangeEnd = "";
       saveState();
       renderDataDecision();
       document.getElementById("dataCalendarPopover")?.classList.remove("open");
@@ -1996,21 +2087,66 @@
     }
 
     function selectDataDate(date) {
-      const period = data.dataPeriods.find(item => item.date === date && item.id.includes("-")) || data.dataPeriods.find(item => item.date === date);
-      if (!period) return toast("该日期暂无样例数据");
-      selectDataPeriod(period.id);
+      if (!state.dataRangeStart || state.dataRangeEnd) {
+        state.dataRangeStart = date;
+        state.dataRangeEnd = "";
+        state.selectedDataPeriod = date;
+        saveState();
+        renderDataDecision();
+        setTimeout(() => document.getElementById("dataCalendarPopover")?.classList.add("open"), 0);
+        toast("已选择开始日期");
+        return;
+      }
+      const start = state.dataRangeStart <= date ? state.dataRangeStart : date;
+      const end = state.dataRangeStart <= date ? date : state.dataRangeStart;
+      state.dataRangeStart = start;
+      state.dataRangeEnd = end;
+      state.selectedDataPeriod = start === end ? start : `range:${start}:${end}`;
+      saveState();
+      renderDataDecision();
       document.getElementById("dataCalendarPopover")?.classList.remove("open");
+      toast(start === end ? "已选择日期" : "已选择日期范围");
     }
 
     function calendarIcon() {
       return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M3 10h18"></path><rect x="4" y="5" width="16" height="18" rx="2"></rect></svg>`;
     }
 
-    function renderMonthCalendar({ selectedDate, enabledDates, onSelect }) {
+    function renderCalendarHeader(scope, year, month) {
+      const years = [2024, 2025, 2026, 2027].map(value => `<option value="${value}" ${value === year ? "selected" : ""}>${value} 年</option>`).join("");
+      const months = Array.from({ length: 12 }, (_, index) => `<option value="${index}" ${index === month ? "selected" : ""}>${index + 1} 月</option>`).join("");
+      return `
+        <button class="calendar-nav" type="button" aria-label="上个月" onclick="shiftCalendarMonth('${scope}', -1)">‹</button>
+        <div class="calendar-selectors">
+          <select class="calendar-select" aria-label="选择年份" onchange="setCalendarView('${scope}', Number(this.value), null)">${years}</select>
+          <select class="calendar-select" aria-label="选择月份" onchange="setCalendarView('${scope}', null, Number(this.value))">${months}</select>
+        </div>
+        <button class="calendar-nav" type="button" aria-label="下个月" onclick="shiftCalendarMonth('${scope}', 1)">›</button>
+      `;
+    }
+
+    function setCalendarView(scope, year, month) {
+      const yearKey = scope === "data" ? "dataCalendarYear" : "actionCalendarYear";
+      const monthKey = scope === "data" ? "dataCalendarMonth" : "actionCalendarMonth";
+      if (year !== null) state[yearKey] = year;
+      if (month !== null) state[monthKey] = month;
+      saveState();
+      scope === "data" ? renderDataDecision() : renderActionCalendar();
+    }
+
+    function shiftCalendarMonth(scope, offset) {
+      const yearKey = scope === "data" ? "dataCalendarYear" : "actionCalendarYear";
+      const monthKey = scope === "data" ? "dataCalendarMonth" : "actionCalendarMonth";
+      const next = new Date(state[yearKey], state[monthKey] + offset, 1);
+      state[yearKey] = next.getFullYear();
+      state[monthKey] = next.getMonth();
+      saveState();
+      scope === "data" ? renderDataDecision() : renderActionCalendar();
+    }
+
+    function renderMonthCalendar({ year, month, selectedDate, rangeStart = "", rangeEnd = "", enabledDates, onSelect }) {
       const enabled = new Set(enabledDates);
       const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
-      const year = 2026;
-      const month = 5;
       const first = new Date(year, month, 1).getDay();
       const days = new Date(year, month + 1, 0).getDate();
       const cells = [];
@@ -2019,11 +2155,14 @@
         cells.push(`<button class="calendar-day empty" type="button" aria-hidden="true" tabindex="-1"></button>`);
       }
       for (let day = 1; day <= days; day += 1) {
-        const date = `${year}-06-${String(day).padStart(2, "0")}`;
+        const date = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
         const active = date === selectedDate ? " active" : "";
-        const disabled = enabled.has(date) ? "" : " disabled";
-        const handler = enabled.has(date) ? ` onclick="${onSelect}('${date}')"` : "";
-        cells.push(`<button class="calendar-day${active}${disabled}" type="button"${handler}>${day}</button>`);
+        const rangeStartClass = date === rangeStart ? " range-start" : "";
+        const rangeEndClass = date === rangeEnd ? " range-end" : "";
+        const inRange = rangeStart && rangeEnd && date > rangeStart && date < rangeEnd ? " in-range" : "";
+        const disabled = onSelect === "selectDataDate" || enabled.has(date) ? "" : " disabled";
+        const handler = disabled ? "" : ` onclick="${onSelect}('${date}')"`;
+        cells.push(`<button class="calendar-day${active}${rangeStartClass}${rangeEndClass}${inRange}${disabled}" type="button"${handler}>${day}</button>`);
       }
       return cells.join("");
     }
@@ -2337,7 +2476,10 @@
     function renderActionCalendar() {
       const selected = data.actionDates.find(day => day.date === state.selectedActionDate) || data.actionDates[0];
       document.getElementById("actionCalendarToggle").innerHTML = `${calendarIcon()}<span>${selected.date}</span>`;
+      document.getElementById("actionCalendarHead").innerHTML = renderCalendarHeader("action", state.actionCalendarYear, state.actionCalendarMonth);
       document.getElementById("actionDateGrid").innerHTML = renderMonthCalendar({
+        year: state.actionCalendarYear,
+        month: state.actionCalendarMonth,
         selectedDate: selected.date,
         enabledDates: data.actionDates.map(day => day.date),
         onSelect: "selectActionDate"
