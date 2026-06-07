@@ -1226,23 +1226,21 @@
     <section class="screen" id="screen-profit-formula">
       <div class="detail-head">
         <div>
-          <h2>利润公式继续拆解</h2>
-          <p>这一层回答：流水利润下降到底来自收入、成本，还是投放周期导致的账面错位。</p>
+          <h2>流水利润视角</h2>
         </div>
         <button class="back" type="button" data-open="home">返回昨日数据</button>
       </div>
       <div class="detail-grid">
         <article class="detail-card wide">
-          <h3>层级路径</h3>
+          <h3>利润口径看数</h3>
           <div class="formula-path">
-            <div class="formula-node"><strong>利润 = 总收入 - 总成本</strong><span>先判断账面变化来自收入侧还是成本侧。</span></div>
-            <div class="formula-node"><strong>总收入 = IAA 广告收入 + IAP 订阅收入 + 历史投放回收</strong><span>昨日收入包含过去投放的回收落点，不能只拿昨天买量判断。</span></div>
-            <div class="formula-node"><strong>总成本 = 昨日 IAA 投放 + 昨日 IAP 投放 + 其他业务投放</strong><span>当前经营判断先只扣投放成本，不扣人力、研发、服务器。</span></div>
-            <div class="formula-node"><strong>下一步 = 分 IAA / IAP 看预估毛利</strong><span>IAA 用 D7，IAP 用 D90+，不能混算。</span></div>
+            <div class="formula-node"><strong>一维：产品</strong><span>CleanX 流水利润 -$7.8k，较上周期 -18%。看哪个产品整体拖累利润。</span></div>
+            <div class="formula-node"><strong>一维：国家</strong><span>US 流水利润 -$12.4k，成本 +31%。看哪个国家市场账面承压。</span></div>
+            <div class="formula-node"><strong>二维：产品 x 国家</strong><span>CleanX x US 流水利润 -$5.9k。定位真实利润口径下最小可归因组合。</span></div>
           </div>
         </article>
         <article class="detail-card wide">
-          <h3>利润可拆维度</h3>
+          <h3>可拆范围</h3>
           <div class="dimension-grid">
             <div class="dimension-pill">业务线</div>
             <div class="dimension-pill">产品</div>
@@ -1251,42 +1249,23 @@
           </div>
           <p class="dimension-note">流水利润是真实利润口径，不能强行拆到渠道、账户、计划、素材或优化师；这些细维度进入 IAA / IAP 回收分析。</p>
         </article>
-        <article class="detail-card clickable" data-open="iaa-detail">
-          <h3>去看 IAA 成本放量</h3>
-          <p>验证流水利润下降是否只是投放量级上升造成的短期账面承压。</p>
-          <div class="deep-link">进入 IAA →</div>
-        </article>
-        <article class="detail-card clickable" data-open="iap-detail">
-          <h3>去看 IAP 订阅质量</h3>
-          <p>验证有效订阅成本、付费结构、取消率和 Billing Retry 是否支持 D90+ 预估。</p>
-          <div class="deep-link">进入 IAP →</div>
-        </article>
       </div>
     </section>
 
     <section class="screen" id="screen-iaa-detail">
       <div class="detail-head">
         <div>
-          <h2>IAA D7 指标拆解</h2>
-          <p>这一层不只看 ROI 下降，而是看投放成本、D0 回收、D7 预估、预估毛利之间的关系。</p>
+          <h2>IAA 回收视角</h2>
         </div>
         <button class="back" type="button" data-open="home">返回昨日数据</button>
       </div>
       <div class="detail-grid">
         <article class="detail-card wide">
-          <h3>IAA 业务公式</h3>
+          <h3>L2 视角范围</h3>
           <div class="formula-path">
-            <div class="formula-node"><strong>D7 ROI 达成率 = 预估 D7 ROI / 目标 D7 ROI</strong><span>当前 106%，说明回收质量没有明显坏掉。</span></div>
-            <div class="formula-node"><strong>D7 预估毛利 = 预估 D7 收入 - 昨日投放成本</strong><span>当前 $42.8k，业务预估仍赚钱。</span></div>
-            <div class="formula-node"><strong>流水利润下降 = 昨日成本上升 + 回收周期未到</strong><span>更像正常放量带来的短期账面压力。</span></div>
-          </div>
-        </article>
-        <article class="detail-card wide">
-          <h3>L2 回收二级概况</h3>
-          <div class="formula-path">
-            <div class="formula-node"><strong>核心组合</strong><span>产品 x 渠道 x 国家。</span></div>
-            <div class="formula-node"><strong>这一层看什么</strong><span>D7 预估毛利、D7 ROI 达成率、投放成本、D0 回收、相对上个周期变化。</span></div>
-            <div class="formula-node"><strong>这一层不做什么</strong><span>不直接展开账户、计划、广告组、素材；这些放到 L3 单渠道细表。</span></div>
+            <div class="formula-node"><strong>一维</strong><span>产品 / 渠道 / 国家。</span></div>
+            <div class="formula-node"><strong>二维</strong><span>产品 x 渠道 / 产品 x 国家 / 渠道 x 国家。</span></div>
+            <div class="formula-node"><strong>三维</strong><span>产品 x 渠道 x 国家，作为进入 L3 的组合入口。</span></div>
           </div>
         </article>
         <article class="detail-card wide">
@@ -1312,49 +1291,23 @@
           </div>
           <p class="dimension-note">L3 只能从 L2 的某个产品 + 渠道组合进入，不在 L2 页面直接展开。</p>
         </article>
-        <article class="detail-card">
-          <h3>支持证据</h3>
-          <div class="list">
-            <div class="row"><div><h4>D7 达成率正常</h4><p>没有出现预估回收明显低于目标。</p></div><span class="status ok">支持</span></div>
-            <div class="row"><div><h4>投放成本 +38%</h4><p>解释了昨日账面利润为什么短期承压。</p></div><span class="status info">解释</span></div>
-            <div class="row"><div><h4>D7 毛利为正</h4><p>说明目前不应直接进入止损动作。</p></div><span class="status ok">支持</span></div>
-          </div>
-        </article>
-        <article class="detail-card">
-          <h3>反对证据 / 复查点</h3>
-          <div class="list">
-            <div class="row"><div><h4>明天 D7 达成率是否继续正常</h4><p>如果连续低于目标，再进入 IAA Triage。</p></div><span class="status watch">Watch</span></div>
-            <div class="row"><div><h4>是否有国家 / campaign 结构变化</h4><p>如果结构变化大，需要再分维度拆。</p></div><span class="status watch">待看</span></div>
-          </div>
-        </article>
       </div>
     </section>
 
     <section class="screen" id="screen-iap-detail">
       <div class="detail-head">
         <div>
-          <h2>IAP D90+ 漏斗拆解</h2>
-          <p>这一层把 IAP 归一化成订阅激活 -> 三日有效订阅 -> 付费 -> 当前有效订阅 -> D90+ 预估。</p>
+          <h2>IAP 回收视角</h2>
         </div>
         <button class="back" type="button" data-open="home">返回昨日数据</button>
       </div>
       <div class="detail-grid">
         <article class="detail-card wide">
-          <h3>IAP 订阅漏斗</h3>
+          <h3>L2 视角范围</h3>
           <div class="formula-path">
-            <div class="formula-node"><strong>订阅激活：20</strong><span>包含免费试用和直接付费。直接付费用户也归一化为订阅激活。</span></div>
-            <div class="formula-node"><strong>三日有效订阅成本：$18.7</strong><span>成本口径正常，所以不立刻 Action。</span></div>
-            <div class="formula-node"><strong>直接付费：1 / 20</strong><span>结构偏弱，提示同渠道免费试用用户也可能质量偏差。</span></div>
-            <div class="formula-node"><strong>D1 取消率：高于近 7 日中位数</strong><span>进入 Watch，D3 扣费后确认。</span></div>
-            <div class="formula-node"><strong>Billing Retry：等待 D3</strong><span>如果大量进入计费重试，说明假量或支付能力风险更高。</span></div>
-          </div>
-        </article>
-        <article class="detail-card wide">
-          <h3>L2 回收二级概况</h3>
-          <div class="formula-path">
-            <div class="formula-node"><strong>核心组合</strong><span>产品 x 渠道 x 国家。</span></div>
-            <div class="formula-node"><strong>这一层看什么</strong><span>D90+ 预估毛利、D90+ ROI、三日有效订阅成本、付费结构、取消率、Billing Retry 风险。</span></div>
-            <div class="formula-node"><strong>这一层不做什么</strong><span>不直接展开账户、计划、广告组、素材、SKU / 支付页细节；这些放到 L3 单渠道细表。</span></div>
+            <div class="formula-node"><strong>一维</strong><span>产品 / 渠道 / 国家。</span></div>
+            <div class="formula-node"><strong>二维</strong><span>产品 x 渠道 / 产品 x 国家 / 渠道 x 国家。</span></div>
+            <div class="formula-node"><strong>三维</strong><span>产品 x 渠道 x 国家，作为进入 L3 的组合入口。</span></div>
           </div>
         </article>
         <article class="detail-card wide">
@@ -1379,16 +1332,6 @@
             <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','TikTok')"><strong>快 / FB / TT / Google</strong><span>计划 / 广告组 / 素材</span></button>
           </div>
           <p class="dimension-note">L3 只能从 L2 的某个产品 + 渠道组合进入，不在 L2 页面直接展开。</p>
-        </article>
-        <article class="detail-card">
-          <h3>当前判断</h3>
-          <p>成本没坏，但质量有风险。前三天先观察，除非有效订阅成本也异常，否则不直接做投放动作。</p>
-          <div class="decision">草案：D3 复查后再判断是否升级 Issue，并决定是否触发 Product Iteration / UA Triage。</div>
-        </article>
-        <article class="detail-card clickable" data-open="watch">
-          <h3>进入 Watch 到期</h3>
-          <p>查看这条 IAP 风险今天需要怎么复查、是否升级、是否发钉钉提醒。</p>
-          <div class="deep-link">去 Watch →</div>
         </article>
       </div>
     </section>
