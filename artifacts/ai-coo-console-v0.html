@@ -835,6 +835,31 @@
       font-size: 13px;
     }
 
+    .dimension-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .dimension-pill {
+      min-height: 42px;
+      padding: 10px 12px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--surface-soft);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 650;
+      text-align: center;
+    }
+
+    .dimension-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
     .list {
       display: grid;
       gap: 8px;
@@ -1122,7 +1147,7 @@
       .hero { min-height: auto; padding: 20px; }
       .hero h2 { font-size: 26px; }
       .detail-head { flex-direction: column-reverse; padding: 14px; }
-      .metric-row, .workflow-picker, .quick-row { grid-template-columns: 1fr; }
+      .metric-row, .workflow-picker, .quick-row, .dimension-grid { grid-template-columns: 1fr; }
       .module-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .row { grid-template-columns: 1fr; }
       .state-pill { width: 100%; justify-content: center; }
@@ -1216,6 +1241,16 @@
             <div class="formula-node"><strong>下一步 = 分 IAA / IAP 看预估毛利</strong><span>IAA 用 D7，IAP 用 D90+，不能混算。</span></div>
           </div>
         </article>
+        <article class="detail-card wide">
+          <h3>利润可拆维度</h3>
+          <div class="dimension-grid">
+            <div class="dimension-pill">业务线</div>
+            <div class="dimension-pill">产品</div>
+            <div class="dimension-pill">国家</div>
+            <div class="dimension-pill">产品 x 国家</div>
+          </div>
+          <p class="dimension-note">流水利润是真实利润口径，不能强行拆到渠道、账户、计划、素材或优化师；这些细维度进入 IAA / IAP 回收分析。</p>
+        </article>
         <article class="detail-card clickable" data-open="iaa-detail">
           <h3>去看 IAA 成本放量</h3>
           <p>验证流水利润下降是否只是投放量级上升造成的短期账面承压。</p>
@@ -1245,6 +1280,33 @@
             <div class="formula-node"><strong>D7 预估毛利 = 预估 D7 收入 - 昨日投放成本</strong><span>当前 $42.8k，业务预估仍赚钱。</span></div>
             <div class="formula-node"><strong>流水利润下降 = 昨日成本上升 + 回收周期未到</strong><span>更像正常放量带来的短期账面压力。</span></div>
           </div>
+        </article>
+        <article class="detail-card wide">
+          <h3>IAA 回收可拆维度</h3>
+          <div class="formula-path">
+            <div class="formula-node"><strong>推荐路径</strong><span>国家 -> 产品 -> 渠道 -> 账户 -> 广告计划 -> 素材。账户只在渠道存在账户层时出现。</span></div>
+            <div class="formula-node"><strong>自由维度</strong><span>国家 / 产品 / 渠道 / 账户 / 广告计划 / 素材 / 优化师。</span></div>
+            <div class="formula-node"><strong>交叉维度</strong><span>国家 x 产品、国家 x 渠道、产品 x 渠道、渠道 x 账户、账户 x 计划、计划 x 素材、优化师 x 计划。</span></div>
+          </div>
+        </article>
+        <article class="detail-card wide">
+          <h3>跨渠道概览</h3>
+          <div class="dimension-grid">
+            <div class="dimension-pill">产品 x 渠道</div>
+            <div class="dimension-pill">产品 x 国家</div>
+            <div class="dimension-pill">渠道 x 国家</div>
+            <div class="dimension-pill">产品 x 渠道 x 国家</div>
+          </div>
+          <p class="dimension-note">先用这一层找影响 D7 回收和预估毛利最大的组合，再进入单渠道细表。</p>
+        </article>
+        <article class="detail-card wide">
+          <h3>单渠道深挖表</h3>
+          <div class="formula-path">
+            <div class="formula-node"><strong>TikTok / 快渠道 / Google / Facebook</strong><span>计划 -> 广告组 -> 素材。部分渠道再叠加广告账户。</span></div>
+            <div class="formula-node"><strong>Mintegral / Unity</strong><span>计划 -> 国家 / 子渠道 / 素材。没有广告组维度，单计划下可能覆盖多个国家。</span></div>
+            <div class="formula-node"><strong>Apple Ads / AppLovin</strong><span>按实际报表字段加载 Campaign、Ad Group、Ads / Keywords、traffic source、creative 等维度。</span></div>
+          </div>
+          <p class="dimension-note">每个渠道是一张独立细表，按该渠道算法机制和真实字段加载入口。</p>
         </article>
         <article class="detail-card">
           <h3>支持证据</h3>
@@ -1282,6 +1344,33 @@
             <div class="formula-node"><strong>D1 取消率：高于近 7 日中位数</strong><span>进入 Watch，D3 扣费后确认。</span></div>
             <div class="formula-node"><strong>Billing Retry：等待 D3</strong><span>如果大量进入计费重试，说明假量或支付能力风险更高。</span></div>
           </div>
+        </article>
+        <article class="detail-card wide">
+          <h3>IAP 回收可拆维度</h3>
+          <div class="formula-path">
+            <div class="formula-node"><strong>推荐路径</strong><span>国家 -> 产品 -> 渠道 -> 账户 -> 广告计划 -> SKU / 支付页 -> 订阅漏斗。账户只在渠道存在账户层时出现。</span></div>
+            <div class="formula-node"><strong>自由维度</strong><span>国家 / 产品 / 渠道 / 账户 / 广告计划 / SKU / 支付页 / 素材 / 优化师。</span></div>
+            <div class="formula-node"><strong>交叉维度</strong><span>国家 x 产品、国家 x 渠道、渠道 x SKU、渠道 x 账户、SKU x 取消率、SKU x Billing Retry、优化师 x 计划。</span></div>
+          </div>
+        </article>
+        <article class="detail-card wide">
+          <h3>跨渠道概览</h3>
+          <div class="dimension-grid">
+            <div class="dimension-pill">产品 x 渠道</div>
+            <div class="dimension-pill">产品 x 国家</div>
+            <div class="dimension-pill">渠道 x 国家</div>
+            <div class="dimension-pill">产品 x 渠道 x 国家</div>
+          </div>
+          <p class="dimension-note">先用这一层找影响 D90+ 回收、订阅质量和预估毛利最大的组合，再进入单渠道细表。</p>
+        </article>
+        <article class="detail-card wide">
+          <h3>单渠道深挖表</h3>
+          <div class="formula-path">
+            <div class="formula-node"><strong>TikTok / 快渠道 / Google / Facebook</strong><span>计划 -> 广告组 -> 素材。订阅质量继续叠加 SKU、支付页和取消率。</span></div>
+            <div class="formula-node"><strong>Mintegral / Unity</strong><span>计划 -> 国家 / 子渠道 / 素材。没有广告组维度，重点看子渠道与订阅质量交叉。</span></div>
+            <div class="formula-node"><strong>Apple Ads / AppLovin</strong><span>按实际报表字段加载 Campaign、Ad Group、Ads / Keywords、traffic source、creative 等维度。</span></div>
+          </div>
+          <p class="dimension-note">每个渠道是一张独立细表，IAP 还要把渠道字段和订阅漏斗字段交叉。</p>
         </article>
         <article class="detail-card">
           <h3>当前判断</h3>
