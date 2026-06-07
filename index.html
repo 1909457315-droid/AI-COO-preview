@@ -574,12 +574,15 @@
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--line);
     }
 
     .time-toolbar {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-end;
       gap: 12px;
     }
 
@@ -624,6 +627,17 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
+    }
+
+    .calendar-trigger svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex: 0 0 auto;
     }
 
     .calendar-popover {
@@ -1061,10 +1075,10 @@
       <div class="detail-grid">
         <article class="detail-card wide">
           <div class="time-toolbar">
-            <div class="period-strip" id="dataPeriodStrip"></div>
             <div class="calendar-filter">
-              <button class="calendar-trigger" type="button" id="dataCalendarToggle" aria-label="选择数据日期" title="选择数据日期">▦</button>
+              <button class="calendar-trigger" type="button" id="dataCalendarToggle" aria-label="选择数据日期" title="选择数据日期"></button>
               <div class="calendar-popover" id="dataCalendarPopover">
+                <div class="period-strip" id="dataPeriodStrip"></div>
                 <div class="calendar-head"><span class="calendar-title">2026 年 6 月</span></div>
                 <div class="calendar-grid" id="dataDateGrid"></div>
               </div>
@@ -1332,7 +1346,7 @@
         <article class="detail-card wide">
           <h3>日期筛选</h3>
           <div class="calendar-filter">
-            <button class="calendar-trigger" type="button" id="actionCalendarToggle" aria-label="选择日期" title="选择日期">▦</button>
+            <button class="calendar-trigger" type="button" id="actionCalendarToggle" aria-label="选择日期" title="选择日期"></button>
             <div class="calendar-popover" id="actionCalendarPopover">
               <div class="calendar-head"><span class="calendar-title">2026 年 6 月</span></div>
               <div class="calendar-grid" id="actionDateGrid"></div>
@@ -1965,7 +1979,7 @@
       document.getElementById("dataPeriodStrip").innerHTML = data.dataPeriods.filter(item => !item.id.includes("-")).map(item => `
         <button class="period-button ${item.id === selected.id ? "active" : ""}" type="button" onclick="selectDataPeriod('${item.id}')">${item.label}</button>
       `).join("");
-      document.getElementById("dataCalendarToggle").innerHTML = selected.id.includes("-") ? `▦ <span>${selected.date}</span>` : "▦";
+      document.getElementById("dataCalendarToggle").innerHTML = selected.id.includes("-") ? `${calendarIcon()}<span>${selected.date}</span>` : calendarIcon();
       document.getElementById("dataDateGrid").innerHTML = renderMonthCalendar({
         selectedDate: selected.date,
         enabledDates: data.dataPeriods.filter(item => item.id.includes("-") || item.id === "today" || item.id === "yesterday").map(item => item.date),
@@ -1977,6 +1991,7 @@
       state.selectedDataPeriod = id;
       saveState();
       renderDataDecision();
+      document.getElementById("dataCalendarPopover")?.classList.remove("open");
       toast("已切换数据周期");
     }
 
@@ -1985,6 +2000,10 @@
       if (!period) return toast("该日期暂无样例数据");
       selectDataPeriod(period.id);
       document.getElementById("dataCalendarPopover")?.classList.remove("open");
+    }
+
+    function calendarIcon() {
+      return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M3 10h18"></path><rect x="4" y="5" width="16" height="18" rx="2"></rect></svg>`;
     }
 
     function renderMonthCalendar({ selectedDate, enabledDates, onSelect }) {
@@ -2317,7 +2336,7 @@
 
     function renderActionCalendar() {
       const selected = data.actionDates.find(day => day.date === state.selectedActionDate) || data.actionDates[0];
-      document.getElementById("actionCalendarToggle").innerHTML = `▦ <span>${selected.date}</span>`;
+      document.getElementById("actionCalendarToggle").innerHTML = `${calendarIcon()}<span>${selected.date}</span>`;
       document.getElementById("actionDateGrid").innerHTML = renderMonthCalendar({
         selectedDate: selected.date,
         enabledDates: data.actionDates.map(day => day.date),
