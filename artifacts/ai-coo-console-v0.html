@@ -1300,21 +1300,14 @@
           <p class="dimension-note">先用这一层找影响 D7 回收和预估毛利最大的组合，再进入单渠道细表。</p>
         </article>
         <article class="detail-card wide">
-          <h3>L3 单渠道深挖表</h3>
-          <div class="formula-path">
-            <div class="formula-node"><strong>Unity</strong><span>产品 -> 渠道 -> 国家 -> 计划 -> 素材 / 创意；并列入口：产品 -> 渠道 -> 国家 -> sites / 子渠道。</span></div>
-            <div class="formula-node"><strong>MTJ / Mintegral</strong><span>产品 -> 渠道 -> 国家 -> 计划 -> 素材 / 创意；并列入口：产品 -> 渠道 -> 国家 -> sites / 子渠道。</span></div>
-            <div class="formula-node"><strong>Apply / AppLovin</strong><span>产品 -> 渠道 -> 国家 -> 计划 -> 创意；当前不单独设 sites 分支。</span></div>
-            <div class="formula-node"><strong>快渠道 / Facebook / TikTok / Google</strong><span>产品 -> 渠道 -> 国家 -> 计划 -> 广告组 -> 素材。</span></div>
+          <h3>L3 下钻入口</h3>
+          <div class="quick-row">
+            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','Unity')"><strong>Unity 细表</strong><span>计划 / 素材 / sites</span></button>
+            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','MTJ')"><strong>MTJ 细表</strong><span>计划 / 素材 / sites</span></button>
+            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','Apply')"><strong>Apply 细表</strong><span>计划 / 创意</span></button>
+            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','TikTok')"><strong>快 / FB / TT / Google</strong><span>计划 / 广告组 / 素材</span></button>
           </div>
-          <p class="dimension-note">每个渠道是一张独立细表，按该渠道算法机制和真实字段加载入口。</p>
-        </article>
-        <article class="detail-card wide">
-          <h3>L4 执行建议层</h3>
-          <div class="formula-path">
-            <div class="formula-node"><strong>进入条件</strong><span>从 L2 选中某产品 + 某渠道，并在 L3 拿到渠道专属证据链。</span></div>
-            <div class="formula-node"><strong>输出内容</strong><span>根因候选、支持证据、反证、风险判断、Action 草案、Workflow 候选。</span></div>
-          </div>
+          <p class="dimension-note">L3 只能从 L2 的某个产品 + 渠道组合进入，不在 L2 页面直接展开。</p>
         </article>
         <article class="detail-card">
           <h3>支持证据</h3>
@@ -1372,21 +1365,14 @@
           <p class="dimension-note">先用这一层找影响 D90+ 回收、订阅质量和预估毛利最大的组合，再进入单渠道细表。</p>
         </article>
         <article class="detail-card wide">
-          <h3>L3 单渠道深挖表</h3>
-          <div class="formula-path">
-            <div class="formula-node"><strong>Unity</strong><span>产品 -> 渠道 -> 国家 -> 计划 -> 素材 / 创意；并列入口：产品 -> 渠道 -> 国家 -> sites / 子渠道。</span></div>
-            <div class="formula-node"><strong>MTJ / Mintegral</strong><span>产品 -> 渠道 -> 国家 -> 计划 -> 素材 / 创意；并列入口：产品 -> 渠道 -> 国家 -> sites / 子渠道。</span></div>
-            <div class="formula-node"><strong>Apply / AppLovin</strong><span>产品 -> 渠道 -> 国家 -> 计划 -> 创意；当前不单独设 sites 分支。</span></div>
-            <div class="formula-node"><strong>快渠道 / Facebook / TikTok / Google</strong><span>产品 -> 渠道 -> 国家 -> 计划 -> 广告组 -> 素材。</span></div>
+          <h3>L3 下钻入口</h3>
+          <div class="quick-row">
+            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','Unity')"><strong>Unity 细表</strong><span>计划 / 素材 / sites</span></button>
+            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','MTJ')"><strong>MTJ 细表</strong><span>计划 / 素材 / sites</span></button>
+            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','Apply')"><strong>Apply 细表</strong><span>计划 / 创意</span></button>
+            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','TikTok')"><strong>快 / FB / TT / Google</strong><span>计划 / 广告组 / 素材</span></button>
           </div>
-          <p class="dimension-note">每个渠道是一张独立细表，IAP 还要把渠道字段和订阅漏斗字段交叉。</p>
-        </article>
-        <article class="detail-card wide">
-          <h3>L4 执行建议层</h3>
-          <div class="formula-path">
-            <div class="formula-node"><strong>进入条件</strong><span>从 L2 选中某产品 + 某渠道，并在 L3 拿到渠道专属证据链和订阅质量证据。</span></div>
-            <div class="formula-node"><strong>输出内容</strong><span>根因候选、支持证据、反证、观察 / Action 草案、IAP Triage / UA / Product Iteration 候选。</span></div>
-          </div>
+          <p class="dimension-note">L3 只能从 L2 的某个产品 + 渠道组合进入，不在 L2 页面直接展开。</p>
         </article>
         <article class="detail-card">
           <h3>当前判断</h3>
@@ -2501,6 +2487,45 @@
       document.getElementById("workflowSteps").innerHTML = steps.map(item => `
         <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>
       `).join("");
+    }
+
+    function channelNodes(channel) {
+      const schemas = {
+        Unity: [
+          ["主链路", "产品 -> 渠道 -> 国家 -> 计划 -> 素材 / 创意"],
+          ["并列 sites 链路", "产品 -> 渠道 -> 国家 -> sites / 子渠道"],
+          ["注意", "sites / 子渠道不是素材下级，而是和计划 / 素材并列的分析入口。"]
+        ],
+        MTJ: [
+          ["主链路", "产品 -> 渠道 -> 国家 -> 计划 -> 素材 / 创意"],
+          ["并列 sites 链路", "产品 -> 渠道 -> 国家 -> sites / 子渠道"],
+          ["注意", "没有广告组维度，不展示广告组入口。"]
+        ],
+        Apply: [
+          ["主链路", "产品 -> 渠道 -> 国家 -> 计划 -> 创意"],
+          ["注意", "当前不单独设 sites / 子渠道分支。"]
+        ],
+        TikTok: [
+          ["快渠道 / Facebook / TikTok / Google", "产品 -> 渠道 -> 国家 -> 计划 -> 广告组 -> 素材"],
+          ["注意", "这一类渠道按计划、广告组、素材继续拆。"]
+        ]
+      };
+      return schemas[channel] || schemas.TikTok;
+    }
+
+    function openChannelDrilldown(business, channel) {
+      state.deepDiveBack = business === "IAA" ? "iaa-detail" : "iap-detail";
+      state.navStack = ["home", state.deepDiveBack];
+      saveState();
+      document.getElementById("deepDiveTitle").textContent = `${business} ${channel} 单渠道深挖`;
+      document.getElementById("deepDiveBody").textContent = "这里是从 L2 产品 x 渠道 x 国家组合继续下钻后的 L3 渠道专属状态表。";
+      document.getElementById("deepDiveNodes").innerHTML = [
+        ["L2 进入条件", "先在回收二级概况选定某产品 + 某渠道 + 某国家组合。"],
+        ...channelNodes(channel),
+        ["L4 执行建议层", "拿到 L3 渠道证据链后，再生成根因候选、反证、Action 草案和 Workflow 候选。"]
+      ].map(item => `<div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join("");
+      document.getElementById("deepDiveDecision").textContent = "这一层仍是分析层；只有证据链足够明确时，才进入执行建议层。";
+      navigateTo("deep-dive", { preserveStack: true });
     }
 
     function openDeepDive(kind, id, backScreen) {
