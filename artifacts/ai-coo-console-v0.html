@@ -514,6 +514,25 @@
       margin-top: 10px;
     }
 
+    .profit-subgrid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .profit-subcard {
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(248,250,253,.82);
+    }
+
+    .profit-subcard h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      font-weight: 720;
+    }
+
     .metric {
       min-height: 82px;
       border: 0;
@@ -1260,7 +1279,7 @@
       .hero { min-height: auto; padding: 20px; }
       .hero h2 { font-size: 26px; }
       .detail-head { flex-direction: column-reverse; padding: 14px; }
-      .metric-row, .workflow-picker, .quick-row, .dimension-grid, .dimension-control { grid-template-columns: 1fr; }
+      .metric-row, .profit-subgrid, .workflow-picker, .quick-row, .dimension-grid, .dimension-control { grid-template-columns: 1fr; }
       .dimension-table-row { grid-template-columns: minmax(0, 1fr) auto; }
       .dimension-table-row.header { display: none; }
       .dimension-table-row span { font-size: 12px; }
@@ -1311,8 +1330,18 @@
           </div>
         </article>
         <article class="detail-card wide">
-          <h3>利润公式</h3>
+          <h3>流水利润</h3>
           <div class="metric-row" id="profitMetricRow"></div>
+          <div class="profit-subgrid">
+            <section class="profit-subcard">
+              <h4>IAA 流水利润</h4>
+              <div class="metric-row" id="iaaProfitMetricRow"></div>
+            </section>
+            <section class="profit-subcard">
+              <h4>IAP 流水利润</h4>
+              <div class="metric-row" id="iapProfitMetricRow"></div>
+            </section>
+          </div>
         </article>
         <article class="detail-card">
           <h3>IAA：D7 回收判断</h3>
@@ -2248,7 +2277,7 @@
     function screenTitle(name) {
       const titles = {
         home: "数据决策",
-        "profit-formula": "利润公式",
+        "profit-formula": "流水利润",
         "iaa-detail": "IAA 回收分析",
         "iap-detail": "IAP 订阅质量",
         initiate: "主动发起",
@@ -2553,13 +2582,34 @@
       `;
     }
 
+    function cloneMetric(base, overrides) {
+      return { ...base, ...overrides, target: "profit-formula" };
+    }
+
+    function buildFlowMetrics(metrics, business, ratio) {
+      const profitValue = +(metrics.profit.value * ratio).toFixed(1);
+      const profitCompare = +(metrics.profit.compare * ratio).toFixed(1);
+      const revenueValue = +(metrics.revenue.value * ratio).toFixed(1);
+      const revenueCompare = +(metrics.revenue.compare * ratio).toFixed(1);
+      const costValue = +(metrics.cost.value * ratio).toFixed(1);
+      const costCompare = +(metrics.cost.compare * ratio).toFixed(1);
+      const prefix = business.toLowerCase();
+      return [
+        [`${prefix}FlowProfit`, cloneMetric(metrics.profit, { label: `${business} 流水利润`, value: profitValue, compare: profitCompare, tone: profitValue < 0 ? "red" : "green" })],
+        [`${prefix}FlowRevenue`, cloneMetric(metrics.revenue, { label: `${business} 实际收入`, value: revenueValue, compare: revenueCompare })],
+        [`${prefix}FlowCost`, cloneMetric(metrics.cost, { label: `${business} 投放成本`, value: costValue, compare: costCompare })]
+      ];
+    }
+
     function renderDataMetrics() {
       const metrics = getSelectedDataPeriod().metrics;
       document.getElementById("profitMetricRow").innerHTML = [
+        ["profit", metrics.profit],
         ["revenue", metrics.revenue],
-        ["cost", metrics.cost],
-        ["profit", metrics.profit]
+        ["cost", metrics.cost]
       ].map(renderMetricButton).join("");
+      document.getElementById("iaaProfitMetricRow").innerHTML = buildFlowMetrics(metrics, "IAA", 0.62).map(renderMetricButton).join("");
+      document.getElementById("iapProfitMetricRow").innerHTML = buildFlowMetrics(metrics, "IAP", 0.38).map(renderMetricButton).join("");
       document.getElementById("iaaMetricRow").innerHTML = [
         ["iaaRoi", metrics.iaaRoi],
         ["iaaMargin", metrics.iaaMargin],
