@@ -159,7 +159,7 @@
     .content {
       min-width: 0;
       width: 100%;
-      max-width: 1120px;
+      max-width: 1480px;
       padding: 16px 18px 40px;
     }
 
@@ -468,6 +468,10 @@
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
+    }
+
+    .home-grid {
+      grid-template-columns: repeat(2, minmax(520px, 1fr));
     }
 
     .detail-card {
@@ -1264,6 +1268,12 @@
       .row { grid-template-columns: 1fr; }
       .state-pill { width: 100%; justify-content: center; }
     }
+
+    @media (min-width: 921px) and (max-width: 1280px) {
+      .home-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1287,7 +1297,7 @@
 
       <div class="content">
     <section class="screen active" id="screen-home">
-      <div class="detail-grid">
+      <div class="detail-grid home-grid">
         <article class="detail-card wide">
           <div class="time-toolbar">
             <div class="calendar-filter">
@@ -1971,6 +1981,28 @@
           confidence: "高"
         },
         {
+          id: "revenue-normal-growth",
+          business: "IAA",
+          scope: "metric",
+          metric: "revenue",
+          priority: "Top1",
+          title: "收入变化正常，重点看成本侧",
+          type: "指标洞察",
+          evidence: "实际收入高于前一天，但不足以覆盖投放成本增幅。",
+          confidence: "中"
+        },
+        {
+          id: "cost-scale-pressure",
+          business: "IAA",
+          scope: "metric",
+          metric: "cost",
+          priority: "Top1",
+          title: "成本增幅高于收入增幅",
+          type: "指标洞察",
+          evidence: "投放成本明显上升，是流水利润转负的主要账面压力。",
+          confidence: "高"
+        },
+        {
           id: "profit-cost-pressure",
           business: "IAA",
           scope: "metric",
@@ -1990,6 +2022,17 @@
           title: "D7 达标率仍高于目标",
           type: "指标洞察",
           evidence: "D7 ROI 达成率 106%，说明当前回收没有同步恶化。",
+          confidence: "高"
+        },
+        {
+          id: "iaa-margin-positive",
+          business: "IAA",
+          scope: "metric",
+          metric: "iaaMargin",
+          priority: "Top1",
+          title: "预估毛利仍为正",
+          type: "指标洞察",
+          evidence: "D7 预估毛利高于前一天，说明放量没有立刻破坏回收质量。",
           confidence: "高"
         },
         {
@@ -2474,8 +2517,8 @@
 
     function metricInsightHtml(key) {
       const items = data.insights.filter(item => item.scope === "metric" && item.metric === key);
-      if (!items.length) return "";
-      const top = items.find(item => item.priority === "Top1") || items[0];
+      const fallback = defaultMetricInsight(key);
+      const top = items.find(item => item.priority === "Top1") || items[0] || fallback;
       const extra = items.length - 1;
       return `
         <span class="metric-insight">
@@ -2483,6 +2526,19 @@
           <button class="more" type="button" aria-label="查看指标洞察" title="查看指标洞察" onclick="event.stopPropagation(); openMetricInsights('${key}')">${extra > 0 ? `+${extra}` : "›"}</button>
         </span>
       `;
+    }
+
+    function defaultMetricInsight(key) {
+      return {
+        id: `default-${key}`,
+        scope: "metric",
+        metric: key,
+        title: "Agent 判断：暂无明显异常",
+        priority: "Top1",
+        type: "指标洞察",
+        evidence: "当前指标没有触发异常规则，继续作为经营状态参考。",
+        confidence: "中"
+      };
     }
 
     function renderMetricButton([key, metric]) {
@@ -2901,8 +2957,8 @@
     }
 
     function openMetricInsights(key) {
-      const items = data.insights.filter(item => item.scope === "metric" && item.metric === key);
-      if (!items.length) return toast("这个指标暂时没有绑定洞察");
+      const configured = data.insights.filter(item => item.scope === "metric" && item.metric === key);
+      const items = configured.length ? configured : [defaultMetricInsight(key)];
       const metric = getSelectedDataPeriod().metrics[key];
       state.deepDiveBack = "home";
       state.navStack = ["home"];
