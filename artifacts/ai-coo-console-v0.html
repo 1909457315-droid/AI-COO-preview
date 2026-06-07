@@ -574,7 +574,13 @@
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      margin-bottom: 10px;
+    }
+
+    .time-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
     }
 
     .period-button {
@@ -597,25 +603,34 @@
       position: relative;
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      justify-content: flex-end;
+      flex: 0 0 auto;
+      width: fit-content;
+      margin-left: auto;
     }
 
     .calendar-trigger {
-      width: 40px;
+      min-width: 40px;
       height: 40px;
+      padding: 0 12px;
       border: 0;
       border-radius: 999px;
       background: var(--surface-blue);
       color: var(--blue-strong);
       cursor: pointer;
-      font-size: 18px;
+      font-size: 14px;
+      font-weight: 720;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
 
     .calendar-popover {
       position: absolute;
       z-index: 10;
       top: 48px;
-      left: 0;
+      right: 0;
       width: min(340px, calc(100vw - 48px));
       padding: 12px;
       border: 0;
@@ -1045,13 +1060,14 @@
     <section class="screen active" id="screen-home">
       <div class="detail-grid">
         <article class="detail-card wide">
-          <div class="period-strip" id="dataPeriodStrip"></div>
-          <div class="calendar-filter">
-            <button class="calendar-trigger" type="button" id="dataCalendarToggle" aria-label="选择数据日期" title="选择数据日期">▦</button>
-            <span class="status info" id="selectedDataDateLabel">昨天</span>
-            <div class="calendar-popover" id="dataCalendarPopover">
-              <div class="calendar-head"><span class="calendar-title">2026 年 6 月</span></div>
-              <div class="calendar-grid" id="dataDateGrid"></div>
+          <div class="time-toolbar">
+            <div class="period-strip" id="dataPeriodStrip"></div>
+            <div class="calendar-filter">
+              <button class="calendar-trigger" type="button" id="dataCalendarToggle" aria-label="选择数据日期" title="选择数据日期">▦</button>
+              <div class="calendar-popover" id="dataCalendarPopover">
+                <div class="calendar-head"><span class="calendar-title">2026 年 6 月</span></div>
+                <div class="calendar-grid" id="dataDateGrid"></div>
+              </div>
             </div>
           </div>
         </article>
@@ -1317,7 +1333,6 @@
           <h3>日期筛选</h3>
           <div class="calendar-filter">
             <button class="calendar-trigger" type="button" id="actionCalendarToggle" aria-label="选择日期" title="选择日期">▦</button>
-            <span class="status info" id="selectedActionDateLabel">今天</span>
             <div class="calendar-popover" id="actionCalendarPopover">
               <div class="calendar-head"><span class="calendar-title">2026 年 6 月</span></div>
               <div class="calendar-grid" id="actionDateGrid"></div>
@@ -1950,7 +1965,7 @@
       document.getElementById("dataPeriodStrip").innerHTML = data.dataPeriods.filter(item => !item.id.includes("-")).map(item => `
         <button class="period-button ${item.id === selected.id ? "active" : ""}" type="button" onclick="selectDataPeriod('${item.id}')">${item.label}</button>
       `).join("");
-      document.getElementById("selectedDataDateLabel").textContent = selected.id.includes("-") ? selected.date : selected.label;
+      document.getElementById("dataCalendarToggle").innerHTML = selected.id.includes("-") ? `▦ <span>${selected.date}</span>` : "▦";
       document.getElementById("dataDateGrid").innerHTML = renderMonthCalendar({
         selectedDate: selected.date,
         enabledDates: data.dataPeriods.filter(item => item.id.includes("-") || item.id === "today" || item.id === "yesterday").map(item => item.date),
@@ -2302,7 +2317,7 @@
 
     function renderActionCalendar() {
       const selected = data.actionDates.find(day => day.date === state.selectedActionDate) || data.actionDates[0];
-      document.getElementById("selectedActionDateLabel").textContent = `${selected.label} · ${selected.date}`;
+      document.getElementById("actionCalendarToggle").innerHTML = `▦ <span>${selected.date}</span>`;
       document.getElementById("actionDateGrid").innerHTML = renderMonthCalendar({
         selectedDate: selected.date,
         enabledDates: data.actionDates.map(day => day.date),
