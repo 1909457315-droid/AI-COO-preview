@@ -448,6 +448,22 @@
       cursor: pointer;
     }
 
+    .back-path {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .back-path span {
+      color: var(--muted);
+    }
+
+    .back-path b {
+      color: var(--blue-strong);
+      font-weight: 720;
+    }
+
     .detail-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1999,7 +2015,11 @@
         research: "Research Center",
         workflow: "Workflow Monitor",
         realtime: "Realtime Monitor",
-        "deep-dive": "详情"
+        "deep-dive": "详情",
+        "iaa-insights": "IAA Agent 洞察",
+        "iap-insights": "IAP Agent 洞察",
+        "iaa-actions": "IAA Action 草案",
+        "iap-actions": "IAP Action 草案"
       };
       return titles[name] || "上一层";
     }
@@ -2008,7 +2028,7 @@
       if (name === "revenue") name = "home";
       if (options.reset) {
         state.navStack = [];
-      } else if (state.screen && state.screen !== name) {
+      } else if (!options.preserveStack && state.screen && state.screen !== name) {
         state.navStack = [...(state.navStack || []), state.screen].slice(-8);
       }
       showScreen(name);
@@ -2024,9 +2044,11 @@
     function updateBackLabels() {
       const stack = state.navStack || [];
       const previous = stack[stack.length - 1] || "home";
-      const label = `返回${screenTitle(previous)}`;
+      const path = stack.map(screenTitle).filter(Boolean);
+      const html = `<span>‹</span> ${path.map((title, index) => index === path.length - 1 ? `<b>${title}</b>` : `<span>${title}</span>`).join(" <span>/</span> ") || `<b>${screenTitle(previous)}</b>`}`;
       document.querySelectorAll(".back").forEach(button => {
-        button.textContent = label;
+        button.innerHTML = `<span class="back-path">${html}</span>`;
+        button.setAttribute("aria-label", `返回${screenTitle(previous)}`);
       });
     }
 
@@ -2387,13 +2409,15 @@
         <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>
       `).join("");
       document.getElementById("deepDiveDecision").textContent = detail.decision;
-      navigateTo("deep-dive");
+      navigateTo("deep-dive", { preserveStack: true });
     }
 
     function openInsight(id) {
       const insight = data.insights.find(item => item.id === id);
       if (!insight) return toast("这个洞察还没有证据详情");
       state.deepDiveBack = "home";
+      const parent = insight.business === "IAA" ? "iaa-insights" : "iap-insights";
+      state.navStack = ["home", parent];
       saveState();
       document.getElementById("deepDiveTitle").textContent = insight.title;
       document.getElementById("deepDiveBody").textContent = `${insight.business} Agent 洞察用于解释判断，不直接等同于执行动作。`;
@@ -2404,12 +2428,13 @@
         ["下一步", "如果需要执行动作，必须转成 Action 草案并由用户确认。"]
       ].map(item => `<div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join("");
       document.getElementById("deepDiveDecision").textContent = "先作为判断依据展示；是否创建或推进 Action，由用户确认。";
-      navigateTo("deep-dive");
+      navigateTo("deep-dive", { preserveStack: true });
     }
 
     function openBusinessInsights(business) {
       const items = data.insights.filter(item => item.business === business);
       state.deepDiveBack = "home";
+      state.navStack = ["home"];
       saveState();
       document.getElementById("deepDiveTitle").textContent = `${business} Agent 洞察`;
       document.getElementById("deepDiveBody").textContent = "这里是该业务线的洞察列表，首页只展示 Top1。";
@@ -2417,12 +2442,13 @@
         <div class="formula-node"><strong>${item.priority || "P1"} · ${item.title}</strong><span>${item.type} · ${item.confidence} · ${item.evidence}</span></div>
       `).join("");
       document.getElementById("deepDiveDecision").textContent = "洞察只用于判断；需要执行时再转成 Action 草案。";
-      navigateTo("deep-dive");
+      navigateTo("deep-dive", { preserveStack: true });
     }
 
     function openBusinessActions(business) {
       const items = data.globalActions.filter(item => item[2] === "数据决策" && item[5] === business);
       state.deepDiveBack = "home";
+      state.navStack = ["home"];
       saveState();
       document.getElementById("deepDiveTitle").textContent = `${business} Action 草案`;
       document.getElementById("deepDiveBody").textContent = "首页只展示 P0，低优先级草案在这里集中查看。";
@@ -2431,7 +2457,7 @@
         return `<div class="formula-node"><strong>${item[6] || "P1"} · ${item[1]}</strong><span>${item[3]} · ${item[4]} · ${current}</span></div>`;
       }).join("");
       document.getElementById("deepDiveDecision").textContent = "需要推进的草案在来源模块或 Action Hub 中确认状态。";
-      navigateTo("deep-dive");
+      navigateTo("deep-dive", { preserveStack: true });
     }
 
     function openActionDraft(id) {
@@ -2439,6 +2465,9 @@
       if (!action) return toast("这个 Action 草案不存在");
       const current = state.actions[id] || "待确认";
       state.deepDiveBack = "home";
+      if (action[2] === "数据决策" && action[5]) {
+        state.navStack = ["home", action[5] === "IAA" ? "iaa-actions" : "iap-actions"];
+      }
       saveState();
       document.getElementById("deepDiveTitle").textContent = action[1];
       document.getElementById("deepDiveBody").textContent = "Action 草案是待确认的执行项，确认后同步进入 Action Hub 的项目管理状态。";
@@ -2457,7 +2486,7 @@
           <button class="action-button" type="button" onclick="navigateTo('action')">去 Action Hub</button>
         </div>
       `;
-      navigateTo("deep-dive");
+      navigateTo("deep-dive", { preserveStack: true });
     }
 
     function renderActions() {
