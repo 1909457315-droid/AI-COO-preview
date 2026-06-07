@@ -659,6 +659,10 @@
     }
 
     .flow-insight {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
       margin-top: 10px;
       padding: 11px 12px;
       border-radius: 12px;
@@ -681,6 +685,22 @@
       margin-bottom: 4px;
       color: var(--blue-strong);
       font-size: 13px;
+    }
+
+    .flow-insight button {
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,.62);
+      color: var(--blue-strong);
+      cursor: pointer;
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .flow-insight button:hover {
+      background: #fff;
     }
 
     .decision {
@@ -2675,7 +2695,7 @@
       ];
     }
 
-    function renderFlowInsight(title, rows) {
+    function renderFlowInsight(title, rows, id) {
       const profit = rows[0][1];
       const revenue = rows[1][1];
       const cost = rows[2][1];
@@ -2690,7 +2710,12 @@
       } else {
         text = "流水利润低于上周期，但成本和收入变化接近，需要结合 IAA / IAP 预估回收继续判断。";
       }
-      return `<div class="flow-insight"><strong>${title}</strong>${text}</div>`;
+      return `
+        <div class="flow-insight">
+          <div><strong>${title}</strong>${text}</div>
+          <button type="button" aria-label="查看流水利润洞察" title="查看流水利润洞察" onclick="openFlowInsight('${id}')">→</button>
+        </div>
+      `;
     }
 
     function renderDataMetrics() {
@@ -2702,12 +2727,12 @@
       ];
       const iaaFlowRows = buildFlowMetrics(metrics, "IAA", 0.62);
       const iapFlowRows = buildFlowMetrics(metrics, "IAP", 0.38);
-      document.getElementById("profitMetricRow").innerHTML = totalFlowRows.map(item => renderMetricButton(item, { showInsight: false, link: false })).join("");
-      document.getElementById("flowProfitInsight").innerHTML = renderFlowInsight("Agent 综合洞察", totalFlowRows);
-      document.getElementById("iaaProfitMetricRow").innerHTML = iaaFlowRows.map(item => renderMetricButton(item, { showInsight: false, link: false })).join("");
-      document.getElementById("iaaFlowProfitInsight").innerHTML = renderFlowInsight("IAA 综合洞察", iaaFlowRows);
-      document.getElementById("iapProfitMetricRow").innerHTML = iapFlowRows.map(item => renderMetricButton(item, { showInsight: false, link: false })).join("");
-      document.getElementById("iapFlowProfitInsight").innerHTML = renderFlowInsight("IAP 综合洞察", iapFlowRows);
+      document.getElementById("profitMetricRow").innerHTML = totalFlowRows.map(item => renderMetricButton(item, { showInsight: false, link: true })).join("");
+      document.getElementById("flowProfitInsight").innerHTML = renderFlowInsight("Agent 综合洞察", totalFlowRows, "total");
+      document.getElementById("iaaProfitMetricRow").innerHTML = iaaFlowRows.map(item => renderMetricButton(item, { showInsight: false, link: true })).join("");
+      document.getElementById("iaaFlowProfitInsight").innerHTML = renderFlowInsight("IAA 综合洞察", iaaFlowRows, "iaa");
+      document.getElementById("iapProfitMetricRow").innerHTML = iapFlowRows.map(item => renderMetricButton(item, { showInsight: false, link: true })).join("");
+      document.getElementById("iapFlowProfitInsight").innerHTML = renderFlowInsight("IAP 综合洞察", iapFlowRows, "iap");
       document.getElementById("iaaMetricRow").innerHTML = [
         ["iaaRoi", metrics.iaaRoi],
         ["iaaMargin", metrics.iaaMargin],
@@ -3117,6 +3142,36 @@
         <div class="formula-node"><strong>${item.priority || "P1"} · ${item.title}</strong><span>${item.type} · ${item.confidence} · ${item.evidence}</span></div>
       `).join("");
       document.getElementById("deepDiveDecision").textContent = "如果需要执行，必须再转成 Action 草案并同步到 Action Hub。";
+      navigateTo("deep-dive", { preserveStack: true });
+    }
+
+    function openFlowInsight(id) {
+      const period = getSelectedDataPeriod();
+      const metrics = period.metrics;
+      const rowsById = {
+        total: [
+          ["流水利润", metrics.profit],
+          ["实际收入", metrics.revenue],
+          ["投放成本", metrics.cost]
+        ],
+        iaa: buildFlowMetrics(metrics, "IAA", 0.62).map(item => [item[1].label, item[1]]),
+        iap: buildFlowMetrics(metrics, "IAP", 0.38).map(item => [item[1].label, item[1]])
+      };
+      const titleMap = {
+        total: "流水利润综合洞察",
+        iaa: "IAA 流水利润综合洞察",
+        iap: "IAP 流水利润综合洞察"
+      };
+      const rows = rowsById[id] || rowsById.total;
+      state.deepDiveBack = "home";
+      state.navStack = ["home"];
+      saveState();
+      document.getElementById("deepDiveTitle").textContent = titleMap[id] || titleMap.total;
+      document.getElementById("deepDiveBody").textContent = "流水利润洞察只做板块综合判断，不拆成单指标洞察。";
+      document.getElementById("deepDiveNodes").innerHTML = rows.map(([label, metric]) => `
+        <div class="formula-node"><strong>${label}</strong><span>${formatMetric(metric)} · ${formatDelta(metric, period.compareLabel)}</span></div>
+      `).join("");
+      document.getElementById("deepDiveDecision").textContent = "下一层进入流水利润视角，按产品、国家、产品 x 国家继续看真实利润口径。";
       navigateTo("deep-dive", { preserveStack: true });
     }
 
