@@ -1290,11 +1290,15 @@
           </div>
         </article>
         <article class="detail-card wide">
-          <h3>L2 维度轴线</h3>
+          <h3>L2 轴线数据预览</h3>
           <div class="formula-path">
-            <div class="formula-node"><strong>一维轴线</strong><span>产品 / 渠道 / 国家。看单条维度整体变化。</span></div>
-            <div class="formula-node"><strong>二维轴线</strong><span>产品 x 渠道 / 产品 x 国家 / 渠道 x 国家。看结构交叉问题。</span></div>
-            <div class="formula-node"><strong>三维轴线</strong><span>产品 x 渠道 x 国家。定位进入 L3 的具体组合。</span></div>
+            <div class="formula-node"><strong>一维：产品</strong><span>CleanX D7 ROI 91%，预估毛利 -$6.4k。看产品整体回收是否承压。</span></div>
+            <div class="formula-node"><strong>一维：渠道</strong><span>Unity D7 ROI 88%，成本 +24%。看渠道整体流量质量或算法状态。</span></div>
+            <div class="formula-node"><strong>一维：国家</strong><span>US D7 ROI 86%，预估毛利 -$9.1k。看国家市场整体是否承压。</span></div>
+            <div class="formula-node"><strong>二维：产品 x 渠道</strong><span>CleanX x Unity ROI 78%。代表产品和渠道算法 / 素材机制是否匹配。</span></div>
+            <div class="formula-node"><strong>二维：产品 x 国家</strong><span>CleanX x US ROI 82%。代表产品在某国家的市场适配和需求质量。</span></div>
+            <div class="formula-node"><strong>二维：渠道 x 国家</strong><span>Unity x US ROI 75%。代表某渠道在某国家的流量质量或子渠道结构。</span></div>
+            <div class="formula-node"><strong>三维：产品 x 渠道 x 国家</strong><span>CleanX x Unity x US ROI 69%，预估毛利 -$4.9k。定位进入 L3 的具体排查单元。</span></div>
           </div>
           <p class="dimension-note">先用这一层找影响 D7 回收和预估毛利最大的组合，再进入单渠道细表。</p>
         </article>
@@ -1354,11 +1358,15 @@
           </div>
         </article>
         <article class="detail-card wide">
-          <h3>L2 维度轴线</h3>
+          <h3>L2 轴线数据预览</h3>
           <div class="formula-path">
-            <div class="formula-node"><strong>一维轴线</strong><span>产品 / 渠道 / 国家。看单条维度整体变化。</span></div>
-            <div class="formula-node"><strong>二维轴线</strong><span>产品 x 渠道 / 产品 x 国家 / 渠道 x 国家。看结构交叉问题。</span></div>
-            <div class="formula-node"><strong>三维轴线</strong><span>产品 x 渠道 x 国家。定位进入 L3 的具体组合。</span></div>
+            <div class="formula-node"><strong>一维：产品</strong><span>CleanPro D90 ROI 84%，预估毛利 -$3.6k。看产品整体订阅回收是否承压。</span></div>
+            <div class="formula-node"><strong>一维：渠道</strong><span>MTJ 三日有效订阅成本 $24.8，付费结构偏弱。看渠道整体用户质量。</span></div>
+            <div class="formula-node"><strong>一维：国家</strong><span>US 取消率 +9%，Billing Retry 风险升高。看国家市场订阅质量。</span></div>
+            <div class="formula-node"><strong>二维：产品 x 渠道</strong><span>CleanPro x MTJ D90 ROI 72%。代表产品和渠道用户质量是否匹配。</span></div>
+            <div class="formula-node"><strong>二维：产品 x 国家</strong><span>CleanPro x US 付费结构 1 / 20。代表产品在某国家的付费意愿和取消风险。</span></div>
+            <div class="formula-node"><strong>二维：渠道 x 国家</strong><span>MTJ x US Billing Retry +11%。代表渠道在某国家的流量真实性或支付能力。</span></div>
+            <div class="formula-node"><strong>三维：产品 x 渠道 x 国家</strong><span>CleanPro x MTJ x US D90 ROI 64%。定位进入 L3 的具体排查单元。</span></div>
           </div>
           <p class="dimension-note">先用这一层找影响 D90+ 回收、订阅质量和预估毛利最大的组合，再进入单渠道细表。</p>
         </article>
@@ -2490,27 +2498,38 @@
     function channelNodes(channel) {
       const schemas = {
         Unity: [
-          ["一维轴线", "国家 / 计划 / 素材 / 创意 / sites / 子渠道 / 优化师"],
-          ["二维轴线", "计划 x 国家 / 计划 x 素材 / 国家 x sites / sites x 素材"],
-          ["三维轴线", "国家 x 计划 x 素材 / 国家 x sites x 计划"],
+          ["一维：计划", "U-US-Scale-12 ROI 72%，成本 $9.4k。看单计划是否拖累整体。"],
+          ["一维：sites / 子渠道", "site_483 ROI 61%，成本占比 18%。看子渠道质量，不把它放到素材下面。"],
+          ["二维：计划 x 素材", "U-US-Scale-12 x C-07 CTR 0.42%。看计划里哪条素材拉低点击或转化。"],
+          ["二维：国家 x sites", "US x site_483 ROI 58%。看某国家下的子渠道是否有质量问题。"],
+          ["三维：国家 x 计划 x 素材", "US x U-US-Scale-12 x C-07 毛利 -$2.1k。定位素材级排查。"],
+          ["三维：国家 x sites x 计划", "US x site_483 x U-US-Scale-12 毛利 -$1.8k。定位子渠道级排查。"],
           ["注意", "sites / 子渠道不是素材下级，而是和计划 / 素材并列的分析入口。"]
         ],
         MTJ: [
-          ["一维轴线", "国家 / 计划 / 素材 / 创意 / sites / 子渠道 / 优化师"],
-          ["二维轴线", "计划 x 国家 / 计划 x 素材 / 国家 x sites / sites x 素材"],
-          ["三维轴线", "国家 x 计划 x 素材 / 国家 x sites x 计划"],
+          ["一维：计划", "M-US-Sub-08 D90 ROI 68%，三日有效订阅成本 $26.1。看单计划质量。"],
+          ["一维：sites / 子渠道", "site_219 取消率 +13%。看子渠道订阅质量。"],
+          ["二维：计划 x 素材", "M-US-Sub-08 x Creative-3 直接付费 0 / 14。看素材是否带来弱付费用户。"],
+          ["二维：国家 x sites", "US x site_219 Billing Retry +15%。看某国家下子渠道是否假量或支付能力差。"],
+          ["三维：国家 x 计划 x 素材", "US x M-US-Sub-08 x Creative-3 D90 ROI 59%。定位素材级排查。"],
+          ["三维：国家 x sites x 计划", "US x site_219 x M-US-Sub-08 D90 ROI 55%。定位子渠道级排查。"],
           ["注意", "没有广告组维度，不展示广告组入口。"]
         ],
         Apply: [
-          ["一维轴线", "国家 / 计划 / 创意 / 优化师"],
-          ["二维轴线", "计划 x 国家 / 计划 x 创意 / 国家 x 创意"],
-          ["三维轴线", "国家 x 计划 x 创意"],
+          ["一维：计划", "AP-US-01 ROI 81%，成本 +17%。看计划整体回收。"],
+          ["一维：创意", "Creative-A CTR 0.38%，CVR 下降。看创意是否拖累。"],
+          ["二维：计划 x 国家", "AP-US-01 x US ROI 76%。看计划在某国家是否失效。"],
+          ["二维：计划 x 创意", "AP-US-01 x Creative-A ROI 69%。看创意和计划组合。"],
+          ["三维：国家 x 计划 x 创意", "US x AP-US-01 x Creative-A 毛利 -$1.2k。定位创意级排查。"],
           ["注意", "当前不单独设 sites / 子渠道分支。"]
         ],
         TikTok: [
-          ["一维轴线", "国家 / 计划 / 广告组 / 素材 / 优化师"],
-          ["二维轴线", "计划 x 国家 / 计划 x 广告组 / 广告组 x 素材 / 优化师 x 计划"],
-          ["三维轴线", "计划 x 广告组 x 素材 / 国家 x 计划 x 素材"],
+          ["一维：计划", "TT-US-Scale-21 ROI 79%。看计划整体质量。"],
+          ["一维：广告组", "AdGroup-3 CPI +22%。看广告组人群或出价问题。"],
+          ["一维：素材", "Video-11 CTR 0.31%，CLR 下降。看素材吸引力。"],
+          ["二维：计划 x 广告组", "TT-US-Scale-21 x AdGroup-3 ROI 67%。看计划内哪个广告组异常。"],
+          ["二维：广告组 x 素材", "AdGroup-3 x Video-11 ROI 61%。看素材在人群里的表现。"],
+          ["三维：国家 x 计划 x 素材", "US x TT-US-Scale-21 x Video-11 毛利 -$1.7k。定位素材级排查。"],
           ["注意", "这一类渠道按计划、广告组、素材继续拆。"]
         ]
       };
