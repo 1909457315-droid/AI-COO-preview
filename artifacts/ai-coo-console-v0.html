@@ -1,0 +1,2291 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI COO Console V0.7</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --surface: #ffffff;
+      --surface-blue: #edf4ff;
+      --surface-green: #edf8f2;
+      --surface-amber: #fff6e6;
+      --surface-red: #fff0ee;
+      --ink: #1f2937;
+      --muted: #64748b;
+      --faint: #94a3b8;
+      --line: #dde5ee;
+      --blue: #1a73e8;
+      --blue-strong: #1558b0;
+      --green: #12805c;
+      --amber: #b56a00;
+      --red: #b42318;
+      --radius: 12px;
+      --shadow: 0 10px 28px rgba(54, 74, 99, .08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      letter-spacing: 0;
+      line-height: 1.48;
+    }
+
+    button, textarea { font: inherit; }
+
+    .app {
+      min-height: 100vh;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 18px 16px 36px;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 204px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 18px;
+      min-height: calc(100vh - 44px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,.9);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav-item {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.72);
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 680;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-item.active {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+      box-shadow: 0 10px 26px rgba(26, 115, 232, .22);
+    }
+
+    .nav-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--surface-blue);
+      color: var(--blue-strong);
+      font-size: 12px;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .nav-item.active .nav-icon {
+      background: rgba(255,255,255,.22);
+      color: #fff;
+    }
+
+    .content {
+      min-width: 0;
+    }
+
+    .brand {
+      min-width: 0;
+    }
+
+    .brand h1 {
+      margin: 0 0 5px;
+      font-size: 24px;
+      font-weight: 760;
+    }
+
+    .brand p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .state-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 36px;
+      padding: 7px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .78);
+      color: var(--muted);
+      font-size: 13px;
+      box-shadow: 0 8px 28px rgba(56, 91, 140, .08);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--blue);
+    }
+
+    .home-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .hero {
+      min-height: 246px;
+      padding: 26px;
+      border: 1px solid rgba(26, 115, 232, .18);
+      border-radius: 24px;
+      background: linear-gradient(135deg, #ffffff 0%, #eef5ff 100%);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 22px;
+    }
+
+    .hero h2 {
+      margin: 0;
+      max-width: 700px;
+      font-size: 32px;
+      line-height: 1.18;
+      font-weight: 780;
+    }
+
+    .hero p {
+      margin: 10px 0 0;
+      max-width: 680px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .summary-chip {
+      min-height: 74px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.8);
+      background: rgba(255,255,255,.74);
+    }
+
+    .summary-chip span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .summary-chip strong {
+      display: block;
+      font-size: 19px;
+      line-height: 1.2;
+    }
+
+    .tablet-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .tablet {
+      min-height: 188px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: var(--surface);
+      box-shadow: 0 10px 30px rgba(56, 91, 140, .08);
+      cursor: pointer;
+      text-align: left;
+      transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .tablet:hover {
+      transform: translateY(-2px);
+      border-color: rgba(26, 115, 232, .45);
+      box-shadow: 0 16px 38px rgba(56, 91, 140, .14);
+    }
+
+    .tablet.blue { background: linear-gradient(180deg, #fff 0%, var(--surface-blue) 100%); }
+    .tablet.green { background: linear-gradient(180deg, #fff 0%, var(--surface-green) 100%); }
+    .tablet.amber { background: linear-gradient(180deg, #fff 0%, var(--surface-amber) 100%); }
+    .tablet.red { background: linear-gradient(180deg, #fff 0%, var(--surface-red) 100%); }
+
+    .tablet-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--blue);
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .green .icon { background: var(--green); }
+    .amber .icon { background: var(--amber); }
+    .red .icon { background: var(--red); }
+
+    .tablet h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 750;
+    }
+
+    .tablet p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .tablet-bottom {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .big-number {
+      font-size: 28px;
+      line-height: 1;
+      font-weight: 780;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    .arrow {
+      color: var(--blue);
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .side-panel {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255,255,255,.82);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .side-panel h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+    }
+
+    .agenda {
+      display: grid;
+      gap: 10px;
+    }
+
+    .agenda-item {
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr);
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .time {
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .agenda-item strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    .agenda-item span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .detail-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 6px 18px rgba(56, 91, 140, .055);
+    }
+
+    .detail-head h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 780;
+    }
+
+    .detail-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      max-width: 720px;
+    }
+
+    .back {
+      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--blue-strong);
+      min-height: 34px;
+      padding: 7px 11px;
+      cursor: pointer;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .detail-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 16px;
+      box-shadow: 0 6px 18px rgba(56, 91, 140, .055);
+    }
+
+    .detail-card.clickable {
+      cursor: pointer;
+      transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+    }
+
+    .detail-card.clickable:hover {
+      transform: translateY(-1px);
+      border-color: rgba(26, 115, 232, .46);
+      box-shadow: 0 10px 26px rgba(56, 91, 140, .11);
+    }
+
+    .detail-card.wide {
+      grid-column: 1 / -1;
+    }
+
+    .detail-card h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .detail-card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .metric {
+      min-height: 82px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfdff;
+      padding: 11px;
+      font: inherit;
+    }
+
+    .metric.metric-link {
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+    }
+
+    .metric.metric-link:hover {
+      border-color: rgba(26, 115, 232, .46);
+      box-shadow: 0 10px 24px rgba(56, 91, 140, .12);
+      transform: translateY(-1px);
+    }
+
+    .metric b {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+      margin-bottom: 9px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1.12;
+    }
+
+    .metric em {
+      display: block;
+      margin-top: 7px;
+      color: var(--faint);
+      font-style: normal;
+      font-size: 12px;
+    }
+
+    .decision {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: var(--surface-blue);
+      color: #174ea6;
+      border: 1px solid rgba(26, 115, 232, .16);
+    }
+
+    .deep-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      color: var(--blue-strong);
+      font-size: 13px;
+      font-weight: 760;
+    }
+
+    button.deep-link {
+      border: 0;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .business-workspace {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .period-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .period-button {
+      min-height: 36px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 720;
+    }
+
+    .period-button.active {
+      color: var(--blue-strong);
+      background: var(--surface-blue);
+      border-color: rgba(26, 115, 232, .32);
+    }
+
+    .calendar-filter {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .calendar-trigger {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--blue-strong);
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .calendar-popover {
+      position: absolute;
+      z-index: 10;
+      top: 48px;
+      left: 0;
+      width: min(320px, calc(100vw - 48px));
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 18px 44px rgba(56, 91, 140, .16);
+      display: none;
+    }
+
+    .calendar-popover.open {
+      display: block;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .calendar-day {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfdff;
+      cursor: pointer;
+      color: var(--ink);
+      font-weight: 720;
+    }
+
+    .calendar-day.active {
+      color: var(--blue-strong);
+      background: var(--surface-blue);
+      border-color: rgba(26, 115, 232, .32);
+    }
+
+    .section-title {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 780;
+    }
+
+    .insight-row {
+      align-items: start;
+    }
+
+    .icon-button {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--blue-strong);
+      cursor: pointer;
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .icon-button:hover {
+      border-color: rgba(26, 115, 232, .46);
+      background: var(--surface-blue);
+    }
+
+    .formula-path {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .formula-node {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfdff;
+    }
+
+    .formula-node strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 15px;
+    }
+
+    .formula-node span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .row {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfdff;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .row h4 {
+      margin: 0 0 5px;
+      font-size: 14px;
+    }
+
+    .row p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 28px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 720;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+
+    .status.ok { color: var(--green); background: var(--surface-green); border-color: rgba(18, 128, 92, .16); }
+    .status.watch { color: var(--amber); background: var(--surface-amber); border-color: rgba(181, 106, 0, .16); }
+    .status.risk { color: var(--red); background: var(--surface-red); border-color: rgba(180, 35, 24, .16); }
+    .status.info { color: var(--blue-strong); background: var(--surface-blue); border-color: rgba(26, 115, 232, .16); }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .action-button {
+      min-height: 34px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .action-button.primary {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .action-button.active {
+      border-color: var(--blue);
+      color: var(--blue-strong);
+      background: var(--surface-blue);
+    }
+
+    .workflow-picker {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .workflow-button {
+      min-height: 76px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfdff;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .workflow-button:hover {
+      border-color: rgba(26, 115, 232, .45);
+      background: var(--surface-blue);
+    }
+
+    .workflow-button strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .workflow-button span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .message-box {
+      width: 100%;
+      min-height: 104px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      color: var(--ink);
+      background: #fbfdff;
+    }
+
+    .module-bar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .mini-stat {
+      min-height: 62px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfdff;
+    }
+
+    .mini-stat b {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .mini-stat strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1.1;
+    }
+
+    .quick-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%) translateY(18px);
+      opacity: 0;
+      pointer-events: none;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #0f172a;
+      color: #fff;
+      font-size: 13px;
+      transition: opacity .18s ease, transform .18s ease;
+      z-index: 30;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 920px) {
+      .app { padding: 16px 12px 96px; }
+      .shell { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        min-height: auto;
+        padding: 14px;
+        border-radius: 16px;
+      }
+      .sidebar-nav {
+        position: fixed;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        z-index: 25;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 6px;
+        padding: 8px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: rgba(255,255,255,.94);
+        box-shadow: 0 16px 46px rgba(56, 91, 140, .22);
+        backdrop-filter: blur(12px);
+      }
+      .nav-item {
+        flex: 1 1 0;
+        min-width: 0;
+        min-height: 52px;
+        padding: 8px 6px;
+        flex-direction: column;
+        justify-content: center;
+        gap: 4px;
+        text-align: center;
+        font-size: 11px;
+        line-height: 1.15;
+      }
+      .nav-icon { width: 24px; height: 24px; border-radius: 8px; }
+      .state-pill { display: none; }
+      .home-layout, .detail-grid { grid-template-columns: 1fr; }
+      .summary-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .tablet-grid { grid-template-columns: 1fr; }
+      .side-panel { margin-top: 14px; }
+      .hero { min-height: auto; padding: 20px; }
+      .hero h2 { font-size: 26px; }
+      .detail-head { flex-direction: column-reverse; padding: 14px; }
+      .metric-row, .workflow-picker, .quick-row { grid-template-columns: 1fr; }
+      .module-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .row { grid-template-columns: 1fr; }
+      .state-pill { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <h1>AI COO</h1>
+        </div>
+        <nav class="sidebar-nav" aria-label="AI COO 主要页面">
+          <button class="nav-item active" type="button" data-open="home"><span class="nav-icon">D</span><span>数据决策</span></button>
+          <button class="nav-item" type="button" data-open="initiate"><span class="nav-icon">N</span><span>主动发起</span></button>
+          <button class="nav-item" type="button" data-open="action"><span class="nav-icon">A</span><span>Action Hub</span></button>
+          <button class="nav-item" type="button" data-open="research"><span class="nav-icon">R</span><span>Research Center</span></button>
+        </nav>
+        <div class="state-pill"><span class="dot"></span><span id="saveState">本地状态：已载入</span></div>
+      </aside>
+
+      <div class="content">
+    <section class="screen active" id="screen-home">
+      <div class="detail-grid">
+        <article class="detail-card wide">
+          <div class="period-strip" id="dataPeriodStrip"></div>
+        </article>
+        <article class="detail-card wide">
+          <h3>利润公式</h3>
+          <div class="metric-row" id="profitMetricRow"></div>
+        </article>
+        <article class="detail-card">
+          <h3>IAA：D7 回收判断</h3>
+          <div class="metric-row" id="iaaMetricRow"></div>
+          <div class="business-workspace">
+            <section>
+              <div class="section-title">Agent 洞察</div>
+              <div class="list" id="iaaInsightList"></div>
+            </section>
+            <section>
+              <div class="section-title">Action 草案</div>
+              <div class="list" id="iaaActionList"></div>
+            </section>
+          </div>
+        </article>
+        <article class="detail-card">
+          <h3>IAP：D90+ 订阅质量</h3>
+          <div class="metric-row" id="iapMetricRow"></div>
+          <div class="business-workspace">
+            <section>
+              <div class="section-title">Agent 洞察</div>
+              <div class="list" id="iapInsightList"></div>
+            </section>
+            <section>
+              <div class="section-title">Action 草案</div>
+              <div class="list" id="iapActionList"></div>
+            </section>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-profit-formula">
+      <div class="detail-head">
+        <div>
+          <h2>利润公式继续拆解</h2>
+          <p>这一层回答：流水利润下降到底来自收入、成本，还是投放周期导致的账面错位。</p>
+        </div>
+        <button class="back" type="button" data-open="home">返回昨日数据</button>
+      </div>
+      <div class="detail-grid">
+        <article class="detail-card wide">
+          <h3>层级路径</h3>
+          <div class="formula-path">
+            <div class="formula-node"><strong>利润 = 总收入 - 总成本</strong><span>先判断账面变化来自收入侧还是成本侧。</span></div>
+            <div class="formula-node"><strong>总收入 = IAA 广告收入 + IAP 订阅收入 + 历史投放回收</strong><span>昨日收入包含过去投放的回收落点，不能只拿昨天买量判断。</span></div>
+            <div class="formula-node"><strong>总成本 = 昨日 IAA 投放 + 昨日 IAP 投放 + 其他业务投放</strong><span>当前经营判断先只扣投放成本，不扣人力、研发、服务器。</span></div>
+            <div class="formula-node"><strong>下一步 = 分 IAA / IAP 看预估毛利</strong><span>IAA 用 D7，IAP 用 D90+，不能混算。</span></div>
+          </div>
+        </article>
+        <article class="detail-card clickable" data-open="iaa-detail">
+          <h3>去看 IAA 成本放量</h3>
+          <p>验证流水利润下降是否只是投放量级上升造成的短期账面承压。</p>
+          <div class="deep-link">进入 IAA →</div>
+        </article>
+        <article class="detail-card clickable" data-open="iap-detail">
+          <h3>去看 IAP 订阅质量</h3>
+          <p>验证有效订阅成本、付费结构、取消率和 Billing Retry 是否支持 D90+ 预估。</p>
+          <div class="deep-link">进入 IAP →</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-iaa-detail">
+      <div class="detail-head">
+        <div>
+          <h2>IAA D7 指标拆解</h2>
+          <p>这一层不只看 ROI 下降，而是看投放成本、D0 回收、D7 预估、预估毛利之间的关系。</p>
+        </div>
+        <button class="back" type="button" data-open="home">返回昨日数据</button>
+      </div>
+      <div class="detail-grid">
+        <article class="detail-card wide">
+          <h3>IAA 业务公式</h3>
+          <div class="formula-path">
+            <div class="formula-node"><strong>D7 ROI 达成率 = 预估 D7 ROI / 目标 D7 ROI</strong><span>当前 106%，说明回收质量没有明显坏掉。</span></div>
+            <div class="formula-node"><strong>D7 预估毛利 = 预估 D7 收入 - 昨日投放成本</strong><span>当前 $42.8k，业务预估仍赚钱。</span></div>
+            <div class="formula-node"><strong>流水利润下降 = 昨日成本上升 + 回收周期未到</strong><span>更像正常放量带来的短期账面压力。</span></div>
+          </div>
+        </article>
+        <article class="detail-card">
+          <h3>支持证据</h3>
+          <div class="list">
+            <div class="row"><div><h4>D7 达成率正常</h4><p>没有出现预估回收明显低于目标。</p></div><span class="status ok">支持</span></div>
+            <div class="row"><div><h4>投放成本 +38%</h4><p>解释了昨日账面利润为什么短期承压。</p></div><span class="status info">解释</span></div>
+            <div class="row"><div><h4>D7 毛利为正</h4><p>说明目前不应直接进入止损动作。</p></div><span class="status ok">支持</span></div>
+          </div>
+        </article>
+        <article class="detail-card">
+          <h3>反对证据 / 复查点</h3>
+          <div class="list">
+            <div class="row"><div><h4>明天 D7 达成率是否继续正常</h4><p>如果连续低于目标，再进入 IAA Triage。</p></div><span class="status watch">Watch</span></div>
+            <div class="row"><div><h4>是否有国家 / campaign 结构变化</h4><p>如果结构变化大，需要再分维度拆。</p></div><span class="status watch">待看</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-iap-detail">
+      <div class="detail-head">
+        <div>
+          <h2>IAP D90+ 漏斗拆解</h2>
+          <p>这一层把 IAP 归一化成订阅激活 -> 三日有效订阅 -> 付费 -> 当前有效订阅 -> D90+ 预估。</p>
+        </div>
+        <button class="back" type="button" data-open="home">返回昨日数据</button>
+      </div>
+      <div class="detail-grid">
+        <article class="detail-card wide">
+          <h3>IAP 订阅漏斗</h3>
+          <div class="formula-path">
+            <div class="formula-node"><strong>订阅激活：20</strong><span>包含免费试用和直接付费。直接付费用户也归一化为订阅激活。</span></div>
+            <div class="formula-node"><strong>三日有效订阅成本：$18.7</strong><span>成本口径正常，所以不立刻 Action。</span></div>
+            <div class="formula-node"><strong>直接付费：1 / 20</strong><span>结构偏弱，提示同渠道免费试用用户也可能质量偏差。</span></div>
+            <div class="formula-node"><strong>D1 取消率：高于近 7 日中位数</strong><span>进入 Watch，D3 扣费后确认。</span></div>
+            <div class="formula-node"><strong>Billing Retry：等待 D3</strong><span>如果大量进入计费重试，说明假量或支付能力风险更高。</span></div>
+          </div>
+        </article>
+        <article class="detail-card">
+          <h3>当前判断</h3>
+          <p>成本没坏，但质量有风险。前三天先观察，除非有效订阅成本也异常，否则不直接做投放动作。</p>
+          <div class="decision">草案：D3 复查后再判断是否升级 Issue，并决定是否触发 Product Iteration / UA Triage。</div>
+        </article>
+        <article class="detail-card clickable" data-open="watch">
+          <h3>进入 Watch 到期</h3>
+          <p>查看这条 IAP 风险今天需要怎么复查、是否升级、是否发钉钉提醒。</p>
+          <div class="deep-link">去 Watch →</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-watch">
+      <div class="detail-head">
+        <div>
+          <h2>观察区到期</h2>
+        </div>
+        <button class="back" type="button" data-back>返回首页</button>
+      </div>
+      <div class="detail-grid">
+        <article class="detail-card wide">
+          <h3>今天到期</h3>
+          <div class="list" id="watchList"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-initiate">
+      <div class="detail-grid">
+        <article class="detail-card wide">
+          <div class="module-bar">
+            <div class="mini-stat"><b>新需求</b><strong>2</strong></div>
+            <div class="mini-stat"><b>竞品</b><strong>1</strong></div>
+            <div class="mini-stat"><b>素材</b><strong>3</strong></div>
+            <div class="mini-stat"><b>待确认</b><strong>1</strong></div>
+          </div>
+        </article>
+        <article class="detail-card wide">
+          <h3>新开 Workflow</h3>
+          <div class="workflow-picker" id="workflowPicker"></div>
+        </article>
+        <article class="detail-card">
+          <h3>当前草案</h3>
+          <p id="workflowDraft">未选择 Workflow</p>
+          <div class="button-row">
+            <button class="action-button primary" type="button" id="confirmWorkflow">确认进入草案</button>
+            <button class="action-button" type="button" id="clearWorkflow">清空选择</button>
+          </div>
+        </article>
+        <article class="detail-card">
+          <h3>快捷入口</h3>
+          <div class="quick-row">
+            <button class="workflow-button" type="button" onclick="selectWorkflow('Requirement Workflow','新需求、PRD、UI、开发、测试、上线验证')"><strong>需求</strong><span>PRD / UI</span></button>
+            <button class="workflow-button" type="button" onclick="selectWorkflow('Product Iteration Workflow','产品漏斗、支付页、版本、活动迭代')"><strong>迭代</strong><span>产品 / 支付页</span></button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-workflow-detail">
+      <div class="detail-head">
+        <div>
+          <h2 id="workflowDetailTitle">Workflow 草案</h2>
+          <p id="workflowDetailDesc">这里展示用户确认前的流程节点草案。</p>
+        </div>
+        <button class="back" type="button" data-open="initiate">返回主动发起</button>
+      </div>
+      <div class="detail-grid">
+        <article class="detail-card wide">
+          <h3>建议节点顺序</h3>
+          <div class="formula-path" id="workflowSteps"></div>
+        </article>
+        <article class="detail-card">
+          <h3>用户确认点</h3>
+          <div class="list">
+            <div class="row"><div><h4>是否启动</h4><p>AI 只能生成决策草案，用户确认后才进入 Workflow Run。</p></div><span class="status watch">待确认</span></div>
+            <div class="row"><div><h4>是否需要钉钉</h4><p>如需通知团队，先生成消息草案，再由用户确认发送。</p></div><span class="status info">草案</span></div>
+          </div>
+        </article>
+        <article class="detail-card">
+          <h3>后续正式实现</h3>
+          <p>正式版这里会写入 Postgres 的 Workflow Run，并由 LangGraph 按节点顺序调度 Agent。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-workflow">
+      <div class="detail-head">
+        <div>
+          <h2>Workflow Monitor</h2>
+        </div>
+        <button class="back" type="button" data-back>返回首页</button>
+      </div>
+      <div class="detail-grid">
+        <article class="detail-card wide">
+          <div class="module-bar">
+            <div class="mini-stat"><b>运行中</b><strong>3</strong></div>
+            <div class="mini-stat"><b>待确认</b><strong>1</strong></div>
+            <div class="mini-stat"><b>模板</b><strong>11</strong></div>
+            <div class="mini-stat"><b>今日运行</b><strong>2</strong></div>
+          </div>
+        </article>
+        <article class="detail-card">
+          <h3>Run</h3>
+          <div class="list" id="workflowRuns"></div>
+        </article>
+        <article class="detail-card">
+          <h3>Registry</h3>
+          <div class="list" id="workflowRegistry"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-action">
+      <div class="detail-grid">
+        <article class="detail-card wide">
+          <div class="module-bar">
+            <div class="mini-stat"><b>今日 Action</b><strong>5</strong></div>
+            <div class="mini-stat"><b>到期复查</b><strong>3</strong></div>
+            <div class="mini-stat"><b>消息草案</b><strong>4</strong></div>
+            <div class="mini-stat"><b>待复盘</b><strong>2</strong></div>
+          </div>
+        </article>
+        <article class="detail-card wide">
+          <div class="quick-row">
+            <button class="workflow-button" type="button" data-open="watch"><strong>观察期</strong><span>到期复查、高风险、待升级</span></button>
+            <button class="workflow-button" type="button" data-open="notify"><strong>消息 / 提醒</strong><span>钉钉草案、日程、提醒</span></button>
+          </div>
+        </article>
+        <article class="detail-card">
+          <h3>今日 Action</h3>
+          <div class="list" id="actionList"></div>
+        </article>
+        <article class="detail-card">
+          <h3>Action 日程表</h3>
+          <div class="list" id="actionScheduleList"></div>
+        </article>
+        <article class="detail-card wide">
+          <h3>日期筛选</h3>
+          <div class="calendar-filter">
+            <button class="calendar-trigger" type="button" id="actionCalendarToggle" aria-label="选择日期" title="选择日期">▦</button>
+            <span class="status info" id="selectedActionDateLabel">今天</span>
+            <div class="calendar-popover" id="actionCalendarPopover">
+              <div class="calendar-grid" id="actionDateGrid"></div>
+            </div>
+          </div>
+        </article>
+        <article class="detail-card wide">
+          <h3 id="actionDateTitle">日期快照</h3>
+          <div class="list" id="actionDateList"></div>
+        </article>
+        <article class="detail-card">
+          <h3>Action 模板</h3>
+          <div class="list" id="actionTemplateList"></div>
+        </article>
+        <article class="detail-card wide">
+          <h3>临时补充</h3>
+          <textarea class="message-box" id="quickNote" placeholder="新增 Action"></textarea>
+          <div class="button-row">
+            <button class="action-button primary" type="button" id="saveNote">保存到本地</button>
+            <button class="action-button" type="button" id="clearNote">清空</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-notify">
+      <div class="detail-head">
+        <div>
+          <h2>提醒消息</h2>
+        </div>
+        <button class="back" type="button" data-back>返回首页</button>
+      </div>
+      <div class="detail-grid">
+        <article class="detail-card">
+          <h3>提醒</h3>
+          <div class="list" id="reminderList"></div>
+        </article>
+        <article class="detail-card">
+          <h3>消息草案</h3>
+          <div class="list" id="messageList"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-research">
+      <div class="detail-grid">
+        <article class="detail-card wide">
+          <div class="module-bar">
+            <div class="mini-stat"><b>Topic</b><strong>12</strong></div>
+            <div class="mini-stat"><b>Question</b><strong>27</strong></div>
+            <div class="mini-stat"><b>Issue</b><strong>6</strong></div>
+            <div class="mini-stat"><b>Experiment</b><strong>9</strong></div>
+          </div>
+        </article>
+        <article class="detail-card wide">
+          <div class="quick-row">
+            <button class="workflow-button" type="button" data-open="workflow"><strong>Workflow Monitor</strong><span>运行、确认、模板</span></button>
+            <button class="workflow-button" type="button" data-open="realtime"><strong>Realtime Monitor</strong><span>实时信号、观察、异常</span></button>
+          </div>
+        </article>
+        <article class="detail-card">
+          <h3>Topic / Question</h3>
+          <div class="list" id="researchQuestionList"></div>
+        </article>
+        <article class="detail-card">
+          <h3>Issue / Watch</h3>
+          <div class="list" id="researchIssueList"></div>
+        </article>
+        <article class="detail-card">
+          <h3>Hypothesis / Experiment</h3>
+          <div class="list" id="researchExperimentList"></div>
+        </article>
+        <article class="detail-card">
+          <h3>Memory / Evidence</h3>
+          <div class="list" id="researchMemoryList"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-realtime">
+      <div class="detail-head">
+        <div>
+          <h2>Realtime Monitor</h2>
+        </div>
+        <button class="back" type="button" data-back>返回首页</button>
+      </div>
+      <div class="detail-grid">
+        <article class="detail-card wide">
+          <h3>实时信号</h3>
+          <div class="list" id="realtimeList"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-deep-dive">
+      <div class="detail-head">
+        <div>
+          <h2 id="deepDiveTitle">详情</h2>
+          <p id="deepDiveBody">这里展示当前条目的下一层判断。</p>
+        </div>
+        <button class="back" type="button" id="deepDiveBack">返回上一层</button>
+      </div>
+      <div class="detail-grid">
+        <article class="detail-card wide">
+          <h3>下一层拆解</h3>
+          <div class="formula-path" id="deepDiveNodes"></div>
+        </article>
+        <article class="detail-card">
+          <h3>建议动作</h3>
+          <div class="decision" id="deepDiveDecision">等待用户确认。</div>
+        </article>
+      </div>
+    </section>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const storageKey = "ai-coo-console-v01-state";
+
+    const seedState = {
+      screen: "home",
+      selectedActionDate: "2026-06-07",
+      selectedDataPeriod: "yesterday",
+      watch: {
+        "iap-us-direct-pay": "到期复查",
+        "iap-billing-retry": "到期复查",
+        "iaa-scale": "观察中"
+      },
+      actions: {
+        "data-iap-d3-review": "待确认",
+        "data-iaa-quality": "观察中",
+        "data-payment-sku": "暂缓",
+        "review-iaa-scale": "待确认",
+        "research-subscription-rule": "待确认"
+      },
+      messages: {
+        "msg-iap-owner": "待确认",
+        "msg-ua-owner": "待确认",
+        "msg-product-owner": "待确认",
+        "msg-self": "待确认"
+      },
+      reminders: {
+        "reminder-iap-d3": "待提醒",
+        "reminder-review": "待提醒",
+        "reminder-self": "待提醒"
+      },
+      selectedWorkflow: "",
+      selectedWorkflowName: "",
+      selectedWorkflowDesc: "",
+      deepDiveBack: "home",
+      quickNote: ""
+    };
+
+    const data = {
+      dataPeriods: [
+        {
+          id: "today",
+          label: "今天",
+          date: "2026-06-07",
+          compareLabel: "比昨天",
+          metrics: {
+            revenue: { label: "实际收入", value: 48.6, compare: 96.2, unit: "$k", target: "profit-formula", tone: "default" },
+            cost: { label: "投放成本", value: 57.8, compare: 114.6, unit: "$k", target: "profit-formula", tone: "default" },
+            profit: { label: "流水利润", value: -9.2, compare: -18.4, unit: "$k", target: "profit-formula", tone: "red" },
+            iaaRoi: { label: "D7 ROI 达成率", value: 105, compare: 106, unit: "%", target: "iaa-detail", tone: "green" },
+            iaaMargin: { label: "D7 预估毛利", value: 21.6, compare: 42.8, unit: "$k", target: "iaa-detail", tone: "default" },
+            iaaCost: { label: "投放成本", value: 18, compare: 38, unit: "%", prefix: "+", target: "iaa-detail", tone: "default" },
+            iapSubCost: { label: "三日有效订阅成本", value: 18.9, compare: 18.7, unit: "$", target: "iap-detail", tone: "green" },
+            iapPayMix: { label: "直接付费结构", value: 1, compare: 1, unit: " / 10", target: "iap-detail", tone: "amber" },
+            iapMargin: { label: "D90+ 预估毛利", value: 15.9, compare: 31.6, unit: "$k", target: "iap-detail", tone: "default" }
+          }
+        },
+        {
+          id: "yesterday",
+          label: "昨天",
+          date: "2026-06-06",
+          compareLabel: "比前一天",
+          metrics: {
+            revenue: { label: "实际收入", value: 96.2, compare: 91.4, unit: "$k", target: "profit-formula", tone: "default" },
+            cost: { label: "投放成本", value: 114.6, compare: 83.1, unit: "$k", target: "profit-formula", tone: "default" },
+            profit: { label: "流水利润", value: -18.4, compare: 8.3, unit: "$k", target: "profit-formula", tone: "red" },
+            iaaRoi: { label: "D7 ROI 达成率", value: 106, compare: 104, unit: "%", target: "iaa-detail", tone: "green" },
+            iaaMargin: { label: "D7 预估毛利", value: 42.8, compare: 39.9, unit: "$k", target: "iaa-detail", tone: "default" },
+            iaaCost: { label: "投放成本", value: 38, compare: 12, unit: "%", prefix: "+", target: "iaa-detail", tone: "default" },
+            iapSubCost: { label: "三日有效订阅成本", value: 18.7, compare: 19.4, unit: "$", target: "iap-detail", tone: "green" },
+            iapPayMix: { label: "直接付费结构", value: 1, compare: 4, unit: " / 20", target: "iap-detail", tone: "amber" },
+            iapMargin: { label: "D90+ 预估毛利", value: 31.6, compare: 35.2, unit: "$k", target: "iap-detail", tone: "default" }
+          }
+        },
+        {
+          id: "last3",
+          label: "过去 3 天",
+          date: "2026-06-04 - 2026-06-06",
+          compareLabel: "比上 3 天",
+          metrics: {
+            revenue: { label: "实际收入", value: 278.4, compare: 261.7, unit: "$k", target: "profit-formula", tone: "default" },
+            cost: { label: "投放成本", value: 286.1, compare: 271.3, unit: "$k", target: "profit-formula", tone: "default" },
+            profit: { label: "流水利润", value: -7.7, compare: -9.6, unit: "$k", target: "profit-formula", tone: "red" },
+            iaaRoi: { label: "D7 ROI 达成率", value: 105, compare: 102, unit: "%", target: "iaa-detail", tone: "green" },
+            iaaMargin: { label: "D7 预估毛利", value: 122.9, compare: 111.8, unit: "$k", target: "iaa-detail", tone: "default" },
+            iaaCost: { label: "投放成本", value: 24, compare: 11, unit: "%", prefix: "+", target: "iaa-detail", tone: "default" },
+            iapSubCost: { label: "三日有效订阅成本", value: 19.1, compare: 20.2, unit: "$", target: "iap-detail", tone: "green" },
+            iapPayMix: { label: "直接付费结构", value: 8, compare: 12, unit: " / 60", target: "iap-detail", tone: "amber" },
+            iapMargin: { label: "D90+ 预估毛利", value: 101.9, compare: 96.4, unit: "$k", target: "iap-detail", tone: "default" }
+          }
+        },
+        {
+          id: "last7",
+          label: "过去 7 天",
+          date: "2026-05-31 - 2026-06-06",
+          compareLabel: "比上 7 天",
+          metrics: {
+            revenue: { label: "实际收入", value: 621.4, compare: 588.2, unit: "$k", target: "profit-formula", tone: "default" },
+            cost: { label: "投放成本", value: 693.8, compare: 642.5, unit: "$k", target: "profit-formula", tone: "default" },
+            profit: { label: "流水利润", value: -72.4, compare: -54.3, unit: "$k", target: "profit-formula", tone: "red" },
+            iaaRoi: { label: "D7 ROI 达成率", value: 103, compare: 101, unit: "%", target: "iaa-detail", tone: "green" },
+            iaaMargin: { label: "D7 预估毛利", value: 264.5, compare: 241.7, unit: "$k", target: "iaa-detail", tone: "default" },
+            iaaCost: { label: "投放成本", value: 21, compare: 9, unit: "%", prefix: "+", target: "iaa-detail", tone: "default" },
+            iapSubCost: { label: "三日有效订阅成本", value: 19.8, compare: 20.6, unit: "$", target: "iap-detail", tone: "green" },
+            iapPayMix: { label: "直接付费结构", value: 17, compare: 23, unit: " / 140", target: "iap-detail", tone: "amber" },
+            iapMargin: { label: "D90+ 预估毛利", value: 212.3, compare: 205.1, unit: "$k", target: "iap-detail", tone: "default" }
+          }
+        },
+        {
+          id: "last14",
+          label: "过去 14 天",
+          date: "2026-05-24 - 2026-06-06",
+          compareLabel: "比上 14 天",
+          metrics: {
+            revenue: { label: "实际收入", value: 1198.6, compare: 1136.2, unit: "$k", target: "profit-formula", tone: "default" },
+            cost: { label: "投放成本", value: 1311.2, compare: 1227.8, unit: "$k", target: "profit-formula", tone: "default" },
+            profit: { label: "流水利润", value: -112.6, compare: -91.6, unit: "$k", target: "profit-formula", tone: "red" },
+            iaaRoi: { label: "D7 ROI 达成率", value: 102, compare: 100, unit: "%", target: "iaa-detail", tone: "green" },
+            iaaMargin: { label: "D7 预估毛利", value: 514.2, compare: 488.7, unit: "$k", target: "iaa-detail", tone: "default" },
+            iaaCost: { label: "投放成本", value: 18, compare: 10, unit: "%", prefix: "+", target: "iaa-detail", tone: "default" },
+            iapSubCost: { label: "三日有效订阅成本", value: 20.1, compare: 21.3, unit: "$", target: "iap-detail", tone: "green" },
+            iapPayMix: { label: "直接付费结构", value: 38, compare: 44, unit: " / 280", target: "iap-detail", tone: "amber" },
+            iapMargin: { label: "D90+ 预估毛利", value: 421.8, compare: 399.5, unit: "$k", target: "iap-detail", tone: "default" }
+          }
+        },
+        {
+          id: "last30",
+          label: "过去 30 天",
+          date: "2026-05-07 - 2026-06-06",
+          compareLabel: "比上 30 天",
+          metrics: {
+            revenue: { label: "实际收入", value: 2546.8, compare: 2388.1, unit: "$k", target: "profit-formula", tone: "default" },
+            cost: { label: "投放成本", value: 2794.1, compare: 2608.5, unit: "$k", target: "profit-formula", tone: "default" },
+            profit: { label: "流水利润", value: -247.3, compare: -220.4, unit: "$k", target: "profit-formula", tone: "red" },
+            iaaRoi: { label: "D7 ROI 达成率", value: 101, compare: 99, unit: "%", target: "iaa-detail", tone: "green" },
+            iaaMargin: { label: "D7 预估毛利", value: 1088.4, compare: 1021.9, unit: "$k", target: "iaa-detail", tone: "default" },
+            iaaCost: { label: "投放成本", value: 16, compare: 7, unit: "%", prefix: "+", target: "iaa-detail", tone: "default" },
+            iapSubCost: { label: "三日有效订阅成本", value: 20.8, compare: 21.9, unit: "$", target: "iap-detail", tone: "green" },
+            iapPayMix: { label: "直接付费结构", value: 86, compare: 93, unit: " / 600", target: "iap-detail", tone: "amber" },
+            iapMargin: { label: "D90+ 预估毛利", value: 901.2, compare: 862.6, unit: "$k", target: "iap-detail", tone: "default" }
+          }
+        },
+        {
+          id: "2026-06-05",
+          label: "自选日期",
+          date: "2026-06-05",
+          compareLabel: "比前一天",
+          metrics: {
+            revenue: { label: "实际收入", value: 91.4, compare: 87.9, unit: "$k", target: "profit-formula", tone: "default" },
+            cost: { label: "投放成本", value: 83.1, compare: 88.4, unit: "$k", target: "profit-formula", tone: "default" },
+            profit: { label: "流水利润", value: 8.3, compare: -0.5, unit: "$k", target: "profit-formula", tone: "green" },
+            iaaRoi: { label: "D7 ROI 达成率", value: 104, compare: 102, unit: "%", target: "iaa-detail", tone: "green" },
+            iaaMargin: { label: "D7 预估毛利", value: 39.9, compare: 37.1, unit: "$k", target: "iaa-detail", tone: "default" },
+            iaaCost: { label: "投放成本", value: 12, compare: 8, unit: "%", prefix: "+", target: "iaa-detail", tone: "default" },
+            iapSubCost: { label: "三日有效订阅成本", value: 19.4, compare: 18.9, unit: "$", target: "iap-detail", tone: "green" },
+            iapPayMix: { label: "直接付费结构", value: 4, compare: 5, unit: " / 20", target: "iap-detail", tone: "amber" },
+            iapMargin: { label: "D90+ 预估毛利", value: 35.2, compare: 33.8, unit: "$k", target: "iap-detail", tone: "default" }
+          }
+        }
+      ],
+      agenda: [
+        ["09:00", "昨日数据回收", "看流水利润，再进入 IAA / IAP 预估毛利。"],
+        ["11:00", "钉钉草案确认", "确认 D3 复查要提醒哪些人。"],
+        ["15:00", "Watch 到期复查", "看 IAP 扣费、取消率、Billing Retry。"],
+        ["18:00", "新需求判断", "决定是否触发 Product Iteration / Requirement。"]
+      ],
+      watch: [
+        {
+          id: "iap-us-direct-pay",
+          title: "US IAP 直接付费结构偏弱",
+          body: "20 个订阅激活中直接付费 1 个。三日有效订阅成本正常，但用户质量有风险。",
+          next: "D3 看付费成功率、取消率、Billing Retry。",
+          level: "risk"
+        },
+        {
+          id: "iap-billing-retry",
+          title: "Billing Retry 到期复查",
+          body: "上一轮 Watch 已到 D3，需要确认扣费失败用户是否进入计费重试。",
+          next: "确认后升级 Issue 或关闭 Watch。",
+          level: "watch"
+        },
+        {
+          id: "iaa-scale",
+          title: "IAA 放量导致流水利润短期承压",
+          body: "D7 预估毛利和 ROI 达成率正常，暂时不是异常。",
+          next: "明天继续观察 D7 达成率是否稳定。",
+          level: "ok"
+        }
+      ],
+      workflows: [
+        ["Requirement Workflow", "新需求、PRD、UI、开发、测试、上线验证"],
+        ["Product Iteration Workflow", "产品漏斗、支付页、版本、活动迭代"],
+        ["Competitor Research Workflow", "竞品功能、素材、策略拆解"],
+        ["Creative Workflow", "素材 Hook、卖点、CTA、测试迭代"],
+        ["UA / Campaign Optimization", "预算、国家、渠道、campaign、人群、出价"],
+        ["Experiment / Test Validation", "AB Test、广告测试、订阅策略测试"],
+        ["Daily Review Workflow", "昨日经营复盘"],
+        ["Data / Business Triage", "利润、成本、回收、漏斗异常排查"],
+        ["Watch / Review Workflow", "D1/D3/D7/D90+ 复查"],
+        ["Action Follow-up Workflow", "Owner、Due、Review、复盘"],
+        ["Reminder / Messaging", "提醒、日程、钉钉消息草案和发送确认"]
+      ],
+      initiateOptions: [
+        ["Requirement Workflow", "新需求、PRD、UI、开发、测试、上线验证"],
+        ["Product Iteration Workflow", "产品漏斗、支付页、版本、活动迭代"],
+        ["Competitor Research Workflow", "竞品功能、素材、策略拆解"],
+        ["Creative Workflow", "素材 Hook、卖点、CTA、测试迭代"],
+        ["UA / Campaign Optimization", "预算、国家、渠道、campaign、人群、出价"],
+        ["Experiment / Test Validation", "AB Test、广告测试、订阅策略测试"]
+      ],
+      workflowRuns: [
+        ["IAP Subscription Quality Triage", "等待 D3", "watch"],
+        ["IAA D7 Recovery Observation", "观察中", "ok"],
+        ["DingTalk Draft Review", "待确认", "watch"]
+      ],
+      globalActions: [
+        ["data-iap-d3-review", "复查 IAP D3 扣费", "数据决策", "观察复查", "今天 15:00", "IAP", "P0"],
+        ["data-iaa-quality", "确认 IAA 放量质量", "数据决策", "观察复查", "明天 09:00", "IAA", "P0"],
+        ["data-payment-sku", "检查支付页 SKU 分流", "数据决策", "推进闭环", "待 D3", "IAP", "P1"],
+        ["review-iaa-scale", "复核 IAA 放量账面利润", "Action Hub", "推进闭环", "今天 16:00", "IAA", "P1"],
+        ["research-subscription-rule", "订阅转化规律复盘", "Research Center", "测试闭环", "待复盘", "IAP", "P1"]
+      ],
+      actionDates: [
+        {
+          date: "2026-06-07",
+          label: "今天",
+          actions: ["data-iap-d3-review", "data-iaa-quality", "data-payment-sku", "review-iaa-scale", "research-subscription-rule"]
+        },
+        {
+          date: "2026-06-06",
+          label: "昨天",
+          actions: [
+            ["2026-06-06-iap-billing", "IAP Billing Retry 复查", "已完成", "IAP"],
+            ["2026-06-06-creative-check", "素材 Hook 表现复盘", "已完成", "IAA"],
+            ["2026-06-06-dingtalk-owner", "钉钉提醒负责人", "已完成", "通用"]
+          ]
+        },
+        {
+          date: "2026-06-05",
+          label: "前天",
+          actions: [
+            ["2026-06-05-sku-test", "支付页 SKU 分流检查", "已完成", "IAP"],
+            ["2026-06-05-d7-watch", "D7 ROI 到期复查", "已完成", "IAA"]
+          ]
+        },
+        {
+          date: "2026-06-04",
+          label: "大前天",
+          actions: [
+            ["2026-06-04-ua-quality", "UA 渠道质量确认", "待复盘", "IAP"]
+          ]
+        },
+        {
+          date: "2026-06-08",
+          label: "明天",
+          actions: [
+            ["2026-06-08-d7-review", "明日 D7 达成率复查", "待确认", "IAA"],
+            ["2026-06-08-action-follow", "未闭环 Action 追问", "待确认", "通用"]
+          ]
+        },
+        {
+          date: "2026-06-09",
+          label: "后天",
+          actions: [
+            ["2026-06-09-iap-d3", "IAP D3 到期确认", "待确认", "IAP"]
+          ]
+        },
+        {
+          date: "2026-06-03",
+          label: "6/3",
+          actions: [
+            ["2026-06-03-cost-review", "投放成本异常复核", "已完成", "IAA"],
+            ["2026-06-03-owner-follow", "负责人进度追问", "已完成", "通用"],
+            ["2026-06-03-watch-close", "关闭正常 Watch", "已完成", "通用"]
+          ]
+        }
+      ],
+      insights: [
+        {
+          id: "iaa-scale-margin",
+          business: "IAA",
+          priority: "Top1",
+          title: "流水利润下降更像放量账面承压",
+          type: "判断",
+          evidence: "D7 ROI 达成率 106%，D7 预估毛利为正；成本 +38% 可以解释短期账面利润下降。",
+          confidence: "高"
+        },
+        {
+          id: "iap-quality-risk",
+          business: "IAP",
+          priority: "Top1",
+          title: "成本正常但用户质量有风险",
+          type: "风险",
+          evidence: "三日有效订阅成本正常，但直接付费结构 1 / 20 偏弱，需要等待 D3 扣费、取消率和 Billing Retry 复查。",
+          confidence: "中"
+        },
+        {
+          id: "iap-no-direct-action",
+          business: "IAP",
+          priority: "P1",
+          title: "D3 前不建议直接做投放动作",
+          type: "反证",
+          evidence: "当前只是质量风险信号，不是确认异常；如果提前调整，可能把观察问题误处理成投放动作。",
+          confidence: "中"
+        }
+      ],
+      actionTemplates: [
+        ["观察复查", "Watch / Review", "观察区"],
+        ["提醒日程", "Reminder / Calendar", "提醒消息"],
+        ["消息发送", "Messaging / DingTalk", "提醒消息"],
+        ["推进闭环", "Action Follow-up", "Action Center"],
+        ["流程执行", "Workflow Run", "Workflow Monitor"]
+      ],
+      reminders: [
+        ["reminder-iap-d3", "IAP D3 复查", "今天 15:00"],
+        ["reminder-review", "未闭环问题回看", "今天 18:00"],
+        ["reminder-self", "明日 D7 达成率复查", "明天 09:00"]
+      ],
+      messages: [
+        ["msg-iap-owner", "给 IAP 负责人", "请确认 US 订阅计划昨天激活用户的 D3 扣费结果、取消率和 Billing Retry 状态。"],
+        ["msg-ua-owner", "给投放负责人", "请看 US IAP 昨日新增的渠道和 campaign 结构，重点确认是否有新渠道或素材导致直接付费占比偏弱。"],
+        ["msg-product-owner", "给产品负责人", "请先确认支付页和 SKU 分流配置是否有异常，暂不需要改动，只做排查准备。"],
+        ["msg-self", "提醒我自己", "今天 15:00 复查 IAP US D3 扣费、取消率和 Billing Retry，确认是否升级为 Issue。"]
+      ],
+      researchQuestions: [
+        ["订阅转化规律", "Topic", "进行中"],
+        ["IAA 放量误判", "Question", "观察"],
+        ["SKU 分流与真实付费结构", "Question", "待验证"]
+      ],
+      researchIssues: [
+        ["US IAP 直接付费结构偏弱", "Issue 候选", "Watch"],
+        ["PH IAA D0 ROI 低于目标", "Watch", "观察"],
+        ["Billing Retry 集中升高", "Issue", "待确认"]
+      ],
+      researchExperiments: [
+        ["D3 前订阅质量判断", "Hypothesis", "验证中"],
+        ["钉钉提醒闭环", "Experiment", "待复盘"],
+        ["支付页 SKU 分流修正", "Experiment 候选", "待确认"]
+      ],
+      researchMemories: [
+        ["IAA 放量账面利润下降不等于回收变差", "Memory", "已沉淀"],
+        ["IAP 前三天 ROI 需要结合有效订阅成本", "Memory", "已沉淀"],
+        ["直接付费为 0 时免费试用质量风险升高", "Evidence", "可复用"]
+      ],
+      realtime: [
+        ["US IAP D1 取消率", "升高", "watch"],
+        ["US IAA Spend", "继续上升", "ok"],
+        ["PH IAA D0 ROI", "低于目标", "watch"]
+      ],
+      deepDives: {
+        "watch:iap-us-direct-pay": {
+          title: "US IAP 直接付费结构偏弱",
+          body: "这一层判断它为什么先是 Watch，而不是立刻 Action。",
+          nodes: [
+            ["成本", "三日有效订阅成本正常，说明不是单纯买贵了。"],
+            ["结构", "直接付费 1 / 20 偏弱，说明同渠道免费试用用户也可能有质量风险。"],
+            ["相对状态", "D1 取消率高于近 7 日中位数，需要看第二天和第三天是否继续恶化。"],
+            ["苹果订阅状态", "D3 扣费失败后是否进入 Billing Retry，是判断假量或支付能力风险的重要证据。"]
+          ],
+          decision: "继续 Watch 到 D3。若付费成功率低且 Billing Retry 增加，再升级 Issue 并触发 UA / Product Iteration。"
+        },
+        "watch:iap-billing-retry": {
+          title: "Billing Retry 到期复查",
+          body: "这一层确认扣费失败到底是普通失败，还是质量风险。",
+          nodes: [
+            ["扣费结果", "看 D3 是否成功扣费。"],
+            ["重试状态", "未取消订阅但扣费失败，进入 Billing Retry。"],
+            ["风险判断", "如果同一渠道大量进入 Billing Retry，优先怀疑用户质量或假量。"]
+          ],
+          decision: "确认异常后升级 Issue；如果只是少量正常失败，则关闭 Watch。"
+        },
+        "watch:iaa-scale": {
+          title: "IAA 放量观察",
+          body: "这一层确认流水利润下降是不是正常放量结果。",
+          nodes: [
+            ["D7 达成率", "达成率正常，说明回收质量暂时没有坏。"],
+            ["投放量级", "成本上升解释账面利润下降。"],
+            ["复查点", "明天看是否连续低于目标。"]
+          ],
+          decision: "继续 Observation，不触发深度排查。"
+        }
+      }
+    };
+
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) return structuredClone(seedState);
+        return { ...structuredClone(seedState), ...JSON.parse(raw) };
+      } catch {
+        return structuredClone(seedState);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(storageKey, JSON.stringify(state));
+      document.getElementById("saveState").textContent = "本地状态：已保存 " + new Date().toLocaleTimeString("zh-CN", { hour12: false });
+    }
+
+    function toast(text) {
+      const el = document.getElementById("toast");
+      el.textContent = text;
+      el.classList.add("show");
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => el.classList.remove("show"), 1700);
+    }
+
+    function statusClass(value) {
+      if (["正常", "已确认", "已完成", "观察中"].includes(value)) return "ok";
+      if (["到期复查", "待确认", "暂缓", "待复盘"].includes(value)) return "watch";
+      if (["高风险", "已升级", "阻塞"].includes(value)) return "risk";
+      return "info";
+    }
+
+    function showScreen(name) {
+      if (name === "revenue") name = "home";
+      state.screen = name;
+      saveState();
+      if (!document.getElementById("screen-" + name)) {
+        name = "home";
+        state.screen = name;
+        saveState();
+      }
+      document.querySelectorAll(".screen").forEach(screen => {
+        screen.classList.toggle("active", screen.id === "screen-" + name);
+      });
+      const tabMap = {
+        home: "home",
+        "profit-formula": "home",
+        "iaa-detail": "home",
+        "iap-detail": "home",
+        watch: "action",
+        "deep-dive": state.deepDiveBack === "watch" ? "action" : (state.deepDiveBack || "home"),
+        initiate: "initiate",
+        "workflow-detail": "initiate",
+        action: "action",
+        notify: "action",
+        research: "research",
+        realtime: "research",
+        workflow: "research"
+      };
+      const activeTab = tabMap[name] || "home";
+      document.querySelectorAll(".nav-item").forEach(tab => {
+        tab.classList.toggle("active", tab.dataset.open === activeTab);
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function setStatus(group, id, value) {
+      state[group][id] = value;
+      saveState();
+      render();
+      toast("状态已更新：" + value);
+    }
+
+    function renderAgenda() {
+      const agendaList = document.getElementById("agendaList");
+      if (!agendaList) return;
+      agendaList.innerHTML = data.agenda.map(item => `
+        <div class="agenda-item">
+          <div class="time">${item[0]}</div>
+          <div><strong>${item[1]}</strong><span>${item[2]}</span></div>
+        </div>
+      `).join("");
+    }
+
+    function renderWatch() {
+      document.getElementById("watchList").innerHTML = data.watch.map(item => {
+        const current = state.watch[item.id] || "待确认";
+        return `
+          <div class="row">
+            <div>
+              <h4>${item.title}</h4>
+              <div class="button-row">
+                <button class="action-button primary" type="button" onclick="openDeepDive('watch','${item.id}','watch')">查看详情</button>
+                ${["观察中", "到期复查", "已升级", "已关闭"].map(v => `<button class="action-button ${current === v ? "active" : ""}" type="button" onclick="setStatus('watch','${item.id}','${v}')">${v}</button>`).join("")}
+              </div>
+            </div>
+            <span class="status ${item.level === "risk" ? "risk" : statusClass(current)}">${current}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderWorkflowPicker() {
+      document.getElementById("workflowPicker").innerHTML = data.initiateOptions.map(item => `
+        <button class="workflow-button" type="button" onclick="selectWorkflow('${item[0]}','${item[1]}')">
+          <strong>${item[0]}</strong>
+          <span>${item[1]}</span>
+        </button>
+      `).join("");
+      renderWorkflowDraft();
+    }
+
+    function renderDataDecision() {
+      renderDataPeriodStrip();
+      renderDataMetrics();
+      document.getElementById("iaaActionList").innerHTML = renderSourceActionRows("IAA");
+      document.getElementById("iapActionList").innerHTML = renderSourceActionRows("IAP");
+      document.getElementById("iaaInsightList").innerHTML = renderInsights("IAA");
+      document.getElementById("iapInsightList").innerHTML = renderInsights("IAP");
+    }
+
+    function getSelectedDataPeriod() {
+      return data.dataPeriods.find(item => item.id === state.selectedDataPeriod) || data.dataPeriods[0];
+    }
+
+    function renderDataPeriodStrip() {
+      const selected = getSelectedDataPeriod();
+      document.getElementById("dataPeriodStrip").innerHTML = data.dataPeriods.map(item => `
+        <button class="period-button ${item.id === selected.id ? "active" : ""}" type="button" onclick="selectDataPeriod('${item.id}')">${item.label}</button>
+      `).join("");
+    }
+
+    function selectDataPeriod(id) {
+      state.selectedDataPeriod = id;
+      saveState();
+      renderDataDecision();
+      toast("已切换数据周期");
+    }
+
+    function formatMetric(metric) {
+      const value = metric.value;
+      const prefix = metric.prefix || "";
+      if (metric.unit === "%") return `${prefix}${value}%`;
+      if (metric.unit === "$k") return `${value < 0 ? "-" : ""}$${Math.abs(value).toFixed(1)}k`;
+      if (metric.unit === "$") return `$${value.toFixed(1)}`;
+      return `${prefix}${value}${metric.unit || ""}`;
+    }
+
+    function formatDelta(metric, compareLabel) {
+      const diff = metric.value - metric.compare;
+      const sign = diff > 0 ? "+" : "";
+      let text;
+      if (metric.unit === "$k") text = `${sign}${diff.toFixed(1)}k`;
+      else if (metric.unit === "$") text = `${sign}${diff.toFixed(1)}`;
+      else text = `${sign}${diff.toFixed(0)}${metric.unit || ""}`;
+      return `${compareLabel} ${text}`;
+    }
+
+    function renderMetricButton(metric) {
+      const color = metric.tone === "red" ? "var(--red)" : metric.tone === "green" ? "var(--green)" : metric.tone === "amber" ? "var(--amber)" : "var(--ink)";
+      return `
+        <button class="metric metric-link" type="button" data-open="${metric.target}">
+          <b>${metric.label}</b>
+          <strong style="color:${color}">${formatMetric(metric)}</strong>
+          <em>${formatDelta(metric, getSelectedDataPeriod().compareLabel)}</em>
+        </button>
+      `;
+    }
+
+    function renderDataMetrics() {
+      const metrics = getSelectedDataPeriod().metrics;
+      document.getElementById("profitMetricRow").innerHTML = [
+        metrics.revenue,
+        metrics.cost,
+        metrics.profit
+      ].map(renderMetricButton).join("");
+      document.getElementById("iaaMetricRow").innerHTML = [
+        metrics.iaaRoi,
+        metrics.iaaMargin,
+        metrics.iaaCost
+      ].map(renderMetricButton).join("");
+      document.getElementById("iapMetricRow").innerHTML = [
+        metrics.iapSubCost,
+        metrics.iapPayMix,
+        metrics.iapMargin
+      ].map(renderMetricButton).join("");
+    }
+
+    function renderInsights(business) {
+      const insights = data.insights.filter(item => item.business === business);
+      const top = insights.find(item => item.priority === "Top1") || insights[0];
+      if (!top) return "";
+      const extra = Math.max(insights.length - 1, 0);
+      return `
+        <div class="row insight-row">
+          <div>
+            <h4>${top.title}</h4>
+          </div>
+          <span class="status info">${top.type} · ${top.confidence}</span>
+          <button class="icon-button" type="button" aria-label="查看证据" title="查看证据" onclick="openInsight('${top.id}')">→</button>
+        </div>
+        ${extra ? `<div class="row">
+          <div><h4>其他洞察</h4><p>${extra} 条</p></div>
+          <button class="icon-button" type="button" aria-label="查看更多洞察" title="查看更多洞察" onclick="openBusinessInsights('${business}')">→</button>
+        </div>` : ""}
+      `;
+    }
+
+    function renderSourceActionRows(business) {
+      const items = data.globalActions.filter(item => item[2] === "数据决策" && item[5] === business);
+      const p0Items = items.filter(item => item[6] === "P0");
+      const lowerCount = items.length - p0Items.length;
+      const rows = p0Items.map(item => {
+        const current = state.actions[item[0]] || "待确认";
+        return `
+          <div class="row">
+            <div>
+              <h4>${item[1]}</h4>
+              <p>${item[3]} · ${item[4]}</p>
+              <div class="button-row">
+                <button class="action-button primary" type="button" onclick="setStatus('actions','${item[0]}','进行中')">确认推进</button>
+                <button class="action-button" type="button" onclick="setStatus('actions','${item[0]}','暂缓')">暂缓</button>
+              </div>
+            </div>
+            <span class="status ${statusClass(current)}">${current}</span>
+            <button class="icon-button" type="button" aria-label="查看草案" title="查看草案" onclick="openActionDraft('${item[0]}')">→</button>
+          </div>
+        `;
+      }).join("");
+      return rows + (lowerCount ? `
+        <div class="row">
+          <div><h4>低优先级草案</h4><p>${lowerCount} 条</p></div>
+          <button class="icon-button" type="button" aria-label="查看更多草案" title="查看更多草案" onclick="openBusinessActions('${business}')">→</button>
+        </div>
+      ` : "");
+    }
+
+    function renderActionRows(items, compact = false) {
+      return items.map(item => {
+        const current = state.actions[item[0]] || "待确认";
+        return `
+          <div class="row">
+            <div>
+              <h4>${item[1]}</h4>
+              <p>${item[6] || "P1"} · ${item[3]} · ${item[4]}</p>
+              ${compact ? "" : `<div class="button-row">
+                ${["待确认", "进行中", "已完成", "待复盘", "阻塞", "暂缓"].map(v => `<button class="action-button ${current === v ? "active" : ""}" type="button" onclick="setStatus('actions','${item[0]}','${v}')">${v}</button>`).join("")}
+              </div>`}
+            </div>
+            <span class="status ${statusClass(current)}">${current}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function selectWorkflow(name, desc) {
+      state.selectedWorkflowName = name;
+      state.selectedWorkflowDesc = desc;
+      state.selectedWorkflow = `${name}：${desc}`;
+      saveState();
+      renderWorkflowDraft();
+      renderWorkflowDetail();
+      toast("已选择：" + name);
+    }
+
+    function renderWorkflowDraft() {
+      const text = state.selectedWorkflow || "未选择 Workflow";
+      document.getElementById("workflowDraft").textContent = text;
+    }
+
+    function renderWorkflowDetail() {
+      const name = state.selectedWorkflowName || "Workflow 草案";
+      const desc = state.selectedWorkflowDesc || "这里展示用户确认前的流程节点草案。";
+      document.getElementById("workflowDetailTitle").textContent = name;
+      document.getElementById("workflowDetailDesc").textContent = desc;
+      const steps = [
+        ["入口原因", "记录为什么触发这个 Workflow，来自哪个 tablet、哪个指标或哪个用户需求。"],
+        ["数据准备", "列出需要的报表字段、业务对象、时间窗口和对比维度。"],
+        ["Agent 节点", "Decision Agent 出草案，Analysis Agent 拆数据，Diagnosis Agent 找可能原因，Recommendation Agent 出建议。"],
+        ["用户确认", "用户确认是否启动、是否发钉钉、是否创建 Action 或 Watch。"],
+        ["状态落库", "正式版写入 Workflow Run、Action、Watch、Issue 或 Topic。"]
+      ];
+      document.getElementById("workflowSteps").innerHTML = steps.map(item => `
+        <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>
+      `).join("");
+    }
+
+    function openDeepDive(kind, id, backScreen) {
+      const detail = data.deepDives[`${kind}:${id}`];
+      if (!detail) return toast("这个条目还没有下一层详情");
+      state.deepDiveBack = backScreen || "home";
+      saveState();
+      document.getElementById("deepDiveTitle").textContent = detail.title;
+      document.getElementById("deepDiveBody").textContent = detail.body;
+      document.getElementById("deepDiveNodes").innerHTML = detail.nodes.map(item => `
+        <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>
+      `).join("");
+      document.getElementById("deepDiveDecision").textContent = detail.decision;
+      showScreen("deep-dive");
+    }
+
+    function openInsight(id) {
+      const insight = data.insights.find(item => item.id === id);
+      if (!insight) return toast("这个洞察还没有证据详情");
+      state.deepDiveBack = "home";
+      saveState();
+      document.getElementById("deepDiveTitle").textContent = insight.title;
+      document.getElementById("deepDiveBody").textContent = `${insight.business} Agent 洞察用于解释判断，不直接等同于执行动作。`;
+      document.getElementById("deepDiveNodes").innerHTML = [
+        ["洞察类型", insight.type],
+        ["证据", insight.evidence],
+        ["置信度", insight.confidence],
+        ["下一步", "如果需要执行动作，必须转成 Action 草案并由用户确认。"]
+      ].map(item => `<div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join("");
+      document.getElementById("deepDiveDecision").textContent = "先作为判断依据展示；是否创建或推进 Action，由用户确认。";
+      showScreen("deep-dive");
+    }
+
+    function openBusinessInsights(business) {
+      const items = data.insights.filter(item => item.business === business);
+      state.deepDiveBack = "home";
+      saveState();
+      document.getElementById("deepDiveTitle").textContent = `${business} Agent 洞察`;
+      document.getElementById("deepDiveBody").textContent = "这里是该业务线的洞察列表，首页只展示 Top1。";
+      document.getElementById("deepDiveNodes").innerHTML = items.map(item => `
+        <div class="formula-node"><strong>${item.priority || "P1"} · ${item.title}</strong><span>${item.type} · ${item.confidence} · ${item.evidence}</span></div>
+      `).join("");
+      document.getElementById("deepDiveDecision").textContent = "洞察只用于判断；需要执行时再转成 Action 草案。";
+      showScreen("deep-dive");
+    }
+
+    function openBusinessActions(business) {
+      const items = data.globalActions.filter(item => item[2] === "数据决策" && item[5] === business);
+      state.deepDiveBack = "home";
+      saveState();
+      document.getElementById("deepDiveTitle").textContent = `${business} Action 草案`;
+      document.getElementById("deepDiveBody").textContent = "首页只展示 P0，低优先级草案在这里集中查看。";
+      document.getElementById("deepDiveNodes").innerHTML = items.map(item => {
+        const current = state.actions[item[0]] || "待确认";
+        return `<div class="formula-node"><strong>${item[6] || "P1"} · ${item[1]}</strong><span>${item[3]} · ${item[4]} · ${current}</span></div>`;
+      }).join("");
+      document.getElementById("deepDiveDecision").textContent = "需要推进的草案在来源模块或 Action Hub 中确认状态。";
+      showScreen("deep-dive");
+    }
+
+    function openActionDraft(id) {
+      const action = data.globalActions.find(item => item[0] === id);
+      if (!action) return toast("这个 Action 草案不存在");
+      const current = state.actions[id] || "待确认";
+      state.deepDiveBack = "home";
+      saveState();
+      document.getElementById("deepDiveTitle").textContent = action[1];
+      document.getElementById("deepDiveBody").textContent = "Action 草案是待确认的执行项，确认后同步进入 Action Hub 的项目管理状态。";
+      document.getElementById("deepDiveNodes").innerHTML = [
+        ["来源模块", action[2]],
+        ["业务线", action[5] || "通用"],
+        ["优先级", action[6] || "P1"],
+        ["动作类型", action[3]],
+        ["复查 / 截止", action[4]],
+        ["当前状态", current]
+      ].map(item => `<div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join("");
+      document.getElementById("deepDiveDecision").innerHTML = `
+        <div class="button-row">
+          <button class="action-button primary" type="button" onclick="setStatus('actions','${id}','进行中')">确认推进</button>
+          <button class="action-button" type="button" onclick="setStatus('actions','${id}','暂缓')">暂缓</button>
+          <button class="action-button" type="button" onclick="showScreen('action')">去 Action Hub</button>
+        </div>
+      `;
+      showScreen("deep-dive");
+    }
+
+    function renderActions() {
+      document.getElementById("actionList").innerHTML = renderActionRows(data.globalActions, false);
+      renderActionCalendar();
+      document.getElementById("actionTemplateList").innerHTML = data.actionTemplates.map(item => `
+        <div class="row">
+          <div>
+            <h4>${item[0]}</h4>
+            <p>${item[1]}</p>
+          </div>
+          <span class="status info">${item[2]}</span>
+        </div>
+      `).join("");
+    }
+
+    function getActionDateItems(day) {
+      return day.actions.map(item => {
+        if (typeof item === "string") {
+          const action = data.globalActions.find(a => a[0] === item);
+          if (!action) return null;
+          return {
+            id: action[0],
+            title: action[1],
+            status: state.actions[action[0]] || "待确认",
+            business: action[5] || "通用",
+            source: action[2],
+            live: true
+          };
+        }
+        return {
+          id: item[0],
+          title: item[1],
+          status: item[2],
+          business: item[3] || "通用",
+          source: day.date > "2026-06-07" ? "计划" : "历史快照",
+          live: false
+        };
+      }).filter(Boolean);
+    }
+
+    function summarizeActionDate(day) {
+      const items = getActionDateItems(day);
+      const done = items.filter(item => item.status === "已完成").length;
+      const doing = items.filter(item => item.status === "进行中").length;
+      const pending = items.filter(item => ["待确认", "待复盘", "暂缓", "阻塞", "观察中"].includes(item.status)).length;
+      return { items, done, doing, pending };
+    }
+
+    function renderActionSchedule(compact = false) {
+      return data.actionDates.map(day => {
+        const summary = summarizeActionDate(day);
+        return `
+          <div class="row">
+            <div>
+              <h4>${day.label} · ${day.date}</h4>
+              <p>${summary.items.length} 个 · 完成 ${summary.done} · 进行 ${summary.doing} · 待处理 ${summary.pending}</p>
+            </div>
+            <button class="icon-button" type="button" aria-label="查看当天 Action" title="查看当天 Action" onclick="selectActionDate('${day.date}', ${compact ? "true" : "false"})">→</button>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function selectActionDate(date, fromHome = false) {
+      state.selectedActionDate = date;
+      state.deepDiveBack = fromHome ? "home" : "action";
+      saveState();
+      if (fromHome) {
+        openActionDateSnapshot(date, "home");
+        return;
+      }
+      renderActionCalendar();
+      document.getElementById("actionCalendarPopover")?.classList.remove("open");
+    }
+
+    function renderActionCalendar() {
+      const selected = data.actionDates.find(day => day.date === state.selectedActionDate) || data.actionDates[0];
+      document.getElementById("selectedActionDateLabel").textContent = `${selected.label} · ${selected.date}`;
+      document.getElementById("actionDateGrid").innerHTML = data.actionDates.map(day => `
+        <button class="calendar-day ${day.date === selected.date ? "active" : ""}" type="button" onclick="selectActionDate('${day.date}')">${day.label}</button>
+      `).join("");
+      document.getElementById("actionScheduleList").innerHTML = renderActionSchedule(false);
+      const items = getActionDateItems(selected);
+      document.getElementById("actionDateTitle").textContent = `${selected.label} · ${selected.date}`;
+      document.getElementById("actionDateList").innerHTML = items.map(item => `
+        <div class="row">
+          <div><h4>${item.title}</h4><p>${item.business} · ${item.source}</p></div>
+          <span class="status ${statusClass(item.status)}">${item.status}</span>
+          ${item.live ? `<button class="icon-button" type="button" aria-label="查看 Action" title="查看 Action" onclick="openActionDraft('${item.id}')">→</button>` : ""}
+        </div>
+      `).join("");
+    }
+
+    function openActionDateSnapshot(date, backScreen = "home") {
+      const day = data.actionDates.find(item => item.date === date);
+      if (!day) return toast("这个日期还没有 Action 快照");
+      const items = getActionDateItems(day);
+      state.deepDiveBack = backScreen;
+      saveState();
+      document.getElementById("deepDiveTitle").textContent = `${day.label} · ${day.date}`;
+      document.getElementById("deepDiveBody").textContent = "日期快照用于回看当天 App / AI / 用户推进过哪些 Action，以及每个 Action 的状态。";
+      document.getElementById("deepDiveNodes").innerHTML = items.map(item => `
+        <div class="formula-node"><strong>${item.status} · ${item.title}</strong><span>${item.business} · ${item.source}</span></div>
+      `).join("");
+      document.getElementById("deepDiveDecision").textContent = "完整日程表在 Action Hub 中查看。";
+      showScreen("deep-dive");
+    }
+
+    function renderReminders() {
+      document.getElementById("reminderList").innerHTML = data.reminders.map(item => {
+        const current = state.reminders[item[0]] || "待提醒";
+        return `
+          <div class="row">
+            <div>
+              <h4>${item[1]}</h4>
+              <p>${item[2]}</p>
+              <div class="button-row">
+                ${["待提醒", "已提醒", "已取消"].map(v => `<button class="action-button ${current === v ? "active" : ""}" type="button" onclick="setStatus('reminders','${item[0]}','${v}')">${v}</button>`).join("")}
+              </div>
+            </div>
+            <span class="status ${statusClass(current)}">${current}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderMessages() {
+      document.getElementById("messageList").innerHTML = data.messages.map(item => {
+        const current = state.messages[item[0]] || "待确认";
+        return `
+          <div class="row">
+            <div>
+              <h4>${item[1]}</h4>
+              <p>${item[2]}</p>
+              <div class="button-row">
+                ${["待确认", "已确认", "已取消"].map(v => `<button class="action-button ${current === v ? "active" : ""}" type="button" onclick="setStatus('messages','${item[0]}','${v}')">${v}</button>`).join("")}
+              </div>
+            </div>
+            <span class="status ${statusClass(current)}">${current}</span>
+          </div>
+        `;
+      }).join("");
+      document.getElementById("quickNote").value = state.quickNote || "";
+    }
+
+    function renderResearch() {
+      document.getElementById("researchQuestionList").innerHTML = renderResearchRows(data.researchQuestions);
+      document.getElementById("researchIssueList").innerHTML = renderResearchRows(data.researchIssues);
+      document.getElementById("researchExperimentList").innerHTML = renderResearchRows(data.researchExperiments);
+      document.getElementById("researchMemoryList").innerHTML = renderResearchRows(data.researchMemories);
+    }
+
+    function renderResearchRows(items) {
+      return items.map(item => `
+        <div class="row">
+          <div><h4>${item[0]}</h4><p>${item[1]}</p></div>
+          <span class="status info">${item[2]}</span>
+        </div>
+      `).join("");
+    }
+
+    function renderRealtime() {
+      document.getElementById("realtimeList").innerHTML = data.realtime.map(item => `
+        <div class="row">
+          <div><h4>${item[0]}</h4><p>${item[1]}</p></div>
+          <span class="status ${item[2]}">${item[2] === "ok" ? "正常" : "观察"}</span>
+        </div>
+      `).join("");
+    }
+
+    function renderWorkflowMonitor() {
+      document.getElementById("workflowRuns").innerHTML = data.workflowRuns.map(item => `
+        <div class="row">
+          <div><h4>${item[0]}</h4></div>
+          <span class="status ${item[2]}">${item[1]}</span>
+        </div>
+      `).join("");
+      document.getElementById("workflowRegistry").innerHTML = data.workflows.map(item => `
+        <div class="row">
+          <div><h4>${item[0]}</h4><p>${item[1]}</p></div>
+          <span class="status info">模板</span>
+        </div>
+      `).join("");
+    }
+
+    function render() {
+      renderDataDecision();
+      renderAgenda();
+      renderWatch();
+      renderWorkflowPicker();
+      renderWorkflowDetail();
+      renderActions();
+      renderReminders();
+      renderMessages();
+      renderResearch();
+      renderRealtime();
+      renderWorkflowMonitor();
+    }
+
+    document.addEventListener("click", event => {
+      const target = event.target.closest("[data-open]");
+      if (!target) return;
+      showScreen(target.dataset.open);
+    });
+
+    document.querySelectorAll("[data-back]").forEach(button => {
+      button.addEventListener("click", () => showScreen("home"));
+    });
+
+    document.getElementById("confirmWorkflow").addEventListener("click", () => {
+      if (!state.selectedWorkflow) return toast("请先选择一个 Workflow");
+      renderWorkflowDetail();
+      showScreen("workflow-detail");
+    });
+
+    document.getElementById("clearWorkflow").addEventListener("click", () => {
+      state.selectedWorkflow = "";
+      state.selectedWorkflowName = "";
+      state.selectedWorkflowDesc = "";
+      saveState();
+      renderWorkflowDraft();
+      renderWorkflowDetail();
+      toast("已清空 Workflow 选择");
+    });
+
+    document.getElementById("deepDiveBack").addEventListener("click", () => {
+      showScreen(state.deepDiveBack || "home");
+    });
+
+    document.getElementById("actionCalendarToggle").addEventListener("click", () => {
+      document.getElementById("actionCalendarPopover").classList.toggle("open");
+    });
+
+    document.getElementById("saveNote").addEventListener("click", () => {
+      state.quickNote = document.getElementById("quickNote").value;
+      saveState();
+      toast("临时补充已保存到本地");
+    });
+
+    document.getElementById("clearNote").addEventListener("click", () => {
+      state.quickNote = "";
+      document.getElementById("quickNote").value = "";
+      saveState();
+      toast("临时补充已清空");
+    });
+
+    render();
+    showScreen(state.screen || "home");
+  </script>
+</body>
+</html>
