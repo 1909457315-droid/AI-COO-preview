@@ -554,6 +554,40 @@
       font-size: 12px;
     }
 
+    .metric-insight {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 6px;
+      align-items: center;
+      margin-top: 9px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .metric-insight span:first-child {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .metric-insight .more {
+      width: 26px;
+      height: 26px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--blue-strong);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .metric-insight .more:hover {
+      background: var(--surface-blue);
+    }
+
     .decision {
       margin-top: 10px;
       padding: 12px;
@@ -1275,7 +1309,7 @@
           <div class="metric-row" id="iaaMetricRow"></div>
           <div class="business-workspace">
             <section>
-              <div class="section-title">Agent 洞察</div>
+              <div class="section-title">综合洞察</div>
               <div class="list" id="iaaInsightList"></div>
             </section>
             <section>
@@ -1289,7 +1323,7 @@
           <div class="metric-row" id="iapMetricRow"></div>
           <div class="business-workspace">
             <section>
-              <div class="section-title">Agent 洞察</div>
+              <div class="section-title">综合洞察</div>
               <div class="list" id="iapInsightList"></div>
             </section>
             <section>
@@ -1929,6 +1963,7 @@
         {
           id: "iaa-scale-margin",
           business: "IAA",
+          scope: "module",
           priority: "Top1",
           title: "流水利润下降更像放量账面承压",
           type: "判断",
@@ -1936,8 +1971,42 @@
           confidence: "高"
         },
         {
+          id: "profit-cost-pressure",
+          business: "IAA",
+          scope: "metric",
+          metric: "profit",
+          priority: "Top1",
+          title: "账面利润承压主要来自投放成本放大",
+          type: "指标洞察",
+          evidence: "实际收入上升但投放成本增幅更高，流水利润短期转负。",
+          confidence: "高"
+        },
+        {
+          id: "iaa-roi-stable",
+          business: "IAA",
+          scope: "metric",
+          metric: "iaaRoi",
+          priority: "Top1",
+          title: "D7 达标率仍高于目标",
+          type: "指标洞察",
+          evidence: "D7 ROI 达成率 106%，说明当前回收没有同步恶化。",
+          confidence: "高"
+        },
+        {
+          id: "iaa-cost-scale",
+          business: "IAA",
+          scope: "metric",
+          metric: "iaaCost",
+          priority: "Top1",
+          title: "成本放量需要继续看 D7 是否保持",
+          type: "指标洞察",
+          evidence: "投放成本 +38%，如果 D7 达标率连续下滑再进入排查。",
+          confidence: "中"
+        },
+        {
           id: "iap-quality-risk",
           business: "IAP",
+          scope: "module",
           priority: "Top1",
           title: "成本正常但用户质量有风险",
           type: "风险",
@@ -1945,8 +2014,42 @@
           confidence: "中"
         },
         {
+          id: "iap-sub-cost-ok",
+          business: "IAP",
+          scope: "metric",
+          metric: "iapSubCost",
+          priority: "Top1",
+          title: "有效订阅成本暂时正常",
+          type: "指标洞察",
+          evidence: "三日有效订阅成本低于前一天，不是当前主要风险来源。",
+          confidence: "中"
+        },
+        {
+          id: "iap-pay-mix-weak",
+          business: "IAP",
+          scope: "metric",
+          metric: "iapPayMix",
+          priority: "Top1",
+          title: "直接付费结构偏弱",
+          type: "指标洞察",
+          evidence: "直接付费 1 / 20，低于预期分流后的健康结构，需要 D3 复查。",
+          confidence: "中"
+        },
+        {
+          id: "iap-margin-watch",
+          business: "IAP",
+          scope: "metric",
+          metric: "iapMargin",
+          priority: "Top1",
+          title: "D90+ 毛利轻微回落，先看订阅质量",
+          type: "指标洞察",
+          evidence: "D90+ 预估毛利低于前一天，但三日成本正常，核心风险在用户质量。",
+          confidence: "中"
+        },
+        {
           id: "iap-no-direct-action",
           business: "IAP",
+          scope: "module",
           priority: "P1",
           title: "D3 前不建议直接做投放动作",
           type: "反证",
@@ -2369,38 +2472,52 @@
       return `${compareLabel} ${text}`;
     }
 
-    function renderMetricButton(metric) {
+    function metricInsightHtml(key) {
+      const items = data.insights.filter(item => item.scope === "metric" && item.metric === key);
+      if (!items.length) return "";
+      const top = items.find(item => item.priority === "Top1") || items[0];
+      const extra = items.length - 1;
+      return `
+        <span class="metric-insight">
+          <span>${top.title}</span>
+          <button class="more" type="button" aria-label="查看指标洞察" title="查看指标洞察" onclick="event.stopPropagation(); openMetricInsights('${key}')">${extra > 0 ? `+${extra}` : "›"}</button>
+        </span>
+      `;
+    }
+
+    function renderMetricButton([key, metric]) {
       const color = metric.tone === "red" ? "var(--red)" : metric.tone === "green" ? "var(--green)" : metric.tone === "amber" ? "var(--amber)" : "var(--ink)";
       return `
-        <button class="metric metric-link" type="button" data-open="${metric.target}">
+        <article class="metric metric-link" role="button" tabindex="0" data-open="${metric.target}">
           <b>${metric.label}</b>
           <strong style="color:${color}">${formatMetric(metric)}</strong>
           <em>${formatDelta(metric, getSelectedDataPeriod().compareLabel)}</em>
-        </button>
+          ${metricInsightHtml(key)}
+        </article>
       `;
     }
 
     function renderDataMetrics() {
       const metrics = getSelectedDataPeriod().metrics;
       document.getElementById("profitMetricRow").innerHTML = [
-        metrics.revenue,
-        metrics.cost,
-        metrics.profit
+        ["revenue", metrics.revenue],
+        ["cost", metrics.cost],
+        ["profit", metrics.profit]
       ].map(renderMetricButton).join("");
       document.getElementById("iaaMetricRow").innerHTML = [
-        metrics.iaaRoi,
-        metrics.iaaMargin,
-        metrics.iaaCost
+        ["iaaRoi", metrics.iaaRoi],
+        ["iaaMargin", metrics.iaaMargin],
+        ["iaaCost", metrics.iaaCost]
       ].map(renderMetricButton).join("");
       document.getElementById("iapMetricRow").innerHTML = [
-        metrics.iapSubCost,
-        metrics.iapPayMix,
-        metrics.iapMargin
+        ["iapSubCost", metrics.iapSubCost],
+        ["iapPayMix", metrics.iapPayMix],
+        ["iapMargin", metrics.iapMargin]
       ].map(renderMetricButton).join("");
     }
 
     function renderInsights(business) {
-      const insights = data.insights.filter(item => item.business === business);
+      const insights = data.insights.filter(item => item.business === business && item.scope !== "metric");
       const top = insights.find(item => item.priority === "Top1") || insights[0];
       if (!top) return "";
       const extra = Math.max(insights.length - 1, 0);
@@ -2783,8 +2900,24 @@
       navigateTo("deep-dive", { preserveStack: true });
     }
 
+    function openMetricInsights(key) {
+      const items = data.insights.filter(item => item.scope === "metric" && item.metric === key);
+      if (!items.length) return toast("这个指标暂时没有绑定洞察");
+      const metric = getSelectedDataPeriod().metrics[key];
+      state.deepDiveBack = "home";
+      state.navStack = ["home"];
+      saveState();
+      document.getElementById("deepDiveTitle").textContent = `${metric?.label || "指标"}洞察`;
+      document.getElementById("deepDiveBody").textContent = "这里只展示和当前指标强绑定的 Agent 洞察；跨指标判断仍放在模块综合洞察。";
+      document.getElementById("deepDiveNodes").innerHTML = items.map(item => `
+        <div class="formula-node"><strong>${item.priority || "P1"} · ${item.title}</strong><span>${item.type} · ${item.confidence} · ${item.evidence}</span></div>
+      `).join("");
+      document.getElementById("deepDiveDecision").textContent = "如果需要执行，必须再转成 Action 草案并同步到 Action Hub。";
+      navigateTo("deep-dive", { preserveStack: true });
+    }
+
     function openBusinessInsights(business) {
-      const items = data.insights.filter(item => item.business === business);
+      const items = data.insights.filter(item => item.business === business && item.scope !== "metric");
       state.deepDiveBack = "home";
       state.navStack = ["home"];
       saveState();
