@@ -860,6 +860,81 @@
       font-size: 13px;
     }
 
+    .dimension-control {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .dimension-toggle {
+      min-height: 58px;
+      border: 0;
+      border-radius: 14px;
+      background: var(--surface-soft);
+      color: var(--ink);
+      cursor: pointer;
+      text-align: left;
+      padding: 11px 12px;
+    }
+
+    .dimension-toggle strong,
+    .dimension-current strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .dimension-toggle span,
+    .dimension-current span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .dimension-toggle.active {
+      background: var(--surface-blue);
+      color: var(--blue-strong);
+    }
+
+    .dimension-current {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 14px;
+      background: var(--surface-soft);
+    }
+
+    .dimension-table {
+      display: grid;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .dimension-table-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(70px, .55fr)) auto;
+      gap: 8px;
+      align-items: center;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .dimension-table-row:last-child {
+      border-bottom: 0;
+    }
+
+    .dimension-table-row.header {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .dimension-table-row button {
+      width: 30px;
+      height: 30px;
+    }
+
     .list {
       display: grid;
       gap: 8px;
@@ -1147,7 +1222,10 @@
       .hero { min-height: auto; padding: 20px; }
       .hero h2 { font-size: 26px; }
       .detail-head { flex-direction: column-reverse; padding: 14px; }
-      .metric-row, .workflow-picker, .quick-row, .dimension-grid { grid-template-columns: 1fr; }
+      .metric-row, .workflow-picker, .quick-row, .dimension-grid, .dimension-control { grid-template-columns: 1fr; }
+      .dimension-table-row { grid-template-columns: minmax(0, 1fr) auto; }
+      .dimension-table-row.header { display: none; }
+      .dimension-table-row span { font-size: 12px; }
       .module-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .row { grid-template-columns: 1fr; }
       .state-pill { width: 100%; justify-content: center; }
@@ -1261,25 +1339,10 @@
       </div>
       <div class="detail-grid">
         <article class="detail-card wide">
-          <h3>L2 视角范围</h3>
-          <div class="formula-path">
-            <div class="formula-node"><strong>一维</strong><span>产品 / 渠道 / 国家。</span></div>
-            <div class="formula-node"><strong>二维</strong><span>产品 x 渠道 / 产品 x 国家 / 渠道 x 国家。</span></div>
-            <div class="formula-node"><strong>三维</strong><span>产品 x 渠道 x 国家，作为进入 L3 的组合入口。</span></div>
-          </div>
-        </article>
-        <article class="detail-card wide">
-          <h3>L2 轴线数据预览</h3>
-          <div class="formula-path">
-            <div class="formula-node"><strong>一维：产品</strong><span>CleanX D7 ROI 91%，预估毛利 -$6.4k。看产品整体回收是否承压。</span></div>
-            <div class="formula-node"><strong>一维：渠道</strong><span>Unity D7 ROI 88%，成本 +24%。看渠道整体流量质量或算法状态。</span></div>
-            <div class="formula-node"><strong>一维：国家</strong><span>US D7 ROI 86%，预估毛利 -$9.1k。看国家市场整体是否承压。</span></div>
-            <div class="formula-node"><strong>二维：产品 x 渠道</strong><span>CleanX x Unity ROI 78%。代表产品和渠道算法 / 素材机制是否匹配。</span></div>
-            <div class="formula-node"><strong>二维：产品 x 国家</strong><span>CleanX x US ROI 82%。代表产品在某国家的市场适配和需求质量。</span></div>
-            <div class="formula-node"><strong>二维：渠道 x 国家</strong><span>Unity x US ROI 75%。代表某渠道在某国家的流量质量或子渠道结构。</span></div>
-            <div class="formula-node"><strong>三维：产品 x 渠道 x 国家</strong><span>CleanX x Unity x US ROI 69%，预估毛利 -$4.9k。定位进入 L3 的具体排查单元。</span></div>
-          </div>
-          <p class="dimension-note">先用这一层找影响 D7 回收和预估毛利最大的组合，再进入单渠道细表。</p>
+          <h3>维度视角</h3>
+          <div class="dimension-control" id="iaaDimensionControl"></div>
+          <div class="dimension-current" id="iaaDimensionCurrent"></div>
+          <div class="dimension-table" id="iaaDimensionTable"></div>
         </article>
         <article class="detail-card wide">
           <h3>L3 下钻入口</h3>
@@ -1303,25 +1366,10 @@
       </div>
       <div class="detail-grid">
         <article class="detail-card wide">
-          <h3>L2 视角范围</h3>
-          <div class="formula-path">
-            <div class="formula-node"><strong>一维</strong><span>产品 / 渠道 / 国家。</span></div>
-            <div class="formula-node"><strong>二维</strong><span>产品 x 渠道 / 产品 x 国家 / 渠道 x 国家。</span></div>
-            <div class="formula-node"><strong>三维</strong><span>产品 x 渠道 x 国家，作为进入 L3 的组合入口。</span></div>
-          </div>
-        </article>
-        <article class="detail-card wide">
-          <h3>L2 轴线数据预览</h3>
-          <div class="formula-path">
-            <div class="formula-node"><strong>一维：产品</strong><span>CleanPro D90 ROI 84%，预估毛利 -$3.6k。看产品整体订阅回收是否承压。</span></div>
-            <div class="formula-node"><strong>一维：渠道</strong><span>MTJ 三日有效订阅成本 $24.8，付费结构偏弱。看渠道整体用户质量。</span></div>
-            <div class="formula-node"><strong>一维：国家</strong><span>US 取消率 +9%，Billing Retry 风险升高。看国家市场订阅质量。</span></div>
-            <div class="formula-node"><strong>二维：产品 x 渠道</strong><span>CleanPro x MTJ D90 ROI 72%。代表产品和渠道用户质量是否匹配。</span></div>
-            <div class="formula-node"><strong>二维：产品 x 国家</strong><span>CleanPro x US 付费结构 1 / 20。代表产品在某国家的付费意愿和取消风险。</span></div>
-            <div class="formula-node"><strong>二维：渠道 x 国家</strong><span>MTJ x US Billing Retry +11%。代表渠道在某国家的流量真实性或支付能力。</span></div>
-            <div class="formula-node"><strong>三维：产品 x 渠道 x 国家</strong><span>CleanPro x MTJ x US D90 ROI 64%。定位进入 L3 的具体排查单元。</span></div>
-          </div>
-          <p class="dimension-note">先用这一层找影响 D90+ 回收、订阅质量和预估毛利最大的组合，再进入单渠道细表。</p>
+          <h3>维度视角</h3>
+          <div class="dimension-control" id="iapDimensionControl"></div>
+          <div class="dimension-current" id="iapDimensionCurrent"></div>
+          <div class="dimension-table" id="iapDimensionTable"></div>
         </article>
         <article class="detail-card wide">
           <h3>L3 下钻入口</h3>
@@ -1592,6 +1640,10 @@
       navStack: [],
       selectedActionDate: "2026-06-07",
       selectedDataPeriod: "yesterday",
+      dimensionViews: {
+        IAA: { product: true, channel: true, country: true },
+        IAP: { product: true, channel: true, country: true }
+      },
       dataCalendarYear: 2026,
       dataCalendarMonth: 5,
       dataRangeStart: "",
@@ -2141,6 +2193,8 @@
     function renderDataDecision() {
       renderDataPeriodStrip();
       renderDataMetrics();
+      renderDimensionExplorer("IAA");
+      renderDimensionExplorer("IAP");
       document.getElementById("iaaActionList").innerHTML = renderSourceActionRows("IAA");
       document.getElementById("iapActionList").innerHTML = renderSourceActionRows("IAP");
       document.getElementById("iaaInsightList").innerHTML = renderInsights("IAA");
@@ -2436,6 +2490,147 @@
       document.getElementById("workflowSteps").innerHTML = steps.map(item => `
         <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>
       `).join("");
+    }
+
+    const dimensionLabels = {
+      product: "产品",
+      channel: "渠道",
+      country: "国家"
+    };
+
+    const dimensionMeanings = {
+      product: "看单个产品整体经营健康度，先判断是不是产品本身拖累回收。",
+      channel: "看单个渠道整体流量质量和算法状态，先判断是不是渠道整体变差。",
+      country: "看单个国家市场质量，先判断是不是国家回收、付费能力或广告收入变化。",
+      "product-channel": "看产品和渠道是否匹配，判断某产品是不是只在某渠道表现差。",
+      "product-country": "看产品和国家市场是否适配，判断某产品是不是只在某国家承压。",
+      "channel-country": "看渠道在某国家的流量质量，判断是否存在国家定向、子渠道或竞价环境问题。",
+      "product-channel-country": "看最小二级经营组合，用来选择进入 L3 单渠道细表的具体对象。",
+      summary: "三个维度都汇总时，只看业务大盘。这个判断已经在首层展示，L2 通常不停留在这里。"
+    };
+
+    const dimensionRows = {
+      IAA: {
+        product: [
+          ["CleanX", "D7 ROI 91%", "-$6.4k", "成本 +18%", "iaa:Unity"],
+          ["PhotoLab", "D7 ROI 108%", "$2.2k", "成本 -3%", "iaa:TikTok"]
+        ],
+        channel: [
+          ["Unity", "D7 ROI 88%", "-$5.2k", "成本 +24%", "iaa:Unity"],
+          ["TikTok", "D7 ROI 103%", "$1.1k", "成本 +6%", "iaa:TikTok"]
+        ],
+        country: [
+          ["US", "D7 ROI 86%", "-$9.1k", "成本 +31%", "iaa:Unity"],
+          ["PH", "D7 ROI 101%", "$0.4k", "成本 +4%", "iaa:TikTok"]
+        ],
+        "product-channel": [
+          ["CleanX x Unity", "D7 ROI 78%", "-$4.8k", "成本 +27%", "iaa:Unity"],
+          ["PhotoLab x TikTok", "D7 ROI 105%", "$1.0k", "成本 +5%", "iaa:TikTok"]
+        ],
+        "product-country": [
+          ["CleanX x US", "D7 ROI 82%", "-$5.7k", "成本 +22%", "iaa:Unity"],
+          ["CleanX x PH", "D7 ROI 99%", "-$0.2k", "成本 +3%", "iaa:TikTok"]
+        ],
+        "channel-country": [
+          ["Unity x US", "D7 ROI 75%", "-$6.1k", "子渠道偏弱", "iaa:Unity"],
+          ["TikTok x PH", "D7 ROI 102%", "$0.6k", "结构正常", "iaa:TikTok"]
+        ],
+        "product-channel-country": [
+          ["CleanX x Unity x US", "D7 ROI 69%", "-$4.9k", "进 L3", "iaa:Unity"],
+          ["PhotoLab x TikTok x PH", "D7 ROI 104%", "$0.5k", "观察", "iaa:TikTok"]
+        ],
+        summary: [
+          ["IAA 大盘", "D7 ROI 106%", "$3.8k", "首层已展示", "iaa:Unity"]
+        ]
+      },
+      IAP: {
+        product: [
+          ["CleanPro", "D90 ROI 84%", "-$3.6k", "取消率 +6%", "iap:MTJ"],
+          ["FitNote", "D90 ROI 101%", "$0.8k", "结构正常", "iap:TikTok"]
+        ],
+        channel: [
+          ["MTJ", "有效订阅 $24.8", "付费 1 / 20", "质量偏弱", "iap:MTJ"],
+          ["Apply", "有效订阅 $19.2", "付费 6 / 24", "正常", "iap:Apply"]
+        ],
+        country: [
+          ["US", "取消率 +9%", "BR +11%", "D3 复查", "iap:MTJ"],
+          ["JP", "取消率 +1%", "BR +2%", "正常", "iap:Apply"]
+        ],
+        "product-channel": [
+          ["CleanPro x MTJ", "D90 ROI 72%", "-$3.1k", "付费偏弱", "iap:MTJ"],
+          ["FitNote x Apply", "D90 ROI 103%", "$0.7k", "正常", "iap:Apply"]
+        ],
+        "product-country": [
+          ["CleanPro x US", "付费 1 / 20", "-$2.8k", "取消风险", "iap:MTJ"],
+          ["CleanPro x JP", "付费 5 / 18", "$0.2k", "观察", "iap:Apply"]
+        ],
+        "channel-country": [
+          ["MTJ x US", "BR +11%", "-$2.4k", "疑似质量", "iap:MTJ"],
+          ["Apply x JP", "BR +2%", "$0.5k", "正常", "iap:Apply"]
+        ],
+        "product-channel-country": [
+          ["CleanPro x MTJ x US", "D90 ROI 64%", "-$2.9k", "进 L3", "iap:MTJ"],
+          ["FitNote x Apply x JP", "D90 ROI 105%", "$0.5k", "正常", "iap:Apply"]
+        ],
+        summary: [
+          ["IAP 大盘", "D90 ROI 92%", "-$1.4k", "首层已展示", "iap:MTJ"]
+        ]
+      }
+    };
+
+    function ensureDimensionState(business) {
+      state.dimensionViews = state.dimensionViews || {};
+      state.dimensionViews[business] = state.dimensionViews[business] || { product: true, channel: true, country: true };
+      return state.dimensionViews[business];
+    }
+
+    function dimensionKey(view) {
+      const active = ["product", "channel", "country"].filter(key => view[key]);
+      return active.length ? active.join("-") : "summary";
+    }
+
+    function renderDimensionExplorer(business) {
+      const prefix = business.toLowerCase();
+      const control = document.getElementById(`${prefix}DimensionControl`);
+      if (!control) return;
+      const view = ensureDimensionState(business);
+      const key = dimensionKey(view);
+      const title = key === "summary" ? "大盘汇总" : key.split("-").map(item => dimensionLabels[item]).join(" x ");
+      control.innerHTML = ["product", "channel", "country"].map(item => `
+        <button class="dimension-toggle ${view[item] ? "active" : ""}" type="button" onclick="toggleDimension('${business}','${item}')">
+          <strong>${dimensionLabels[item]}</strong>
+          <span>${view[item] ? "展开" : "汇总"}</span>
+        </button>
+      `).join("");
+      document.getElementById(`${prefix}DimensionCurrent`).innerHTML = `
+        <strong>${title}</strong>
+        <span>${dimensionMeanings[key]}</span>
+      `;
+      const rows = dimensionRows[business][key] || dimensionRows[business].summary;
+      document.getElementById(`${prefix}DimensionTable`).innerHTML = `
+        <div class="dimension-table-row header"><span>对象</span><span>核心指标</span><span>影响</span><span>状态</span><span></span></div>
+        ${rows.map(row => `
+          <div class="dimension-table-row">
+            <strong>${row[0]}</strong>
+            <span>${row[1]}</span>
+            <span>${row[2]}</span>
+            <span>${row[3]}</span>
+            <button class="icon-button" type="button" aria-label="下钻" title="下钻" onclick="openDimensionRow('${business}','${row[4]}')">→</button>
+          </div>
+        `).join("")}
+      `;
+    }
+
+    function toggleDimension(business, dim) {
+      const view = ensureDimensionState(business);
+      view[dim] = !view[dim];
+      saveState();
+      renderDimensionExplorer(business);
+    }
+
+    function openDimensionRow(business, target) {
+      const [, channel] = target.split(":");
+      openChannelDrilldown(business, channel || "Unity");
     }
 
     function channelNodes(channel) {
