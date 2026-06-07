@@ -611,6 +611,23 @@
       background: var(--surface-blue);
     }
 
+    .flow-insight {
+      margin-top: 10px;
+      padding: 11px 12px;
+      border-radius: 12px;
+      background: var(--surface-blue);
+      color: #174ea6;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .flow-insight strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--blue-strong);
+      font-size: 13px;
+    }
+
     .decision {
       margin-top: 10px;
       padding: 12px;
@@ -1327,14 +1344,17 @@
         <article class="detail-card wide">
           <h3>流水利润</h3>
           <div class="metric-row" id="profitMetricRow"></div>
+          <div id="flowProfitInsight"></div>
           <div class="profit-subgrid">
             <section class="profit-subcard">
               <h4>IAA 流水利润</h4>
               <div class="metric-row" id="iaaProfitMetricRow"></div>
+              <div id="iaaFlowProfitInsight"></div>
             </section>
             <section class="profit-subcard">
               <h4>IAP 流水利润</h4>
               <div class="metric-row" id="iapProfitMetricRow"></div>
+              <div id="iapFlowProfitInsight"></div>
             </section>
           </div>
         </article>
@@ -2565,14 +2585,18 @@
       };
     }
 
-    function renderMetricButton([key, metric]) {
+    function renderMetricButton([key, metric], options = {}) {
+      const showInsight = options.showInsight !== false;
+      const link = options.link !== false;
       const color = metric.tone === "red" ? "var(--red)" : metric.tone === "green" ? "var(--green)" : metric.tone === "amber" ? "var(--amber)" : "var(--ink)";
+      const openAttr = link ? ` role="button" tabindex="0" data-open="${metric.target}"` : "";
+      const className = link ? "metric metric-link" : "metric";
       return `
-        <article class="metric metric-link" role="button" tabindex="0" data-open="${metric.target}">
+        <article class="${className}"${openAttr}>
           <b>${metric.label}</b>
           <strong style="color:${color}">${formatMetric(metric)}</strong>
           <em>${formatDelta(metric, getSelectedDataPeriod().compareLabel)}</em>
-          ${metricInsightHtml(key)}
+          ${showInsight ? metricInsightHtml(key) : ""}
         </article>
       `;
     }
@@ -2596,15 +2620,39 @@
       ];
     }
 
+    function renderFlowInsight(title, rows) {
+      const profit = rows[0][1];
+      const revenue = rows[1][1];
+      const cost = rows[2][1];
+      const profitDiff = profit.value - profit.compare;
+      const revenueDiff = revenue.value - revenue.compare;
+      const costDiff = cost.value - cost.compare;
+      let text;
+      if (profit.value < profit.compare && costDiff > revenueDiff) {
+        text = "流水利润承压主要来自投放成本增幅高于实际收入增幅，先判断是否为放量导致的账面压力。";
+      } else if (profit.value >= profit.compare) {
+        text = "流水利润较上周期改善，实际收入与投放成本结构暂时可接受，继续观察回收质量。";
+      } else {
+        text = "流水利润低于上周期，但成本和收入变化接近，需要结合 IAA / IAP 预估回收继续判断。";
+      }
+      return `<div class="flow-insight"><strong>${title}</strong>${text}</div>`;
+    }
+
     function renderDataMetrics() {
       const metrics = getSelectedDataPeriod().metrics;
-      document.getElementById("profitMetricRow").innerHTML = [
+      const totalFlowRows = [
         ["profit", metrics.profit],
         ["revenue", metrics.revenue],
         ["cost", metrics.cost]
-      ].map(renderMetricButton).join("");
-      document.getElementById("iaaProfitMetricRow").innerHTML = buildFlowMetrics(metrics, "IAA", 0.62).map(renderMetricButton).join("");
-      document.getElementById("iapProfitMetricRow").innerHTML = buildFlowMetrics(metrics, "IAP", 0.38).map(renderMetricButton).join("");
+      ];
+      const iaaFlowRows = buildFlowMetrics(metrics, "IAA", 0.62);
+      const iapFlowRows = buildFlowMetrics(metrics, "IAP", 0.38);
+      document.getElementById("profitMetricRow").innerHTML = totalFlowRows.map(item => renderMetricButton(item, { showInsight: false, link: false })).join("");
+      document.getElementById("flowProfitInsight").innerHTML = renderFlowInsight("Agent 综合洞察", totalFlowRows);
+      document.getElementById("iaaProfitMetricRow").innerHTML = iaaFlowRows.map(item => renderMetricButton(item, { showInsight: false, link: false })).join("");
+      document.getElementById("iaaFlowProfitInsight").innerHTML = renderFlowInsight("IAA 综合洞察", iaaFlowRows);
+      document.getElementById("iapProfitMetricRow").innerHTML = iapFlowRows.map(item => renderMetricButton(item, { showInsight: false, link: false })).join("");
+      document.getElementById("iapFlowProfitInsight").innerHTML = renderFlowInsight("IAP 综合洞察", iapFlowRows);
       document.getElementById("iaaMetricRow").innerHTML = [
         ["iaaRoi", metrics.iaaRoi],
         ["iaaMargin", metrics.iaaMargin],
