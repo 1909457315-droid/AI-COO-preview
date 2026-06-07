@@ -1290,12 +1290,11 @@
           </div>
         </article>
         <article class="detail-card wide">
-          <h3>L2 组合入口</h3>
-          <div class="dimension-grid">
-            <div class="dimension-pill">产品 x 渠道</div>
-            <div class="dimension-pill">产品 x 国家</div>
-            <div class="dimension-pill">渠道 x 国家</div>
-            <div class="dimension-pill">产品 x 渠道 x 国家</div>
+          <h3>L2 维度轴线</h3>
+          <div class="formula-path">
+            <div class="formula-node"><strong>一维轴线</strong><span>产品 / 渠道 / 国家。看单条维度整体变化。</span></div>
+            <div class="formula-node"><strong>二维轴线</strong><span>产品 x 渠道 / 产品 x 国家 / 渠道 x 国家。看结构交叉问题。</span></div>
+            <div class="formula-node"><strong>三维轴线</strong><span>产品 x 渠道 x 国家。定位进入 L3 的具体组合。</span></div>
           </div>
           <p class="dimension-note">先用这一层找影响 D7 回收和预估毛利最大的组合，再进入单渠道细表。</p>
         </article>
@@ -1355,12 +1354,11 @@
           </div>
         </article>
         <article class="detail-card wide">
-          <h3>L2 组合入口</h3>
-          <div class="dimension-grid">
-            <div class="dimension-pill">产品 x 渠道</div>
-            <div class="dimension-pill">产品 x 国家</div>
-            <div class="dimension-pill">渠道 x 国家</div>
-            <div class="dimension-pill">产品 x 渠道 x 国家</div>
+          <h3>L2 维度轴线</h3>
+          <div class="formula-path">
+            <div class="formula-node"><strong>一维轴线</strong><span>产品 / 渠道 / 国家。看单条维度整体变化。</span></div>
+            <div class="formula-node"><strong>二维轴线</strong><span>产品 x 渠道 / 产品 x 国家 / 渠道 x 国家。看结构交叉问题。</span></div>
+            <div class="formula-node"><strong>三维轴线</strong><span>产品 x 渠道 x 国家。定位进入 L3 的具体组合。</span></div>
           </div>
           <p class="dimension-note">先用这一层找影响 D90+ 回收、订阅质量和预估毛利最大的组合，再进入单渠道细表。</p>
         </article>
@@ -2492,21 +2490,27 @@
     function channelNodes(channel) {
       const schemas = {
         Unity: [
-          ["主链路", "产品 -> 渠道 -> 国家 -> 计划 -> 素材 / 创意"],
-          ["并列 sites 链路", "产品 -> 渠道 -> 国家 -> sites / 子渠道"],
+          ["一维轴线", "国家 / 计划 / 素材 / 创意 / sites / 子渠道 / 优化师"],
+          ["二维轴线", "计划 x 国家 / 计划 x 素材 / 国家 x sites / sites x 素材"],
+          ["三维轴线", "国家 x 计划 x 素材 / 国家 x sites x 计划"],
           ["注意", "sites / 子渠道不是素材下级，而是和计划 / 素材并列的分析入口。"]
         ],
         MTJ: [
-          ["主链路", "产品 -> 渠道 -> 国家 -> 计划 -> 素材 / 创意"],
-          ["并列 sites 链路", "产品 -> 渠道 -> 国家 -> sites / 子渠道"],
+          ["一维轴线", "国家 / 计划 / 素材 / 创意 / sites / 子渠道 / 优化师"],
+          ["二维轴线", "计划 x 国家 / 计划 x 素材 / 国家 x sites / sites x 素材"],
+          ["三维轴线", "国家 x 计划 x 素材 / 国家 x sites x 计划"],
           ["注意", "没有广告组维度，不展示广告组入口。"]
         ],
         Apply: [
-          ["主链路", "产品 -> 渠道 -> 国家 -> 计划 -> 创意"],
+          ["一维轴线", "国家 / 计划 / 创意 / 优化师"],
+          ["二维轴线", "计划 x 国家 / 计划 x 创意 / 国家 x 创意"],
+          ["三维轴线", "国家 x 计划 x 创意"],
           ["注意", "当前不单独设 sites / 子渠道分支。"]
         ],
         TikTok: [
-          ["快渠道 / Facebook / TikTok / Google", "产品 -> 渠道 -> 国家 -> 计划 -> 广告组 -> 素材"],
+          ["一维轴线", "国家 / 计划 / 广告组 / 素材 / 优化师"],
+          ["二维轴线", "计划 x 国家 / 计划 x 广告组 / 广告组 x 素材 / 优化师 x 计划"],
+          ["三维轴线", "计划 x 广告组 x 素材 / 国家 x 计划 x 素材"],
           ["注意", "这一类渠道按计划、广告组、素材继续拆。"]
         ]
       };
