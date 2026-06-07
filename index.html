@@ -88,6 +88,10 @@
       background: rgba(255,255,255,.72);
     }
 
+    .mobile-menu-toggle {
+      display: none;
+    }
+
     .sidebar-scrim {
       display: none;
     }
@@ -901,8 +905,29 @@
 
     @media (max-width: 920px) {
       .app { padding: 0; }
-      .shell { grid-template-columns: 58px minmax(0, 1fr); }
-      .content { grid-column: 2; padding: 10px 10px 24px; max-width: none; }
+      .shell { display: block; min-height: 100vh; }
+      .content { padding: 62px 10px 24px; max-width: none; }
+      .mobile-menu-toggle {
+        display: grid;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 19;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        border: 0;
+        border-radius: 999px;
+        background: #eef3f8;
+        color: var(--ink);
+        cursor: pointer;
+        font-size: 20px;
+        box-shadow: 0 1px 2px rgba(60,64,67,.12);
+      }
+      body.sidebar-open .mobile-menu-toggle {
+        opacity: 0;
+        pointer-events: none;
+      }
       .sidebar-scrim {
         display: block;
         position: fixed;
@@ -923,33 +948,25 @@
         left: 0;
         bottom: 0;
         z-index: 25;
-        width: 58px;
+        width: min(272px, 86vw);
         min-height: 100vh;
-        padding: 10px 6px;
+        padding: 10px 8px;
         border-radius: 0;
         overflow: hidden;
         background: #eef3f8;
-        transition: width .18s ease, box-shadow .18s ease;
+        box-shadow: 0 18px 40px rgba(60,64,67,.18);
+        transform: translateX(-100%);
+        transition: transform .18s ease;
       }
       body.sidebar-open .sidebar {
-        width: min(272px, 86vw);
-        box-shadow: 0 18px 40px rgba(60,64,67,.18);
+        transform: translateX(0);
       }
       .sidebar-toggle {
         display: grid;
-        margin: 0 auto 6px;
-      }
-      body.sidebar-open .sidebar-toggle {
-        margin-left: 2px;
+        margin: 0 0 6px 2px;
       }
       .brand {
         display: block;
-        opacity: 0;
-        height: 0;
-        overflow: hidden;
-        transition: opacity .14s ease;
-      }
-      body.sidebar-open .brand {
         height: auto;
         opacity: 1;
       }
@@ -984,17 +1001,12 @@
       .nav-icon { width: 28px; height: 28px; border-radius: 999px; }
       .nav-label {
         display: block;
-        opacity: 0;
-        max-width: 0;
-        transition: opacity .12s ease, max-width .18s ease;
-      }
-      body.sidebar-open .nav-label {
         opacity: 1;
         max-width: 190px;
       }
       .state-pill { display: none; }
       .calendar-popover {
-        width: min(260px, calc(100vw - 86px));
+        width: min(300px, calc(100vw - 40px));
       }
       .home-layout, .detail-grid { grid-template-columns: 1fr; }
       .summary-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1012,6 +1024,7 @@
 </head>
 <body>
   <main class="app">
+    <button class="mobile-menu-toggle" type="button" id="mobileMenuToggle" aria-label="展开侧栏" title="展开侧栏">☰</button>
     <div class="sidebar-scrim" id="sidebarScrim"></div>
     <div class="shell">
       <aside class="sidebar">
@@ -2418,7 +2431,7 @@
       if (!target) return;
       showScreen(target.dataset.open);
       if (window.matchMedia("(max-width: 920px)").matches) {
-        document.body.classList.remove("sidebar-open");
+        toggleSidebar(false);
       }
     });
 
@@ -2446,15 +2459,26 @@
       showScreen(state.deepDiveBack || "home");
     });
 
+    function toggleSidebar(open) {
+      const shouldOpen = open ?? !document.body.classList.contains("sidebar-open");
+      document.body.classList.toggle("sidebar-open", shouldOpen);
+      const label = shouldOpen ? "收起侧栏" : "展开侧栏";
+      document.getElementById("sidebarToggle").setAttribute("aria-label", label);
+      document.getElementById("mobileMenuToggle").setAttribute("aria-label", label);
+    }
+
+    document.getElementById("mobileMenuToggle").addEventListener("click", event => {
+      event.stopPropagation();
+      toggleSidebar(true);
+    });
+
     document.getElementById("sidebarToggle").addEventListener("click", event => {
       event.stopPropagation();
-      document.body.classList.toggle("sidebar-open");
-      document.getElementById("sidebarToggle").setAttribute("aria-label", document.body.classList.contains("sidebar-open") ? "收起侧栏" : "展开侧栏");
+      toggleSidebar();
     });
 
     document.getElementById("sidebarScrim").addEventListener("click", () => {
-      document.body.classList.remove("sidebar-open");
-      document.getElementById("sidebarToggle").setAttribute("aria-label", "展开侧栏");
+      toggleSidebar(false);
     });
 
     document.getElementById("dataCalendarToggle").addEventListener("click", event => {
