@@ -541,9 +541,13 @@
 
     .business-frame {
       display: grid;
-      grid-template-columns: minmax(210px, .76fr) minmax(0, 1.25fr) minmax(220px, .82fr);
+      grid-template-columns: minmax(0, 1fr) minmax(260px, .36fr);
       gap: 12px;
       align-items: start;
+    }
+
+    .business-insight {
+      grid-column: 1 / -1;
     }
 
     .business-frame .metric-row {
@@ -702,7 +706,7 @@
       background: var(--surface-blue);
     }
 
-    .flow-insight {
+    .insight-card {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 10px;
@@ -716,22 +720,40 @@
       line-height: 1.45;
     }
 
-    .profit-subcard .flow-insight {
-      margin-top: 8px;
+    .insight-card.compact {
       padding: 9px 10px;
       background: rgba(232,240,254,.55);
-      font-size: 12px;
-      line-height: 1.4;
     }
 
-    .flow-insight strong {
+    .insight-card strong {
       display: block;
       margin-bottom: 4px;
       color: var(--blue-strong);
       font-size: 13px;
     }
 
-    .flow-insight button {
+    .insight-card p {
+      margin: 0;
+      color: #174ea6;
+      font-size: 13px;
+    }
+
+    .insight-card-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+      color: var(--blue-strong);
+      font-size: 12px;
+      font-weight: 720;
+    }
+
+    .insight-card-meta span {
+      color: var(--muted);
+      font-weight: 650;
+    }
+
+    .insight-card button {
       width: 30px;
       height: 30px;
       border: 0;
@@ -743,7 +765,7 @@
       line-height: 1;
     }
 
-    .flow-insight button:hover {
+    .insight-card button:hover {
       background: #fff;
     }
 
@@ -982,10 +1004,6 @@
       color: var(--muted);
       font-size: 12px;
       font-weight: 780;
-    }
-
-    .insight-row {
-      align-items: start;
     }
 
     .icon-button {
@@ -1517,9 +1535,8 @@
         <article class="detail-card wide">
           <h3>IAA：D7 回收判断</h3>
           <div class="business-frame">
-            <div class="business-workspace">
+            <div class="business-workspace business-insight">
               <section>
-                <div class="section-title">综合洞察</div>
                 <div class="list" id="iaaInsightList"></div>
               </section>
             </div>
@@ -1535,9 +1552,8 @@
         <article class="detail-card wide">
           <h3>IAP：D90+ 订阅质量</h3>
           <div class="business-frame">
-            <div class="business-workspace">
+            <div class="business-workspace business-insight">
               <section>
-                <div class="section-title">综合洞察</div>
                 <div class="list" id="iapInsightList"></div>
               </section>
             </div>
@@ -2799,10 +2815,24 @@
       } else {
         text = "流水利润低于上周期，但成本和收入变化接近，需要结合 IAA / IAP 预估回收继续判断。";
       }
+      return renderInsightCard({
+        label: title,
+        title: text,
+        actionLabel: "查看流水利润洞察",
+        onClick: `openFlowInsight('${id}')`,
+        compact: id !== "total"
+      });
+    }
+
+    function renderInsightCard({ label, title, body = "", meta = "", actionLabel, onClick, compact = false }) {
       return `
-        <div class="flow-insight">
-          <div><strong>${title}</strong>${text}</div>
-          <button type="button" aria-label="查看流水利润洞察" title="查看流水利润洞察" onclick="openFlowInsight('${id}')">→</button>
+        <div class="insight-card ${compact ? "compact" : ""}">
+          <div>
+            <div class="insight-card-meta">${label}${meta ? `<span>${meta}</span>` : ""}</div>
+            <strong>${title}</strong>
+            ${body ? `<p>${body}</p>` : ""}
+          </div>
+          <button type="button" aria-label="${actionLabel}" title="${actionLabel}" onclick="${onClick}">→</button>
         </div>
       `;
     }
@@ -2840,13 +2870,14 @@
       if (!top) return "";
       const extra = Math.max(insights.length - 1, 0);
       return `
-        <div class="row insight-row">
-          <div>
-            <h4>${top.title}</h4>
-          </div>
-          <span class="status info">${top.type} · ${top.confidence}</span>
-          <button class="icon-button" type="button" aria-label="查看证据" title="查看证据" onclick="openInsight('${top.id}')">→</button>
-        </div>
+        ${renderInsightCard({
+          label: "综合洞察",
+          title: top.title,
+          body: top.evidence,
+          meta: `${top.type} · ${top.confidence}`,
+          actionLabel: "查看证据",
+          onClick: `openInsight('${top.id}')`
+        })}
         ${extra ? `<button class="micro-link" type="button" aria-label="查看更多洞察" title="查看更多洞察" onclick="openBusinessInsights('${business}')">其他洞察 ${extra} 条 →</button>` : ""}
       `;
     }
