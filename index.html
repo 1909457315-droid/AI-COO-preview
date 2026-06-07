@@ -1529,10 +1529,11 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const storageKey = "ai-coo-console-v01-state";
+    const storageKey = "ai-coo-console-v02-state";
 
     const seedState = {
       screen: "home",
+      navStack: [],
       selectedActionDate: "2026-06-07",
       selectedDataPeriod: "yesterday",
       dataCalendarYear: 2026,
@@ -1980,7 +1981,53 @@
       document.querySelectorAll(".nav-item").forEach(tab => {
         tab.classList.toggle("active", tab.dataset.open === activeTab);
       });
+      updateBackLabels();
       window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function screenTitle(name) {
+      const titles = {
+        home: "数据决策",
+        "profit-formula": "利润公式",
+        "iaa-detail": "IAA 回收分析",
+        "iap-detail": "IAP 订阅质量",
+        initiate: "主动发起",
+        "workflow-detail": "Workflow 草案",
+        action: "Action Hub",
+        watch: "观察期",
+        notify: "消息 / 提醒",
+        research: "Research Center",
+        workflow: "Workflow Monitor",
+        realtime: "Realtime Monitor",
+        "deep-dive": "详情"
+      };
+      return titles[name] || "上一层";
+    }
+
+    function navigateTo(name, options = {}) {
+      if (name === "revenue") name = "home";
+      if (options.reset) {
+        state.navStack = [];
+      } else if (state.screen && state.screen !== name) {
+        state.navStack = [...(state.navStack || []), state.screen].slice(-8);
+      }
+      showScreen(name);
+    }
+
+    function goBack(fallback = "home") {
+      const stack = state.navStack || [];
+      const previous = stack.pop() || fallback;
+      state.navStack = stack;
+      showScreen(previous);
+    }
+
+    function updateBackLabels() {
+      const stack = state.navStack || [];
+      const previous = stack[stack.length - 1] || "home";
+      const label = `返回${screenTitle(previous)}`;
+      document.querySelectorAll(".back").forEach(button => {
+        button.textContent = label;
+      });
     }
 
     function setStatus(group, id, value) {
@@ -2340,7 +2387,7 @@
         <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>
       `).join("");
       document.getElementById("deepDiveDecision").textContent = detail.decision;
-      showScreen("deep-dive");
+      navigateTo("deep-dive");
     }
 
     function openInsight(id) {
@@ -2357,7 +2404,7 @@
         ["下一步", "如果需要执行动作，必须转成 Action 草案并由用户确认。"]
       ].map(item => `<div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join("");
       document.getElementById("deepDiveDecision").textContent = "先作为判断依据展示；是否创建或推进 Action，由用户确认。";
-      showScreen("deep-dive");
+      navigateTo("deep-dive");
     }
 
     function openBusinessInsights(business) {
@@ -2370,7 +2417,7 @@
         <div class="formula-node"><strong>${item.priority || "P1"} · ${item.title}</strong><span>${item.type} · ${item.confidence} · ${item.evidence}</span></div>
       `).join("");
       document.getElementById("deepDiveDecision").textContent = "洞察只用于判断；需要执行时再转成 Action 草案。";
-      showScreen("deep-dive");
+      navigateTo("deep-dive");
     }
 
     function openBusinessActions(business) {
@@ -2384,7 +2431,7 @@
         return `<div class="formula-node"><strong>${item[6] || "P1"} · ${item[1]}</strong><span>${item[3]} · ${item[4]} · ${current}</span></div>`;
       }).join("");
       document.getElementById("deepDiveDecision").textContent = "需要推进的草案在来源模块或 Action Hub 中确认状态。";
-      showScreen("deep-dive");
+      navigateTo("deep-dive");
     }
 
     function openActionDraft(id) {
@@ -2407,10 +2454,10 @@
         <div class="button-row">
           <button class="action-button primary" type="button" onclick="setStatus('actions','${id}','进行中')">确认推进</button>
           <button class="action-button" type="button" onclick="setStatus('actions','${id}','暂缓')">暂缓</button>
-          <button class="action-button" type="button" onclick="showScreen('action')">去 Action Hub</button>
+          <button class="action-button" type="button" onclick="navigateTo('action')">去 Action Hub</button>
         </div>
       `;
-      showScreen("deep-dive");
+      navigateTo("deep-dive");
     }
 
     function renderActions() {
@@ -2522,7 +2569,7 @@
         <div class="formula-node"><strong>${item.status} · ${item.title}</strong><span>${item.business} · ${item.source}</span></div>
       `).join("");
       document.getElementById("deepDiveDecision").textContent = "完整日程表在 Action Hub 中查看。";
-      showScreen("deep-dive");
+      navigateTo("deep-dive");
     }
 
     function renderReminders() {
@@ -2619,20 +2666,24 @@
     document.addEventListener("click", event => {
       const target = event.target.closest("[data-open]");
       if (!target) return;
-      showScreen(target.dataset.open);
+      if (target.classList.contains("back")) {
+        goBack(target.dataset.open || "home");
+      } else {
+        navigateTo(target.dataset.open, { reset: Boolean(target.closest(".sidebar")) });
+      }
       if (window.matchMedia("(max-width: 920px)").matches) {
         toggleSidebar(false);
       }
     });
 
     document.querySelectorAll("[data-back]").forEach(button => {
-      button.addEventListener("click", () => showScreen("home"));
+      button.addEventListener("click", () => goBack("home"));
     });
 
     document.getElementById("confirmWorkflow").addEventListener("click", () => {
       if (!state.selectedWorkflow) return toast("请先选择一个 Workflow");
       renderWorkflowDetail();
-      showScreen("workflow-detail");
+      navigateTo("workflow-detail");
     });
 
     document.getElementById("clearWorkflow").addEventListener("click", () => {
@@ -2646,7 +2697,7 @@
     });
 
     document.getElementById("deepDiveBack").addEventListener("click", () => {
-      showScreen(state.deepDiveBack || "home");
+      goBack(state.deepDiveBack || "home");
     });
 
     function toggleSidebar(open) {
