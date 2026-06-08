@@ -1927,28 +1927,23 @@
     <section class="screen" id="screen-profit-formula">
       <div class="detail-head">
         <div>
-          <h2>流水利润视角</h2>
+          <h2 id="profitFormulaTitle">大盘流水利润</h2>
+          <p id="profitFormulaContext">当前周期流水利润、收入和成本的业务看数页。</p>
         </div>
         <button class="back" type="button" data-open="home">返回昨日数据</button>
       </div>
       <div class="detail-grid">
         <article class="detail-card wide">
-          <h3>利润口径看数</h3>
-          <div class="formula-path">
-            <div class="formula-node"><strong>按产品</strong><span>CleanX 流水利润 -$7.8k，较上周期 -18%。先看哪个产品整体拖累利润。</span></div>
-            <div class="formula-node"><strong>按国家</strong><span>US 流水利润 -$12.4k，成本 +31%。先看哪个国家市场账面承压。</span></div>
-            <div class="formula-node"><strong>产品 x 国家</strong><span>CleanX x US 流水利润 -$5.9k。定位真实利润口径下最小可归因组合。</span></div>
-          </div>
+          <h3 id="profitFormulaPrimaryTitle">当前流水利润</h3>
+          <div class="module-bar" id="profitFormulaSummary"></div>
         </article>
         <article class="detail-card wide">
-          <h3>可拆范围</h3>
-          <div class="dimension-grid">
-            <div class="dimension-pill">业务线</div>
-            <div class="dimension-pill">产品</div>
-            <div class="dimension-pill">国家</div>
-            <div class="dimension-pill">产品 x 国家</div>
-          </div>
-          <p class="dimension-note">流水利润是真实利润口径，不能强行拆到渠道、账户、计划、素材或优化师；这些细维度进入 IAA / IAP 回收分析。</p>
+          <h3 id="profitFormulaTableTitle">影响组合</h3>
+          <div class="formula-path" id="profitFormulaBreakdown"></div>
+        </article>
+        <article class="detail-card">
+          <h3>下一步</h3>
+          <div class="decision" id="profitFormulaDecision">继续看利润影响最大的产品和国家。</div>
         </article>
       </div>
     </section>
@@ -2831,11 +2826,11 @@
         element: "流水利润数字",
         intent: "进入真实利润口径看数",
         routeType: "metric-view",
-        title: "流水利润视角",
-        path: ["数据决策", "流水利润视角"],
-        context: ["视角：产品 / 国家 / 产品 x 国家", "口径：真实利润"],
-        primaryTitle: "利润口径看数",
-        decisionTitle: "可拆范围",
+        title: "流水利润",
+        path: ["数据决策", "流水利润", "大盘 / IAA / IAP 流水利润"],
+        context: ["入口来源：大盘 / IAA / IAP", "口径：真实利润"],
+        primaryTitle: "当前流水利润",
+        decisionTitle: "下一步",
         next: "继续按可归因维度看利润影响",
         sync: "不进入 Action Hub"
       },
@@ -3010,7 +3005,6 @@
     function routePathForScreen(name) {
       const staticPaths = {
         home: ["数据决策"],
-        "profit-formula": ["数据决策", "流水利润视角"],
         "iaa-detail": ["数据决策", "IAA 回收判断", "回收拆解"],
         "iap-detail": ["数据决策", "IAP 订阅质量", "订阅质量拆解"],
         initiate: ["主动发起"],
@@ -3022,6 +3016,10 @@
         workflow: ["Research Center", "Workflow Monitor"],
         realtime: ["Research Center", "Realtime Monitor"]
       };
+      if (name === "profit-formula") {
+        const scope = profitScopeConfig(state.selectedProfitScope || "total");
+        return scope.path;
+      }
       if (name === "deep-dive" && Array.isArray(state.routePath) && state.routePath.length) {
         return state.routePath;
       }
@@ -3338,8 +3336,10 @@
       const color = metric.tone === "red" ? "var(--red)" : metric.tone === "green" ? "var(--green)" : metric.tone === "amber" ? "var(--amber)" : "var(--ink)";
       const intentTitle = metric.target === "iaa-detail" ? "查看 IAA 回收拆解" :
         metric.target === "iap-detail" ? "查看 IAP 订阅质量拆解" :
-        "查看流水利润视角";
-      const openAttr = link ? ` role="button" tabindex="0" data-open="${metric.target}" aria-label="${intentTitle}" title="${intentTitle}"` : "";
+        `查看${profitScopeConfig(metric.profitScope || "total").title}`;
+      const openAttr = link && metric.target === "profit-formula"
+        ? ` role="button" tabindex="0" onclick="openProfitView('${metric.profitScope || "total"}')" aria-label="${intentTitle}" title="${intentTitle}"`
+        : link ? ` role="button" tabindex="0" data-open="${metric.target}" aria-label="${intentTitle}" title="${intentTitle}"` : "";
       const className = link ? "metric metric-link" : "metric";
       return `
         <article class="${className}"${openAttr}>
@@ -3364,9 +3364,9 @@
       const costCompare = +(metrics.cost.compare * ratio).toFixed(1);
       const prefix = business.toLowerCase();
       return [
-        [`${prefix}FlowProfit`, cloneMetric(metrics.profit, { label: `${business} 流水利润`, value: profitValue, compare: profitCompare, tone: profitValue < 0 ? "red" : "green" })],
-        [`${prefix}FlowRevenue`, cloneMetric(metrics.revenue, { label: `${business} 实际收入`, value: revenueValue, compare: revenueCompare })],
-        [`${prefix}FlowCost`, cloneMetric(metrics.cost, { label: `${business} 投放成本`, value: costValue, compare: costCompare })]
+        [`${prefix}FlowProfit`, cloneMetric(metrics.profit, { label: `${business} 流水利润`, value: profitValue, compare: profitCompare, tone: profitValue < 0 ? "red" : "green", profitScope: business.toLowerCase() })],
+        [`${prefix}FlowRevenue`, cloneMetric(metrics.revenue, { label: `${business} 实际收入`, value: revenueValue, compare: revenueCompare, profitScope: business.toLowerCase() })],
+        [`${prefix}FlowCost`, cloneMetric(metrics.cost, { label: `${business} 投放成本`, value: costValue, compare: costCompare, profitScope: business.toLowerCase() })]
       ];
     }
 
@@ -3413,9 +3413,9 @@
     function renderDataMetrics() {
       const metrics = getSelectedDataPeriod().metrics;
       const totalFlowRows = [
-        ["profit", metrics.profit],
-        ["revenue", metrics.revenue],
-        ["cost", metrics.cost]
+        ["profit", { ...metrics.profit, profitScope: "total" }],
+        ["revenue", { ...metrics.revenue, profitScope: "total" }],
+        ["cost", { ...metrics.cost, profitScope: "total" }]
       ];
       const iaaFlowRows = buildFlowMetrics(metrics, "IAA", 0.62);
       const iapFlowRows = buildFlowMetrics(metrics, "IAP", 0.38);
@@ -3435,6 +3435,88 @@
         ["iapPayMix", metrics.iapPayMix],
         ["iapMargin", metrics.iapMargin]
       ].map(item => renderMetricButton(item, { showInsight: false })).join("");
+      renderProfitView(state.selectedProfitScope || "total");
+    }
+
+    function profitScopeConfig(scope = "total") {
+      const configs = {
+        total: {
+          key: "total",
+          title: "大盘流水利润",
+          path: ["数据决策", "流水利润", "大盘流水利润"],
+          context: "大盘总览 · 真实利润口径",
+          rows: period => [
+            ["流水利润", period.metrics.profit],
+            ["实际收入", period.metrics.revenue],
+            ["投放成本", period.metrics.cost]
+          ],
+          breakdown: [
+            ["按业务线", "IAA 流水利润 -$11.4k；IAP 流水利润 -$7.0k。先看哪条业务线拖累大盘。"],
+            ["按产品", "CleanX 流水利润 -$7.8k；CleanPro 流水利润 -$4.3k。优先看影响最大的产品。"],
+            ["按国家", "US 流水利润 -$12.4k；JP 流水利润 -$3.1k。国家维度用于判断市场账面承压。"],
+            ["产品 x 国家", "CleanX x US 流水利润 -$5.9k。进入真实利润口径下最小可归因组合。"]
+          ],
+          decision: "大盘先判断是 IAA 还是 IAP 拖累，再进入对应业务线流水利润或回收拆解。"
+        },
+        iaa: {
+          key: "iaa",
+          title: "IAA 流水利润",
+          path: ["数据决策", "流水利润", "IAA 流水利润"],
+          context: "IAA 子账本 · 真实利润口径",
+          rows: period => buildFlowMetrics(period.metrics, "IAA", 0.62).map(item => [item[1].label, item[1]]),
+          breakdown: [
+            ["按产品", "CleanX IAA 流水利润 -$6.8k；PhotoLab IAA 流水利润 +$1.2k。先看 IAA 产品结构。"],
+            ["按国家", "US IAA 流水利润 -$8.1k；PH IAA 流水利润 +$0.6k。国家变化优先于渠道归因。"],
+            ["产品 x 国家", "CleanX x US IAA 流水利润 -$4.9k。确认后再进入 IAA 回收拆解看渠道。"]
+          ],
+          decision: "如果 IAA 流水利润承压，下一步进入 IAA 回收拆解，而不是在利润页强行拆到渠道。"
+        },
+        iap: {
+          key: "iap",
+          title: "IAP 流水利润",
+          path: ["数据决策", "流水利润", "IAP 流水利润"],
+          context: "IAP 子账本 · 真实利润口径",
+          rows: period => buildFlowMetrics(period.metrics, "IAP", 0.38).map(item => [item[1].label, item[1]]),
+          breakdown: [
+            ["按产品", "CleanPro IAP 流水利润 -$4.3k；FitNote IAP 流水利润 +$0.8k。先看订阅产品结构。"],
+            ["按国家", "US IAP 流水利润 -$4.3k；JP IAP 流水利润 -$0.9k。国家维度用于判断订阅市场压力。"],
+            ["产品 x 国家", "CleanPro x US IAP 流水利润 -$3.2k。确认后进入 IAP 订阅质量拆解。"]
+          ],
+          decision: "如果 IAP 流水利润承压，下一步进入 IAP 订阅质量拆解看有效订阅、直接付费和 D90+ 毛利。"
+        }
+      };
+      return configs[scope] || configs.total;
+    }
+
+    function openProfitView(scope = "total") {
+      state.selectedProfitScope = scope;
+      state.navStack = ["home"];
+      saveState();
+      renderProfitView(scope);
+      navigateTo("profit-formula", { preserveStack: true });
+    }
+
+    function renderProfitView(scope = "total") {
+      const config = profitScopeConfig(scope);
+      const period = getSelectedDataPeriod();
+      const rows = config.rows(period);
+      const title = document.getElementById("profitFormulaTitle");
+      if (!title) return;
+      title.textContent = config.title;
+      document.getElementById("profitFormulaContext").textContent = `${period.date} · ${config.context}`;
+      document.getElementById("profitFormulaPrimaryTitle").textContent = `${config.title} · 当前数据`;
+      document.getElementById("profitFormulaSummary").innerHTML = rows.map(([label, metric]) => `
+        <div class="mini-stat">
+          <b>${label}</b>
+          <strong>${formatMetric(metric)}</strong>
+          <span>${formatDelta(metric, period.compareLabel)}</span>
+        </div>
+      `).join("");
+      document.getElementById("profitFormulaTableTitle").textContent = `${config.title} · 影响组合`;
+      document.getElementById("profitFormulaBreakdown").innerHTML = config.breakdown.map(item => `
+        <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>
+      `).join("");
+      document.getElementById("profitFormulaDecision").textContent = config.decision;
     }
 
     function compactInsightTitle(text) {
