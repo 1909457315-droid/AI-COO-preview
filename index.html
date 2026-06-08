@@ -1379,6 +1379,30 @@
       font-weight: 700;
     }
 
+    .route-contract {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .route-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: var(--surface-soft);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 680;
+    }
+
+    .route-chip.answer {
+      background: var(--surface-blue);
+      color: var(--blue-strong);
+    }
+
     .channel-table {
       display: grid;
       gap: 6px;
@@ -2191,16 +2215,17 @@
         <div>
           <h2 id="deepDiveTitle">详情</h2>
           <p id="deepDiveBody">这里展示当前条目的下一层判断。</p>
+          <div class="route-contract" id="deepDiveContract"></div>
         </div>
         <button class="back" type="button" id="deepDiveBack">返回上一层</button>
       </div>
       <div class="detail-grid">
         <article class="detail-card wide">
-          <h3>下一层拆解</h3>
+          <h3 id="deepDivePrimaryTitle">下一层拆解</h3>
           <div class="formula-path" id="deepDiveNodes"></div>
         </article>
         <article class="detail-card">
-          <h3>建议动作</h3>
+          <h3 id="deepDiveDecisionTitle">建议动作</h3>
           <div class="decision" id="deepDiveDecision">等待用户确认。</div>
         </article>
       </div>
@@ -2777,6 +2802,121 @@
       }
     ];
 
+    const homeClickMatrix = [
+      {
+        element: "顶部数据源",
+        intent: "主动查看全量数据源",
+        routeType: "source-index",
+        title: "数据源",
+        path: ["数据决策", "数据源"],
+        context: ["入口：全局数据源", "用途：主动查全表"],
+        primaryTitle: "可打开的数据源",
+        decisionTitle: "使用边界",
+        next: "选择原始表验证字段和证据",
+        sync: "不进入 Action Hub"
+      },
+      {
+        element: "来源链接",
+        intent: "从判断证据穿透原始表",
+        routeType: "source-detail",
+        title: "原始数据表",
+        path: ["数据决策", "判断证据", "原始数据表"],
+        context: ["入口：证据旁来源", "用途：验证证据可信度"],
+        primaryTitle: "原始字段和样例数据",
+        decisionTitle: "回到决策流",
+        next: "确认可信后回到洞察或 Action",
+        sync: "不进入 Action Hub"
+      },
+      {
+        element: "流水利润数字",
+        intent: "进入真实利润口径看数",
+        routeType: "metric-view",
+        title: "流水利润视角",
+        path: ["数据决策", "流水利润视角"],
+        context: ["视角：产品 / 国家 / 产品 x 国家", "口径：真实利润"],
+        primaryTitle: "利润口径看数",
+        decisionTitle: "可拆范围",
+        next: "继续按可归因维度看利润影响",
+        sync: "不进入 Action Hub"
+      },
+      {
+        element: "流水利润洞察箭头",
+        intent: "解释流水利润综合判断",
+        routeType: "insight-detail",
+        title: "流水利润综合洞察",
+        path: ["数据决策", "流水利润", "综合洞察"],
+        context: ["模块：流水利润", "用途：解释判断"],
+        primaryTitle: "判断依据",
+        decisionTitle: "下一步",
+        next: "必要时进入流水利润视角继续看数",
+        sync: "不进入 Action Hub"
+      },
+      {
+        element: "IAA 指标数字",
+        intent: "进入 IAA 回收拆解",
+        routeType: "metric-view",
+        title: "IAA 回收拆解",
+        path: ["数据决策", "IAA 回收判断", "回收拆解"],
+        context: ["业务线：IAA", "视角：产品 x 渠道 x 国家"],
+        primaryTitle: "回收拆解",
+        decisionTitle: "下一步",
+        next: "选择组合进入单渠道细表",
+        sync: "不进入 Action Hub"
+      },
+      {
+        element: "IAP 指标数字",
+        intent: "进入 IAP 订阅质量拆解",
+        routeType: "metric-view",
+        title: "IAP 订阅质量拆解",
+        path: ["数据决策", "IAP 订阅质量", "订阅质量拆解"],
+        context: ["业务线：IAP", "视角：产品 x 渠道 x 国家"],
+        primaryTitle: "订阅质量拆解",
+        decisionTitle: "下一步",
+        next: "选择组合进入单渠道细表",
+        sync: "不进入 Action Hub"
+      },
+      {
+        element: "Agent 洞察箭头",
+        intent: "解释 AI 为什么这么判断",
+        routeType: "insight-detail",
+        title: "Agent 洞察",
+        path: ["数据决策", "业务模块", "Agent 洞察"],
+        context: ["用途：判断层", "不是待办"],
+        primaryTitle: "证据 / 反证 / 置信度",
+        decisionTitle: "是否转 Action",
+        next: "由用户确认是否创建或推进 Action",
+        sync: "转成 Action 后同步"
+      },
+      {
+        element: "Action 草案箭头",
+        intent: "确认或暂缓待执行动作",
+        routeType: "action-detail",
+        title: "Action 草案",
+        path: ["数据决策", "业务模块", "Action 草案"],
+        context: ["用途：执行层", "对象：canonical Action ID"],
+        primaryTitle: "草案字段",
+        decisionTitle: "确认动作",
+        next: "确认推进 / 暂缓 / 去 Action Hub",
+        sync: "同步 Action Hub"
+      },
+      {
+        element: "回收拆解表行箭头",
+        intent: "进入单渠道细表定位根因",
+        routeType: "channel-detail",
+        title: "渠道细表",
+        path: ["数据决策", "业务模块", "回收拆解", "渠道细表"],
+        context: ["视角：当前产品 / 渠道 / 国家", "用途：定位根因"],
+        primaryTitle: "渠道字段和明细数据",
+        decisionTitle: "证据链 / 根因候选 / Action 草案",
+        next: "拿到证据后再生成 Action 草案",
+        sync: "生成 Action 后同步"
+      }
+    ];
+
+    function matrixEntry(element) {
+      return homeClickMatrix.find(item => item.element === element) || homeClickMatrix[0];
+    }
+
     let state = loadState();
 
     function loadState() {
@@ -2867,8 +3007,60 @@
       return titles[name] || "上一层";
     }
 
+    function routePathForScreen(name) {
+      const staticPaths = {
+        home: ["数据决策"],
+        "profit-formula": ["数据决策", "流水利润视角"],
+        "iaa-detail": ["数据决策", "IAA 回收判断", "回收拆解"],
+        "iap-detail": ["数据决策", "IAP 订阅质量", "订阅质量拆解"],
+        initiate: ["主动发起"],
+        "workflow-detail": ["主动发起", "Workflow 草案"],
+        action: ["Action Hub"],
+        watch: ["Action Hub", "观察期"],
+        notify: ["Action Hub", "消息 / 提醒"],
+        research: ["Research Center"],
+        workflow: ["Research Center", "Workflow Monitor"],
+        realtime: ["Research Center", "Realtime Monitor"]
+      };
+      if (name === "deep-dive" && Array.isArray(state.routePath) && state.routePath.length) {
+        return state.routePath;
+      }
+      return staticPaths[name] || (state.navStack || []).map(screenTitle).filter(Boolean);
+    }
+
+    function resetDeepDiveContract() {
+      state.routePath = [];
+      state.deepDiveType = "";
+      const contract = document.getElementById("deepDiveContract");
+      if (contract) contract.innerHTML = "";
+      const primaryTitle = document.getElementById("deepDivePrimaryTitle");
+      if (primaryTitle) primaryTitle.textContent = "下一层拆解";
+      const decisionTitle = document.getElementById("deepDiveDecisionTitle");
+      if (decisionTitle) decisionTitle.textContent = "建议动作";
+    }
+
+    function applyDeepDiveContract(contract) {
+      state.deepDiveBack = contract.back || "home";
+      state.deepDiveType = contract.routeType || "";
+      state.routePath = contract.path || ["数据决策", contract.title || "详情"];
+      const chips = [
+        contract.intent ? `点击意图：${contract.intent}` : "",
+        contract.routeType ? `页面类型：${contract.routeType}` : "",
+        ...(contract.context || []),
+        contract.next ? `下一步：${contract.next}` : ""
+      ].filter(Boolean);
+      document.getElementById("deepDiveContract").innerHTML = chips.map((item, index) => `
+        <span class="route-chip ${index === 0 ? "answer" : ""}">${item}</span>
+      `).join("");
+      document.getElementById("deepDivePrimaryTitle").textContent = contract.primaryTitle || "下一层拆解";
+      document.getElementById("deepDiveDecisionTitle").textContent = contract.decisionTitle || "建议动作";
+    }
+
     function navigateTo(name, options = {}) {
       if (name === "revenue") name = "home";
+      if (name !== "deep-dive") {
+        resetDeepDiveContract();
+      }
       if (options.reset) {
         state.navStack = [];
       } else if (!options.preserveStack && state.screen && state.screen !== name) {
@@ -2887,7 +3079,7 @@
     function updateBackLabels() {
       const stack = (state.navStack || []).filter((screen, index, list) => index === 0 || screen !== list[index - 1]);
       const previous = stack[stack.length - 1] || "home";
-      const path = stack.map(screenTitle).filter(Boolean);
+      const path = routePathForScreen(state.screen).filter(Boolean);
       const html = `<span>‹</span> ${path.map((title, index) => index === path.length - 1 ? `<b>${title}</b>` : `<span>${title}</span>`).join(" <span>/</span> ") || `<b>${screenTitle(previous)}</b>`}`;
       document.querySelectorAll(".back").forEach(button => {
         button.innerHTML = `<span class="back-path">${html}</span>`;
@@ -3144,7 +3336,10 @@
       const showInsight = options.showInsight !== false;
       const link = options.link !== false;
       const color = metric.tone === "red" ? "var(--red)" : metric.tone === "green" ? "var(--green)" : metric.tone === "amber" ? "var(--amber)" : "var(--ink)";
-      const openAttr = link ? ` role="button" tabindex="0" data-open="${metric.target}"` : "";
+      const intentTitle = metric.target === "iaa-detail" ? "查看 IAA 回收拆解" :
+        metric.target === "iap-detail" ? "查看 IAP 订阅质量拆解" :
+        "查看流水利润视角";
+      const openAttr = link ? ` role="button" tabindex="0" data-open="${metric.target}" aria-label="${intentTitle}" title="${intentTitle}"` : "";
       const className = link ? "metric metric-link" : "metric";
       return `
         <article class="${className}"${openAttr}>
@@ -3292,8 +3487,9 @@
     }
 
     function openDataSourceExplorer() {
-      state.deepDiveBack = "home";
       state.navStack = ["home"];
+      const route = matrixEntry("顶部数据源");
+      applyDeepDiveContract({ ...route, back: "home" });
       saveState();
       document.getElementById("deepDiveTitle").textContent = "数据源";
       document.getElementById("deepDiveBody").textContent = "默认先看判断和证据；当证据不可信时，再打开对应原始数据表查看所有数据和所有指标。";
@@ -3314,8 +3510,16 @@
 
     function openRawDataSource(sourceId, contextLabel = "当前证据上下文") {
       const source = rawDataSources.find(item => item.id === sourceId) || rawDataSources[0];
-      state.deepDiveBack = "home";
-      state.navStack = ["home", "deep-dive"];
+      const fromGlobal = contextLabel === "全局数据源入口";
+      const route = matrixEntry("来源链接");
+      state.navStack = ["home"];
+      applyDeepDiveContract({
+        ...route,
+        title: source.name,
+        back: "home",
+        path: fromGlobal ? ["数据决策", "数据源", source.name] : ["数据决策", "判断证据", source.name],
+        context: [`当前证据上下文：${contextLabel}`, `粒度：${source.grain}`, "全量字段"]
+      });
       saveState();
       document.getElementById("deepDiveTitle").textContent = source.name;
       document.getElementById("deepDiveBody").innerHTML = `
@@ -3655,6 +3859,25 @@
       state.selectedRecoveryContext = { business, ...context };
       state.selectedChannelDetail = { business, context, sourceRow };
       state.channelFilters[channel] = state.channelFilters[channel] || {};
+      const route = matrixEntry("回收拆解表行箭头");
+      applyDeepDiveContract({
+        ...route,
+        back: state.deepDiveBack,
+        title: `${business} / ${channel} 渠道细表`,
+        path: [
+          "数据决策",
+          business === "IAA" ? "IAA 回收判断" : "IAP 订阅质量",
+          business === "IAA" ? "回收拆解" : "订阅质量拆解",
+          `${channel} 渠道细表`
+        ],
+        context: [
+          `业务线：${business}`,
+          `产品：${context.product === "All" ? "全部" : context.product || "全部"}`,
+          `渠道：${channel}`,
+          `国家：${context.country && context.country !== "All" ? context.country : "全部"}`,
+          `来源：${sourceRow?.label || "回收拆解"}`
+        ]
+      });
       saveState();
       renderChannelDetail();
       navigateTo("deep-dive", { preserveStack: true });
@@ -3753,6 +3976,16 @@
       const detail = data.deepDives[`${kind}:${id}`];
       if (!detail) return toast("这个条目还没有下一层详情");
       state.deepDiveBack = backScreen || "home";
+      applyDeepDiveContract({
+        routeType: "object-detail",
+        intent: "查看当前对象的下一层状态",
+        back: state.deepDiveBack,
+        path: state.deepDiveBack === "watch" ? ["Action Hub", "观察期", detail.title] : ["数据决策", detail.title],
+        context: [`对象类型：${kind}`, `对象 ID：${id}`],
+        primaryTitle: "对象详情",
+        decisionTitle: "可执行动作",
+        next: "确认状态或继续观察"
+      });
       saveState();
       document.getElementById("deepDiveTitle").textContent = detail.title;
       document.getElementById("deepDiveBody").textContent = detail.body;
@@ -3769,6 +4002,19 @@
       state.deepDiveBack = "home";
       const parent = insight.business === "IAA" ? "iaa-insights" : "iap-insights";
       state.navStack = ["home", parent];
+      const route = matrixEntry("Agent 洞察箭头");
+      applyDeepDiveContract({
+        ...route,
+        back: "home",
+        title: insight.title,
+        path: [
+          "数据决策",
+          insight.business === "IAA" ? "IAA 回收判断" : "IAP 订阅质量",
+          "Agent 洞察",
+          insight.title
+        ],
+        context: [`业务线：${insight.business}`, `洞察类型：${insight.type}`, `置信度：${insight.confidence}`]
+      });
       saveState();
       document.getElementById("deepDiveTitle").textContent = insight.title;
       document.getElementById("deepDiveBody").textContent = `${insight.business} Agent 洞察用于解释判断，不直接等同于执行动作。`;
@@ -3788,6 +4034,19 @@
       const metric = getSelectedDataPeriod().metrics[key];
       state.deepDiveBack = "home";
       state.navStack = ["home"];
+      const businessPath = metric?.target === "iaa-detail" ? ["数据决策", "IAA 回收判断", "指标洞察"] :
+        metric?.target === "iap-detail" ? ["数据决策", "IAP 订阅质量", "指标洞察"] :
+        ["数据决策", "流水利润", "指标洞察"];
+      applyDeepDiveContract({
+        routeType: "insight-detail",
+        intent: "查看单指标绑定洞察",
+        back: "home",
+        path: [...businessPath, `${metric?.label || "指标"}洞察`],
+        context: [`指标：${metric?.label || key}`, "用途：解释单指标，不替代综合判断"],
+        primaryTitle: "指标洞察",
+        decisionTitle: "是否转 Action",
+        next: "必要时转成 Action 草案"
+      });
       saveState();
       document.getElementById("deepDiveTitle").textContent = `${metric?.label || "指标"}洞察`;
       document.getElementById("deepDiveBody").textContent = "这里只展示和当前指标强绑定的 Agent 洞察；跨指标判断仍放在模块综合洞察。";
@@ -3818,6 +4077,14 @@
       const rows = rowsById[id] || rowsById.total;
       state.deepDiveBack = "home";
       state.navStack = ["home"];
+      const route = matrixEntry("流水利润洞察箭头");
+      applyDeepDiveContract({
+        ...route,
+        back: "home",
+        title: titleMap[id] || titleMap.total,
+        path: ["数据决策", "流水利润", titleMap[id] || titleMap.total],
+        context: [`周期：${period.date}`, "用途：解释利润 / 收入 / 成本的综合关系"]
+      });
       saveState();
       document.getElementById("deepDiveTitle").textContent = titleMap[id] || titleMap.total;
       document.getElementById("deepDiveBody").textContent = "流水利润洞察只做板块综合判断，不拆成单指标洞察。";
@@ -3832,6 +4099,14 @@
       const items = data.insights.filter(item => item.business === business && item.scope !== "metric");
       state.deepDiveBack = "home";
       state.navStack = ["home"];
+      const route = matrixEntry("Agent 洞察箭头");
+      applyDeepDiveContract({
+        ...route,
+        back: "home",
+        title: `${business} Agent 洞察`,
+        path: ["数据决策", business === "IAA" ? "IAA 回收判断" : "IAP 订阅质量", "Agent 洞察"],
+        context: [`业务线：${business}`, "首页只展示 Top1，这里查看完整洞察"]
+      });
       saveState();
       document.getElementById("deepDiveTitle").textContent = `${business} Agent 洞察`;
       document.getElementById("deepDiveBody").textContent = "这里是该业务线的洞察列表，首页只展示 Top1。";
@@ -3846,6 +4121,14 @@
       const items = data.globalActions.filter(item => item[2] === "数据决策" && item[5] === business);
       state.deepDiveBack = "home";
       state.navStack = ["home"];
+      const route = matrixEntry("Action 草案箭头");
+      applyDeepDiveContract({
+        ...route,
+        back: "home",
+        title: `${business} Action 草案`,
+        path: ["数据决策", business === "IAA" ? "IAA 回收判断" : "IAP 订阅质量", "Action 草案"],
+        context: [`业务线：${business}`, "首页只展示 P0，这里查看同业务线草案"]
+      });
       saveState();
       document.getElementById("deepDiveTitle").textContent = `${business} Action 草案`;
       document.getElementById("deepDiveBody").textContent = "首页只展示 P0，低优先级草案在这里集中查看。";
@@ -3862,9 +4145,25 @@
       if (!action) return toast("这个 Action 草案不存在");
       const current = state.actions[id] || "待确认";
       state.deepDiveBack = "home";
+      const fromActionHub = state.screen === "action";
+      const route = matrixEntry("Action 草案箭头");
       if (action[2] === "数据决策" && action[5]) {
         state.navStack = ["home", action[5] === "IAA" ? "iaa-actions" : "iap-actions"];
       }
+      applyDeepDiveContract({
+        ...route,
+        back: fromActionHub ? "action" : "home",
+        title: action[1],
+        path: fromActionHub
+          ? ["Action Hub", "今日 Action", action[1]]
+          : ["数据决策", action[5] === "IAA" ? "IAA 回收判断" : action[5] === "IAP" ? "IAP 订阅质量" : "通用", "Action 草案", action[1]],
+        context: [
+          `Action ID：${action[0]}`,
+          `来源：${action[2]}`,
+          `业务线：${action[5] || "通用"}`,
+          `状态：${current}`
+        ]
+      });
       saveState();
       document.getElementById("deepDiveTitle").textContent = action[1];
       document.getElementById("deepDiveBody").textContent = "Action 草案是待确认的执行项，确认后同步进入 Action Hub 的项目管理状态。";
@@ -3988,6 +4287,16 @@
       if (!day) return toast("这个日期还没有 Action 快照");
       const items = getActionDateItems(day);
       state.deepDiveBack = backScreen;
+      applyDeepDiveContract({
+        routeType: "action-date-snapshot",
+        intent: "查看某一天的 Action 状态快照",
+        back: backScreen,
+        path: ["Action Hub", "日期筛选", `${day.label} · ${day.date}`],
+        context: [`日期：${day.date}`, "用途：回看 App / AI / 用户动作"],
+        primaryTitle: "当天 Action",
+        decisionTitle: "下一步",
+        next: "完整日程表在 Action Hub 查看"
+      });
       saveState();
       document.getElementById("deepDiveTitle").textContent = `${day.label} · ${day.date}`;
       document.getElementById("deepDiveBody").textContent = "日期快照用于回看当天 App / AI / 用户推进过哪些 Action，以及每个 Action 的状态。";
