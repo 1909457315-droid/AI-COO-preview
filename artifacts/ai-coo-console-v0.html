@@ -412,9 +412,9 @@
     }
 
     .detail-head {
-      display: flex;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
       align-items: flex-start;
-      justify-content: space-between;
       gap: 12px;
       margin-bottom: 12px;
       padding: 14px;
@@ -422,6 +422,18 @@
       border-radius: 14px;
       background: rgba(255,255,255,.72);
       box-shadow: none;
+    }
+
+    .detail-head > .back {
+      grid-column: 1;
+      grid-row: 1;
+      justify-self: start;
+    }
+
+    .detail-head > div {
+      grid-column: 2;
+      grid-row: 1;
+      min-width: 0;
     }
 
     .detail-head h2 {
@@ -1752,7 +1764,18 @@
       .side-panel { margin-top: 14px; }
       .hero { min-height: auto; padding: 20px; }
       .hero h2 { font-size: 26px; }
-      .detail-head { flex-direction: column-reverse; padding: 14px; }
+      .detail-head {
+        grid-template-columns: 1fr;
+        padding: 14px;
+      }
+      .detail-head > .back {
+        grid-column: 1;
+        grid-row: 1;
+      }
+      .detail-head > div {
+        grid-column: 1;
+        grid-row: 2;
+      }
       .metric-row, .profit-subgrid, .workflow-picker, .quick-row, .dimension-grid, .dimension-control, .evidence-grid, .raw-source-grid { grid-template-columns: 1fr; }
       .dimension-table-row { grid-template-columns: minmax(0, 1fr) auto; }
       .dimension-table-row.header { display: none; }
@@ -2862,7 +2885,7 @@
     }
 
     function updateBackLabels() {
-      const stack = state.navStack || [];
+      const stack = (state.navStack || []).filter((screen, index, list) => index === 0 || screen !== list[index - 1]);
       const previous = stack[stack.length - 1] || "home";
       const path = stack.map(screenTitle).filter(Boolean);
       const html = `<span>‹</span> ${path.map((title, index) => index === path.length - 1 ? `<b>${title}</b>` : `<span>${title}</span>`).join(" <span>/</span> ") || `<b>${screenTitle(previous)}</b>`}`;
