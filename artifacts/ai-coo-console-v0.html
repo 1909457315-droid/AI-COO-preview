@@ -2949,10 +2949,19 @@
     };
 
     const metricDefinitionRows = [
-      ["profit", "大盘流水利润", "profit-detail", "业务线 / 产品 / 国家", "流水利润表", "已配置", "total"],
-      ["iaaRoi", "IAA D7 ROI 达成率", "recovery-breakdown", "产品 / 渠道 / 国家", "回收表 / Camp 表 / 素材表", "已配置", "iaaRoi"],
-      ["iapSubCost", "IAP 三日有效订阅成本", "subscription-quality", "产品 / 渠道 / 国家", "回收表 / Camp 表", "已配置", "iapSubCost"],
-      ["customUsAndroid", "自定义：美国 Android D7 毛利", "recovery-breakdown", "产品 / 渠道 / 国家 / 平台", "待绑定", "缺元数据", "iaaMargin"]
+      ["profit", "大盘流水利润", "profit-detail", "业务线 / 产品 / 国家", "流水利润表", "已配置", "total", "home"],
+      ["revenue", "大盘实际收入", "profit-detail", "业务线 / 产品 / 国家", "流水利润表", "已配置", "total", "raw"],
+      ["cost", "大盘投放成本", "profit-detail", "业务线 / 产品 / 国家", "流水利润表", "已配置", "total", "raw"],
+      ["iaaRoi", "IAA D7 ROI 达成率", "recovery-breakdown", "产品 / 渠道 / 国家", "回收表 / Camp 表 / 素材表", "已配置", "iaaRoi", "home"],
+      ["iaaMargin", "IAA D7 预估毛利", "recovery-breakdown", "产品 / 渠道 / 国家", "回收表 / Camp 表", "已配置", "iaaMargin", "raw"],
+      ["iaaCost", "IAA 投放成本", "recovery-breakdown", "产品 / 渠道 / 国家", "回收表 / Camp 表", "已配置", "iaaCost", "raw"],
+      ["iapSubCost", "IAP 三日有效订阅成本", "subscription-quality", "产品 / 渠道 / 国家", "回收表 / Camp 表", "已配置", "iapSubCost", "home"],
+      ["iapPayMix", "IAP 直接付费结构", "subscription-quality", "产品 / 渠道 / 国家", "回收表", "已配置", "iapPayMix", "raw"],
+      ["iapMargin", "IAP D90+ 预估毛利", "subscription-quality", "产品 / 渠道 / 国家", "回收表 / Camp 表", "已配置", "iapMargin", "raw"],
+      ["campaignSpend", "计划消耗", "campaign-detail", "产品 / 渠道 / 国家 / 账户 / 计划", "Camp 表", "候选", "iaaCost", "raw"],
+      ["creativeCtr", "素材 CTR", "creative-detail", "产品 / 渠道 / 国家 / 计划 / 素材", "素材表", "候选", "iaaRoi", "raw"],
+      ["siteQuality", "Sites 子渠道质量", "site-detail", "渠道 / 国家 / site", "Sites 表", "候选", "iaaRoi", "raw"],
+      ["customUsAndroid", "自定义：美国 Android D7 毛利", "recovery-breakdown", "产品 / 渠道 / 国家 / 平台", "待绑定", "缺元数据", "iaaMargin", "custom"]
     ];
 
     function sourceObjectForAction(action) {
@@ -3825,14 +3834,39 @@
         back: "home",
         path: ["数据决策", "指标定义"],
         context: ["指标来自 registry", "首页只是 placement"],
-        primaryTitle: "当前首页指标",
-        decisionTitle: "缺失状态",
+        primaryTitle: "当前首页指标 / 候选指标库",
+        decisionTitle: "原始数据字段和缺失状态",
         next: "缺元数据的指标不能进入完整下钻"
       });
       saveState();
       document.getElementById("deepDiveTitle").textContent = "指标定义";
-      document.getElementById("deepDiveBody").textContent = "这里不是后台管理页，而是让原型显性展示：首页指标由定义和 placement 生成。";
-      document.getElementById("deepDiveNodes").innerHTML = metricDefinitionRows.map(item => `
+      document.getElementById("deepDiveBody").textContent = "这里演示未来从大量原始数据指标中挑选、预览、置顶和补元数据，不限于当前首页已有指标。";
+      document.getElementById("deepDiveNodes").innerHTML = [
+        renderMetricDefinitionGroup("当前首页指标", "home"),
+        renderMetricDefinitionGroup("原始数据可选指标", "raw"),
+        renderMetricDefinitionGroup("自定义指标草案", "custom")
+      ].join("");
+      document.getElementById("deepDiveDecision").innerHTML = `
+        <div class="formula-node"><strong>原始数据已有字段</strong><span>${rawDataSources.map(source => `${source.name}：${source.fields.slice(4).join(" / ")}`).join("；")}</span></div>
+      ` + frameworkStates.slice(0, 3).map(item => `
+        <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]} · ${item[2]}</span></div>
+      `).join("");
+      navigateTo("deep-dive", { preserveStack: true });
+    }
+
+    function renderMetricDefinitionGroup(title, group) {
+      const rows = metricDefinitionRows.filter(item => item[7] === group);
+      return `
+        <div class="formula-node">
+          <strong>${title}</strong>
+          <span>${rows.length} 个指标 · 可预览、置顶或补元数据</span>
+        </div>
+        ${rows.map(item => renderMetricDefinitionRow(item)).join("")}
+      `;
+    }
+
+    function renderMetricDefinitionRow(item) {
+      return `
         <div class="formula-node">
           <strong>${item[1]}</strong>
           <span>${item[2]} · ${item[3]} · 来源：${item[4]} · ${state.metricDefinitionStatus?.[item[0]] || item[5]}</span>
@@ -3842,11 +3876,7 @@
             <button class="action-button" type="button" onclick="completeMetricMetadata('${item[0]}')">补元数据</button>
           </div>
         </div>
-      `).join("");
-      document.getElementById("deepDiveDecision").innerHTML = frameworkStates.slice(0, 3).map(item => `
-        <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]} · ${item[2]}</span></div>
-      `).join("");
-      navigateTo("deep-dive", { preserveStack: true });
+      `;
     }
 
     function openHomeProfile() {
@@ -3867,6 +3897,7 @@
       document.getElementById("deepDiveNodes").innerHTML = [
         ["置顶指标", currentPinnedMetrics().join(" / "), "pin"],
         ["隐藏指标", currentHiddenMetrics().join(" / "), "hide"],
+        ["候选指标池", metricDefinitionRows.filter(item => item[7] !== "home").map(item => item[1]).slice(0, 7).join(" / "), "pool"],
         ["布局规则", homeProfile.layoutRules.join("；"), "layout"]
       ].map(item => `
         <div class="formula-node">
@@ -3875,6 +3906,7 @@
           <div class="button-row">
             ${item[2] === "pin" ? `<button class="action-button primary" type="button" onclick="simulateProfileAction('pin')">置顶 IAP D90+ 毛利</button>` : ""}
             ${item[2] === "hide" ? `<button class="action-button" type="button" onclick="simulateProfileAction('hide')">隐藏 IAA 投放成本</button>` : ""}
+            ${item[2] === "pool" ? `<button class="action-button primary" type="button" onclick="pinMetricFromDefinition('素材 CTR')">从候选池添加素材 CTR</button>` : ""}
             ${item[2] === "layout" ? `<button class="action-button" type="button" onclick="simulateProfileAction('period')">默认周期改为 7 天</button>` : ""}
           </div>
         </div>
