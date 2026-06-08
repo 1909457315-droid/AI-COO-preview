@@ -1209,7 +1209,7 @@
 
     .channel-table-row {
       display: grid;
-      grid-template-columns: minmax(0, 1.05fr) repeat(4, minmax(76px, .6fr));
+      grid-template-columns: minmax(58px, .38fr) minmax(0, 1.05fr) repeat(4, minmax(76px, .6fr));
       gap: 8px;
       align-items: center;
       padding: 10px 0;
@@ -3187,48 +3187,66 @@
     }
 
     function openDimensionRow(business, rowIndex) {
-      const key = dimensionKey(ensureDimensionState(business));
-      const rows = filterDimensionRows(dimensionRows[business][key] || dimensionRows[business].summary, ensureDimensionFilters(business));
+      const view = ensureDimensionState(business);
+      const filters = ensureDimensionFilters(business);
+      const key = dimensionKey(view);
+      const rows = filterDimensionRows(dimensionRows[business][key] || dimensionRows[business].summary, filters);
       const row = rows[rowIndex];
       if (!row) return toast("这个组合没有可进入的渠道细表");
-      openChannelDrilldown(business, row.context, row);
+      openChannelDrilldown(business, drilldownContext(row.context, view, filters), row);
     }
 
-    function channelRow(name, metric, cost, quality, impact, status) {
-      return { name, metric, cost, quality, impact, status };
+    function drilldownContext(context, view, filters) {
+      return {
+        ...context,
+        product: view.product ? context.product : filters.product,
+        channel: view.channel ? context.channel : filters.channel,
+        country: view.country ? context.country : filters.country
+      };
+    }
+
+    function channelRow(name, country, metric, cost, quality, impact, status) {
+      return { name, country, metric, cost, quality, impact, status };
     }
 
     function adGroupChannelRows(channel) {
       const samples = {
-        "快渠道": ["K-US-Scale-09", "AdGroup-K3", "Video-K11", "ROI 77%", "CPI +19%", "CTR 0.34% / CLR 下降", "-$1.5k", "先看素材"],
-        Facebook: ["FB-US-AEO-14", "AdSet-5", "Video-F08", "ROI 81%", "CPI +15%", "CTR 0.39% / CVR 下降", "-$1.3k", "看广告组"],
-        TikTok: ["TT-US-Scale-21", "AdGroup-3", "Video-11", "ROI 79%", "CPI +22%", "CTR 0.31% / CLR 下降", "-$1.7k", "素材复查"],
-        Google: ["G-US-UAC-18", "AssetGroup-2", "Asset-G06", "ROI 83%", "CPI +12%", "CTR 0.36% / CVR 偏低", "-$1.1k", "资产组复查"]
+        "快渠道": ["K", "Scale", "AdGroup-K3", "Video-K11", "ROI 77%", "CPI +19%", "CTR 0.34% / CLR 下降", "-$1.5k", "先看素材"],
+        Facebook: ["FB", "AEO", "AdSet-5", "Video-F08", "ROI 81%", "CPI +15%", "CTR 0.39% / CVR 下降", "-$1.3k", "看广告组"],
+        TikTok: ["TT", "Scale", "AdGroup-3", "Video-11", "ROI 79%", "CPI +22%", "CTR 0.31% / CLR 下降", "-$1.7k", "素材复查"],
+        Google: ["G", "UAC", "AssetGroup-2", "Asset-G06", "ROI 83%", "CPI +12%", "CTR 0.36% / CVR 偏低", "-$1.1k", "资产组复查"]
       };
       const s = samples[channel] || samples.TikTok;
       return [
-        channelRow(s[0], s[3], s[4], s[5], s[6], s[7]),
-        channelRow(`${s[0]} / ${s[1]}`, "ROI 70%", "预算 +18%", "学习期波动", "-$0.9k", "暂不放量"),
-        channelRow(`${s[1]} / ${s[2]}`, "ROI 62%", "消耗 $2.4k", "转化链路弱", "-$0.7k", "换素材")
+        channelRow(`${s[0]}-US-${s[1]}-21`, "US", s[4], s[5], s[6], s[7], s[8]),
+        channelRow(`${s[0]}-JP-${s[1]}-07 / ${s[2]}`, "JP", "ROI 92%", "预算 +6%", "学习期稳定", "-$0.3k", "观察"),
+        channelRow(`${s[0]}-PH-${s[1]}-04 / ${s[2]} / ${s[3]}`, "PH", "ROI 70%", "消耗 $2.4k", "转化链路弱", "-$0.7k", "换素材"),
+        channelRow(`${s[0]}-US-${s[1]}-21 / ${s[2]} / ${s[3]}`, "US", "ROI 62%", "消耗 $1.8k", "同国家素材衰减", "-$0.6k", "降预算")
       ];
     }
 
     function channelTableRows(channel) {
       const rows = {
         Unity: [
-          channelRow("U-US-Scale-12", "ROI 72%", "成本 $9.4k", "回收低于均值", "-$2.1k", "看计划"),
-          channelRow("site_483", "ROI 61%", "成本占比 18%", "子渠道质量弱", "-$1.8k", "停弱源"),
-          channelRow("U-US-Scale-12 / C-07", "CTR 0.42%", "消耗 $1.9k", "点击正常但回收弱", "-$0.8k", "查转化")
+          channelRow("U-US-Scale-12", "US", "ROI 72%", "成本 $9.4k", "回收低于均值", "-$2.1k", "看计划"),
+          channelRow("U-JP-Scale-04", "JP", "ROI 96%", "成本 $3.1k", "回收接近均值", "-$0.3k", "观察"),
+          channelRow("site_483", "US", "ROI 61%", "成本占比 18%", "子渠道质量弱", "-$1.8k", "停弱源"),
+          channelRow("site_918", "PH", "ROI 89%", "成本占比 9%", "子渠道波动", "-$0.5k", "限预算"),
+          channelRow("U-US-Scale-12 / C-07", "US", "CTR 0.42%", "消耗 $1.9k", "点击正常但回收弱", "-$0.8k", "查转化")
         ],
         MTJ: [
-          channelRow("M-US-Sub-08", "D90 ROI 68%", "有效订阅 $26.1", "付费 1 / 20", "-$2.4k", "D3 复查"),
-          channelRow("site_219", "取消率 +13%", "BR +15%", "疑似弱质量", "-$1.6k", "查子渠道"),
-          channelRow("M-US-Sub-08 / Creative-3", "直接付费 0 / 14", "消耗 $1.2k", "素材带来弱付费", "-$0.7k", "换素材")
+          channelRow("M-US-Sub-08", "US", "D90 ROI 68%", "有效订阅 $26.1", "付费 1 / 20", "-$2.4k", "D3 复查"),
+          channelRow("M-PH-Sub-03", "PH", "D90 ROI 87%", "有效订阅 $21.4", "付费 3 / 18", "-$0.6k", "观察"),
+          channelRow("site_219", "US", "取消率 +13%", "BR +15%", "疑似弱质量", "-$1.6k", "查子渠道"),
+          channelRow("site_604", "JP", "取消率 +3%", "BR +4%", "质量正常", "$0.2k", "保留"),
+          channelRow("M-US-Sub-08 / Creative-3", "US", "直接付费 0 / 14", "消耗 $1.2k", "素材带来弱付费", "-$0.7k", "换素材")
         ],
         Apply: [
-          channelRow("AP-US-01", "ROI 81%", "成本 +17%", "计划整体偏弱", "-$1.2k", "看计划"),
-          channelRow("Creative-A", "CTR 0.38%", "消耗 $1.4k", "CVR 下降", "-$0.8k", "换创意"),
-          channelRow("AP-US-01 / Creative-A", "ROI 69%", "成本 +12%", "组合不稳定", "-$0.6k", "暂停测试")
+          channelRow("AP-US-01", "US", "ROI 81%", "成本 +17%", "计划整体偏弱", "-$1.2k", "看计划"),
+          channelRow("AP-JP-02", "JP", "ROI 98%", "成本 +4%", "结构正常", "-$0.1k", "观察"),
+          channelRow("Creative-A", "US", "CTR 0.38%", "消耗 $1.4k", "CVR 下降", "-$0.8k", "换创意"),
+          channelRow("Creative-C", "PH", "CTR 0.46%", "消耗 $0.8k", "CVR 正常", "$0.1k", "保留"),
+          channelRow("AP-US-01 / Creative-A", "US", "ROI 69%", "成本 +12%", "组合不稳定", "-$0.6k", "暂停测试")
         ],
         "快渠道": adGroupChannelRows("快渠道"),
         Facebook: adGroupChannelRows("Facebook"),
@@ -3239,9 +3257,9 @@
     }
 
     function channelFilterLabels(channel) {
-      if (["Unity", "MTJ"].includes(channel)) return ["计划", "素材", "sites / 子渠道"];
-      if (channel === "Apply") return ["计划", "创意", "国家"];
-      return ["计划", "广告组", "素材"];
+      if (["Unity", "MTJ"].includes(channel)) return ["国家", "计划", "素材", "sites / 子渠道"];
+      if (channel === "Apply") return ["国家", "计划", "创意"];
+      return ["国家", "计划", "广告组", "素材"];
     }
 
     function openChannelDrilldown(business, context, sourceRow) {
@@ -3264,23 +3282,28 @@
       state.channelFilters = state.channelFilters || {};
       state.channelFilters[channel] = state.channelFilters[channel] || {};
       const activeFilters = state.channelFilters[channel];
+      const contextCountry = context.country && context.country !== "All" ? context.country : "全部";
+      const effectiveFilters = {
+        ...activeFilters,
+        ...((contextCountry !== "全部" && !activeFilters["国家"]) ? { "国家": contextCountry } : {})
+      };
       document.getElementById("deepDiveTitle").textContent = `${business} / ${channel} 渠道细表`;
       document.getElementById("deepDiveBody").innerHTML = `
         <div class="channel-context">
-          <span class="context-chip">产品：${context.product || "全部"}</span>
+          <span class="context-chip">产品：${context.product === "All" ? "全部" : context.product || "全部"}</span>
           <span class="context-chip">渠道：${channel}</span>
-          <span class="context-chip">国家：${context.country || "全部"}</span>
+          <span class="context-chip">国家：${contextCountry}</span>
           <span class="context-chip">来源：${sourceRow?.label || "回收拆解"}</span>
         </div>
       `;
       const filters = channelFilterLabels(channel);
       const allRows = channelTableRows(channel);
-      const rows = filterChannelRows(allRows, activeFilters);
+      const rows = filterChannelRows(allRows, effectiveFilters);
       document.getElementById("deepDiveNodes").innerHTML = `
         <div class="dimension-control">
           ${filters.map((label, index) => {
             const options = channelFilterOptions(label, allRows);
-            const selected = activeFilters[label] || "全部";
+            const selected = effectiveFilters[label] || "全部";
             return `
             <div class="dimension-card active">
               <button class="dimension-toggle" type="button">
@@ -3294,19 +3317,20 @@
           `}).join("")}
         </div>
         <div class="channel-table">
-          <div class="channel-table-row header"><span>对象</span><span>核心指标</span><span>成本</span><span>质量</span><span>利润影响</span></div>
+          <div class="channel-table-row header"><span>国家</span><span>对象</span><span>核心指标</span><span>成本</span><span>质量</span><span>利润影响</span></div>
           ${rows.length ? rows.map(row => `
             <div class="channel-table-row">
+              <span>${row.country}</span>
               <strong>${row.name}</strong>
               <span>${row.metric}</span>
               <span>${row.cost}</span>
               <span>${row.quality}</span>
               <span>${row.impact}</span>
             </div>
-          `).join("") : `<div class="channel-table-row"><strong>没有匹配对象</strong><span>调整筛选</span><span>-</span><span>-</span><span>-</span></div>`}
+          `).join("") : `<div class="channel-table-row"><span>-</span><strong>没有匹配对象</strong><span>调整筛选</span><span>-</span><span>-</span><span>-</span></div>`}
         </div>
         <div class="evidence-grid">
-          <div class="formula-node"><strong>证据链</strong><span>${sourceRow?.metric || allRows[0].metric}；${(rows[0] || allRows[0]).quality}；利润影响 ${sourceRow?.impact || (rows[0] || allRows[0]).impact}。</span></div>
+          <div class="formula-node"><strong>证据链</strong><span>${sourceRow?.metric || allRows[0].metric}；${(rows[0] || allRows[0]).country} ${(rows[0] || allRows[0]).quality}；利润影响 ${sourceRow?.impact || (rows[0] || allRows[0]).impact}。</span></div>
           <div class="formula-node"><strong>根因候选</strong><span>${channel} 当前更像 ${(rows[0] || allRows[0]).status}，先按渠道字段继续缩小范围。</span></div>
           <div class="formula-node"><strong>Action 草案</strong><span>生成前先确认是否需要推进；确认后同步到 Action Hub。</span></div>
         </div>
@@ -3315,6 +3339,7 @@
     }
 
     function channelFilterOptions(label, rows) {
+      if (label === "国家") return ["全部", ...new Set(rows.map(row => row.country).filter(Boolean))];
       if (label.includes("计划")) return ["全部", ...new Set(rows.map(row => row.name.split(" / ")[0]))];
       if (label.includes("广告组") || label.includes("素材") || label.includes("创意")) return ["全部", ...new Set(rows.map(row => row.name.split(" / ")[1]).filter(Boolean))];
       if (label.includes("sites")) return ["全部", ...new Set(rows.map(row => row.name).filter(name => name.includes("site_")))];
@@ -3322,9 +3347,12 @@
     }
 
     function filterChannelRows(rows, filters) {
-      const values = Object.values(filters || {}).filter(value => value && value !== "全部");
-      if (!values.length) return rows;
-      return rows.filter(row => values.every(value => row.name.includes(value)));
+      const entries = Object.entries(filters || {}).filter(([, value]) => value && value !== "全部");
+      if (!entries.length) return rows;
+      return rows.filter(row => entries.every(([label, value]) => {
+        if (label === "国家") return row.country === value;
+        return row.name.includes(value);
+      }));
     }
 
     function setChannelFilter(channel, label, value) {
