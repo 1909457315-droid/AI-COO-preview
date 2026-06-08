@@ -1403,6 +1403,70 @@
       color: var(--blue-strong);
     }
 
+    .metric-library {
+      display: grid;
+      gap: 8px;
+    }
+
+    .metric-library-tools {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .metric-search {
+      min-height: 38px;
+      width: 100%;
+      border: 0;
+      border-radius: 999px;
+      background: var(--surface-soft);
+      color: var(--ink);
+      padding: 0 14px;
+      font: inherit;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .metric-filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .metric-library-list {
+      display: grid;
+      gap: 4px;
+      max-height: 430px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .metric-library-row {
+      display: grid;
+      grid-template-columns: minmax(150px, 1.2fr) minmax(92px, .7fr) minmax(120px, .9fr) auto;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .metric-library-row strong {
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .metric-library-row span {
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .metric-library-row .button-row {
+      justify-content: flex-end;
+      margin-top: 0;
+    }
+
     .channel-table {
       display: grid;
       gap: 6px;
@@ -1808,6 +1872,13 @@
       .channel-table-row.header { display: none; }
       .raw-table-row { grid-template-columns: minmax(0, 1fr); }
       .raw-table-row.header { display: none; }
+      .metric-library-tools,
+      .metric-library-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .metric-library-row .button-row {
+        justify-content: flex-start;
+      }
       .module-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .row { grid-template-columns: 1fr; }
       .micro-link {
@@ -2943,7 +3014,7 @@
       role: "经营负责人",
       defaultPeriod: "昨日",
       pinnedMetrics: ["大盘流水利润", "IAA D7 ROI 达成率", "IAP 三日有效订阅成本"],
-      hiddenMetrics: ["素材 CTR", "支付页 CVR"],
+      hiddenMetrics: ["支付页 CVR", "素材曝光量"],
       thresholdProfile: ["D7 ROI < 90% 高风险", "D90+ 毛利下降超过 8% 进入观察"],
       layoutRules: ["数据决策置顶", "Action Hub 显示待确认和阻塞", "Research Center 保留对象图入口"]
     };
@@ -3841,11 +3912,7 @@
       saveState();
       document.getElementById("deepDiveTitle").textContent = "指标定义";
       document.getElementById("deepDiveBody").textContent = "这里演示未来从大量原始数据指标中挑选、预览、置顶和补元数据，不限于当前首页已有指标。";
-      document.getElementById("deepDiveNodes").innerHTML = [
-        renderMetricDefinitionGroup("当前首页指标", "home"),
-        renderMetricDefinitionGroup("原始数据可选指标", "raw"),
-        renderMetricDefinitionGroup("自定义指标草案", "custom")
-      ].join("");
+      document.getElementById("deepDiveNodes").innerHTML = renderMetricLibrary();
       document.getElementById("deepDiveDecision").innerHTML = `
         <div class="formula-node"><strong>原始数据已有字段</strong><span>${rawDataSources.map(source => `${source.name}：${source.fields.slice(4).join(" / ")}`).join("；")}</span></div>
       ` + frameworkStates.slice(0, 3).map(item => `
@@ -3854,22 +3921,44 @@
       navigateTo("deep-dive", { preserveStack: true });
     }
 
-    function renderMetricDefinitionGroup(title, group) {
-      const rows = metricDefinitionRows.filter(item => item[7] === group);
+    function renderMetricLibrary() {
+      const group = state.metricLibraryGroup || "all";
+      const query = (state.metricLibraryQuery || "").trim().toLowerCase();
+      const rows = metricDefinitionRows.filter(item => {
+        const groupMatch = group === "all" || item[7] === group;
+        const text = item.join(" ").toLowerCase();
+        return groupMatch && (!query || text.includes(query));
+      });
+      const groupLabels = {
+        all: "全部",
+        home: "当前首页",
+        raw: "原始数据",
+        custom: "自定义"
+      };
       return `
-        <div class="formula-node">
-          <strong>${title}</strong>
-          <span>${rows.length} 个指标 · 可预览、置顶或补元数据</span>
+        <div class="metric-library">
+          <div class="metric-library-tools">
+            <input class="metric-search" type="search" value="${state.metricLibraryQuery || ""}" placeholder="搜索指标、来源表、维度" oninput="setMetricLibraryQuery(this.value)" />
+            <span class="status info">${rows.length} 个</span>
+          </div>
+          <div class="metric-filter-row">
+            ${Object.entries(groupLabels).map(([key, label]) => `
+              <button class="action-button ${group === key ? "active" : ""}" type="button" onclick="setMetricLibraryGroup('${key}')">${label}</button>
+            `).join("")}
+          </div>
+          <div class="metric-library-list">
+            ${rows.map(item => renderMetricDefinitionRow(item)).join("") || `<div class="metric-library-row"><strong>没有匹配指标</strong><span>换个关键词</span><span>-</span><span></span></div>`}
+          </div>
         </div>
-        ${rows.map(item => renderMetricDefinitionRow(item)).join("")}
       `;
     }
 
     function renderMetricDefinitionRow(item) {
       return `
-        <div class="formula-node">
+        <div class="metric-library-row">
           <strong>${item[1]}</strong>
-          <span>${item[2]} · ${item[3]} · 来源：${item[4]} · ${state.metricDefinitionStatus?.[item[0]] || item[5]}</span>
+          <span>${item[2]} · ${state.metricDefinitionStatus?.[item[0]] || item[5]}</span>
+          <span>${item[4]} · ${item[3]}</span>
           <div class="button-row">
             <button class="action-button primary" type="button" onclick="previewMetricDefinition('${item[0]}')">预览下钻</button>
             <button class="action-button" type="button" onclick="pinMetricFromDefinition('${item[1]}')">设为首页指标</button>
@@ -3877,6 +3966,18 @@
           </div>
         </div>
       `;
+    }
+
+    function setMetricLibraryGroup(group) {
+      state.metricLibraryGroup = group;
+      saveState();
+      openMetricDefinitionExplorer();
+    }
+
+    function setMetricLibraryQuery(value) {
+      state.metricLibraryQuery = value;
+      saveState();
+      document.getElementById("deepDiveNodes").innerHTML = renderMetricLibrary();
     }
 
     function openHomeProfile() {
