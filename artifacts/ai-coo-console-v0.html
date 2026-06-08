@@ -878,6 +878,21 @@
       background: #fff;
     }
 
+    .source-link {
+      border: 0;
+      background: transparent;
+      color: var(--module-accent, var(--blue-strong));
+      cursor: pointer;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 760;
+      padding: 0;
+    }
+
+    .source-link:hover {
+      text-decoration: underline;
+    }
+
     .decision {
       margin-top: 10px;
       padding: 12px;
@@ -938,7 +953,25 @@
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      gap: 12px;
+      gap: 8px;
+    }
+
+    .data-source-trigger {
+      min-height: 36px;
+      padding: 8px 12px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--surface-soft);
+      color: var(--ink);
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 760;
+    }
+
+    .data-source-trigger:hover {
+      background: var(--surface-blue);
+      color: var(--blue-strong);
     }
 
     .period-button {
@@ -1331,6 +1364,62 @@
       margin-top: 12px;
     }
 
+    .raw-source-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .raw-source-card {
+      display: grid;
+      gap: 6px;
+      padding: 12px;
+      border: 0;
+      border-radius: 12px;
+      background: var(--surface-soft);
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .raw-source-card strong {
+      font-size: 14px;
+    }
+
+    .raw-source-card span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .raw-source-card:hover {
+      background: var(--surface-blue);
+    }
+
+    .raw-table {
+      display: grid;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .raw-table-row {
+      display: grid;
+      grid-template-columns: minmax(128px, .7fr) repeat(4, minmax(86px, 1fr));
+      gap: 8px;
+      align-items: center;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .raw-table-row.header {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 760;
+    }
+
     .channel-table-row {
       display: grid;
       grid-template-columns: minmax(58px, .38fr) minmax(0, 1.05fr) repeat(4, minmax(76px, .6fr));
@@ -1655,12 +1744,14 @@
       .hero { min-height: auto; padding: 20px; }
       .hero h2 { font-size: 26px; }
       .detail-head { flex-direction: column-reverse; padding: 14px; }
-      .metric-row, .profit-subgrid, .workflow-picker, .quick-row, .dimension-grid, .dimension-control, .evidence-grid { grid-template-columns: 1fr; }
+      .metric-row, .profit-subgrid, .workflow-picker, .quick-row, .dimension-grid, .dimension-control, .evidence-grid, .raw-source-grid { grid-template-columns: 1fr; }
       .dimension-table-row { grid-template-columns: minmax(0, 1fr) auto; }
       .dimension-table-row.header { display: none; }
       .dimension-table-row span { font-size: 12px; }
       .channel-table-row { grid-template-columns: minmax(0, 1fr); }
       .channel-table-row.header { display: none; }
+      .raw-table-row { grid-template-columns: minmax(0, 1fr); }
+      .raw-table-row.header { display: none; }
       .module-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .row { grid-template-columns: 1fr; }
       .micro-link {
@@ -1696,6 +1787,7 @@
       <div class="detail-grid home-grid">
         <article class="detail-card wide">
           <div class="time-toolbar">
+            <button class="data-source-trigger" type="button" id="dataSourceButton" onclick="openDataSourceExplorer()" aria-label="打开数据源" title="打开数据源">数据源</button>
             <div class="calendar-filter">
               <button class="calendar-trigger" type="button" id="dataCalendarToggle" aria-label="选择数据日期" title="选择数据日期"></button>
               <div class="calendar-popover" id="dataCalendarPopover">
@@ -2590,6 +2682,69 @@
       }
     };
 
+    const rawDataSources = [
+      {
+        id: "profit",
+        name: "流水利润表",
+        grain: "业务线 / 产品 / 国家 / 日期",
+        use: "验证流水利润、实际收入、投放成本这些真实利润口径。",
+        fields: ["日期", "业务线", "产品", "国家", "流水利润", "实际收入", "投放成本", "较前周期"],
+        rows: [
+          ["2026-06-07", "All", "CleanX", "US", "-$18.4k", "$96.2k", "$114.6k", "-$26.7k"],
+          ["2026-06-07", "IAA", "CleanX", "US", "-$11.4k", "$59.6k", "$71.1k", "-$16.5k"],
+          ["2026-06-07", "IAP", "CleanPro", "JP", "-$7.0k", "$36.6k", "$43.5k", "-$10.1k"]
+        ]
+      },
+      {
+        id: "recovery",
+        name: "回收表",
+        grain: "产品 / 渠道 / 国家",
+        use: "验证 D7 / D90+ ROI、预估毛利、有效订阅成本和直接付费结构。",
+        fields: ["日期", "产品", "渠道", "国家", "D7 ROI", "D90+ 毛利", "成本", "订阅质量"],
+        rows: [
+          ["2026-06-07", "CleanX", "Unity", "US", "69%", "$42.8k", "+38%", "正常"],
+          ["2026-06-07", "CleanPro", "MTJ", "US", "64%", "$31.6k", "$18.7", "待 D3"],
+          ["2026-06-07", "FitNote", "Apply", "JP", "105%", "$0.5k", "$19.2", "正常"]
+        ]
+      },
+      {
+        id: "camp",
+        name: "Camp 表",
+        grain: "产品 / 渠道 / 国家 / 账户 / 计划",
+        use: "验证计划、账户、预算和成本变化是否支撑下一步 Workflow。",
+        fields: ["日期", "产品", "渠道", "国家", "账户", "计划", "消耗", "ROI"],
+        rows: [
+          ["2026-06-07", "CleanX", "Unity", "US", "UA-01", "U-US-Scale-12", "$9.4k", "72%"],
+          ["2026-06-07", "CleanPro", "MTJ", "US", "M-03", "M-US-Sub-08", "$4.6k", "68%"],
+          ["2026-06-07", "FitNote", "Apply", "JP", "AP-02", "AP-JP-02", "$2.1k", "98%"]
+        ]
+      },
+      {
+        id: "creative",
+        name: "素材表",
+        grain: "产品 / 渠道 / 国家 / 账户 / 计划 / 广告组 / 素材",
+        use: "验证广告组、素材、CTR、CVR、CLR 是否解释回收变化。",
+        fields: ["日期", "产品", "渠道", "国家", "计划", "广告组", "素材", "CTR / CVR"],
+        rows: [
+          ["2026-06-07", "CleanX", "TikTok", "US", "TT-US-Scale-21", "AdGroup-3", "Video-11", "0.31% / 下降"],
+          ["2026-06-07", "CleanX", "Google", "US", "G-US-UAC-18", "AssetGroup-2", "Asset-G06", "0.36% / 偏低"],
+          ["2026-06-07", "CleanPro", "MTJ", "US", "M-US-Sub-08", "-", "Creative-3", "直接付费 0 / 14"]
+        ]
+      },
+      {
+        id: "sites",
+        name: "Sites 表",
+        grain: "Unity / MTG / AppLovin 专用 sites / 子渠道",
+        use: "验证 Unity、MTG、AppLovin 的 sites、source app、子渠道质量。",
+        fields: ["日期", "产品", "渠道", "国家", "计划", "site / source", "成本占比", "质量"],
+        rows: [
+          ["2026-06-07", "CleanX", "Unity", "US", "U-US-Scale-12", "site_483", "18%", "弱"],
+          ["2026-06-07", "CleanPro", "MTJ", "US", "M-US-Sub-08", "site_219", "12%", "疑似弱质"],
+          ["2026-06-07", "FitNote", "Apply", "PH", "AP-PH-03", "source_17", "7%", "正常"]
+        ]
+      }
+    ];
+
     let state = loadState();
 
     function loadState() {
@@ -3006,19 +3161,22 @@
       return renderInsightCard({
         label: title,
         title: text,
+        sourceId: "profit",
         actionLabel: "查看流水利润洞察",
         onClick: `openFlowInsight('${id}')`,
         compact: id !== "total"
       });
     }
 
-    function renderInsightCard({ label, title, body = "", meta = "", actionLabel, onClick, compact = false }) {
+    function renderInsightCard({ label, title, body = "", meta = "", sourceId = "", actionLabel, onClick, compact = false }) {
+      const source = sourceId ? rawDataSources.find(item => item.id === sourceId) : null;
       return `
         <div class="insight-card ${compact ? "compact" : ""}">
           <div>
             <div class="insight-card-meta">${label}${meta ? `<span>${meta}</span>` : ""}</div>
             <strong>${title}</strong>
             ${body ? `<p>${body}</p>` : ""}
+            ${source ? `<button class="source-link" type="button" onclick="event.stopPropagation(); openRawDataSource('${source.id}', '首页判断证据')">来源：${source.name}</button>` : ""}
           </div>
           <button type="button" aria-label="${actionLabel}" title="${actionLabel}" onclick="${onClick}">→</button>
         </div>
@@ -3071,6 +3229,7 @@
           label: business === "IAA" ? "判断" : "风险",
           title: compactInsightTitle(top.title),
           body: "",
+          sourceId: "recovery",
           actionLabel: "查看证据",
           onClick: `openInsight('${top.id}')`
         })}
@@ -3098,6 +3257,55 @@
         `;
       }).join("");
       return rows;
+    }
+
+    function openDataSourceExplorer() {
+      state.deepDiveBack = "home";
+      state.navStack = ["home"];
+      saveState();
+      document.getElementById("deepDiveTitle").textContent = "数据源";
+      document.getElementById("deepDiveBody").textContent = "默认先看判断和证据；当证据不可信时，再打开对应原始数据表查看所有数据和所有指标。";
+      document.getElementById("deepDiveNodes").innerHTML = `
+        <div class="raw-source-grid">
+          ${rawDataSources.map(source => `
+            <button class="raw-source-card" type="button" onclick="openRawDataSource('${source.id}', '全局数据源入口')">
+              <strong>${source.name}</strong>
+              <span>${source.grain}</span>
+              <span>${source.use}</span>
+            </button>
+          `).join("")}
+        </div>
+      `;
+      document.getElementById("deepDiveDecision").textContent = "这个入口用于主动查全表；决策流里更推荐从具体证据旁边打开来源表。";
+      navigateTo("deep-dive", { preserveStack: true });
+    }
+
+    function openRawDataSource(sourceId, contextLabel = "当前证据上下文") {
+      const source = rawDataSources.find(item => item.id === sourceId) || rawDataSources[0];
+      state.deepDiveBack = "home";
+      state.navStack = ["home", "deep-dive"];
+      saveState();
+      document.getElementById("deepDiveTitle").textContent = source.name;
+      document.getElementById("deepDiveBody").innerHTML = `
+        <div class="channel-context">
+          <span class="context-chip">当前证据上下文：${contextLabel}</span>
+          <span class="context-chip">粒度：${source.grain}</span>
+          <span class="context-chip">全量字段</span>
+        </div>
+      `;
+      document.getElementById("deepDiveNodes").innerHTML = `
+        <div class="raw-table">
+          <div class="raw-table-row header">${source.fields.slice(0, 5).map(field => `<span>${field}</span>`).join("")}</div>
+          ${source.rows.map(row => `<div class="raw-table-row">${row.slice(0, 5).map(value => `<span>${value}</span>`).join("")}</div>`).join("")}
+        </div>
+        <div class="evidence-grid">
+          <div class="formula-node"><strong>字段口径</strong><span>${source.fields.join(" / ")}</span></div>
+          <div class="formula-node"><strong>打开原因</strong><span>当你不信任首页证据或需要确认下一步 Workflow 时，查看这张原始表。</span></div>
+          <div class="formula-node"><strong>下一步</strong><span>确认数据可信后回到证据或 Action；不可信则发起数据口径排查。</span></div>
+        </div>
+      `;
+      document.getElementById("deepDiveDecision").textContent = "原始表只负责校验证据，不替代首页判断流。";
+      navigateTo("deep-dive", { preserveStack: true });
     }
 
     function renderActionRows(items, compact = false) {
