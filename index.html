@@ -1097,15 +1097,35 @@
       margin-top: 10px;
     }
 
-    .dimension-toggle {
-      min-height: 58px;
-      border: 0;
+    .dimension-card {
+      display: grid;
+      gap: 8px;
+      min-height: 82px;
+      padding: 10px;
       border-radius: 14px;
       background: var(--surface-soft);
       color: var(--ink);
+    }
+
+    .dimension-toggle {
+      border: 0;
+      background: transparent;
+      color: inherit;
       cursor: pointer;
       text-align: left;
-      padding: 11px 12px;
+      padding: 0;
+    }
+
+    .dimension-filter {
+      width: 100%;
+      min-height: 34px;
+      border: 1px solid rgba(95,99,104,.16);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+      padding: 0 10px;
+      font-size: 13px;
+      font-weight: 650;
     }
 
     .dimension-toggle strong,
@@ -1123,7 +1143,7 @@
       font-size: 12px;
     }
 
-    .dimension-toggle.active {
+    .dimension-card.active {
       background: var(--surface-blue);
       color: var(--blue-strong);
     }
@@ -1163,6 +1183,51 @@
     .dimension-table-row button {
       width: 30px;
       height: 30px;
+    }
+
+    .channel-context {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0 0;
+    }
+
+    .context-chip {
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: var(--surface-blue);
+      color: var(--blue-strong);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .channel-table {
+      display: grid;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .channel-table-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) repeat(4, minmax(76px, .6fr));
+      gap: 8px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .channel-table-row.header {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
     }
 
     .list {
@@ -1466,10 +1531,12 @@
       .hero { min-height: auto; padding: 20px; }
       .hero h2 { font-size: 26px; }
       .detail-head { flex-direction: column-reverse; padding: 14px; }
-      .metric-row, .profit-subgrid, .workflow-picker, .quick-row, .dimension-grid, .dimension-control { grid-template-columns: 1fr; }
+      .metric-row, .profit-subgrid, .workflow-picker, .quick-row, .dimension-grid, .dimension-control, .evidence-grid { grid-template-columns: 1fr; }
       .dimension-table-row { grid-template-columns: minmax(0, 1fr) auto; }
       .dimension-table-row.header { display: none; }
       .dimension-table-row span { font-size: 12px; }
+      .channel-table-row { grid-template-columns: minmax(0, 1fr); }
+      .channel-table-row.header { display: none; }
       .module-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .row { grid-template-columns: 1fr; }
       .micro-link {
@@ -1580,9 +1647,9 @@
         <article class="detail-card wide">
           <h3>利润口径看数</h3>
           <div class="formula-path">
-            <div class="formula-node"><strong>一维：产品</strong><span>CleanX 流水利润 -$7.8k，较上周期 -18%。看哪个产品整体拖累利润。</span></div>
-            <div class="formula-node"><strong>一维：国家</strong><span>US 流水利润 -$12.4k，成本 +31%。看哪个国家市场账面承压。</span></div>
-            <div class="formula-node"><strong>二维：产品 x 国家</strong><span>CleanX x US 流水利润 -$5.9k。定位真实利润口径下最小可归因组合。</span></div>
+            <div class="formula-node"><strong>按产品</strong><span>CleanX 流水利润 -$7.8k，较上周期 -18%。先看哪个产品整体拖累利润。</span></div>
+            <div class="formula-node"><strong>按国家</strong><span>US 流水利润 -$12.4k，成本 +31%。先看哪个国家市场账面承压。</span></div>
+            <div class="formula-node"><strong>产品 x 国家</strong><span>CleanX x US 流水利润 -$5.9k。定位真实利润口径下最小可归因组合。</span></div>
           </div>
         </article>
         <article class="detail-card wide">
@@ -1607,23 +1674,10 @@
       </div>
       <div class="detail-grid">
         <article class="detail-card wide">
-          <h3>维度视角</h3>
+          <h3>回收拆解</h3>
           <div class="dimension-control" id="iaaDimensionControl"></div>
           <div class="dimension-current" id="iaaDimensionCurrent"></div>
           <div class="dimension-table" id="iaaDimensionTable"></div>
-        </article>
-        <article class="detail-card wide">
-          <h3>L3 下钻入口</h3>
-          <div class="quick-row">
-            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','Unity')"><strong>Unity 细表</strong><span>计划 / 素材 / sites</span></button>
-            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','MTJ')"><strong>MTJ 细表</strong><span>计划 / 素材 / sites</span></button>
-            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','Apply')"><strong>Apply 细表</strong><span>计划 / 创意</span></button>
-            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','快渠道')"><strong>快渠道细表</strong><span>计划 / 广告组 / 素材</span></button>
-            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','Facebook')"><strong>Facebook 细表</strong><span>计划 / 广告组 / 素材</span></button>
-            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','TikTok')"><strong>TikTok 细表</strong><span>计划 / 广告组 / 素材</span></button>
-            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAA','Google')"><strong>Google 细表</strong><span>计划 / 广告组 / 素材</span></button>
-          </div>
-          <p class="dimension-note">L3 只能从 L2 的某个产品 + 渠道组合进入，不在 L2 页面直接展开。</p>
         </article>
       </div>
     </section>
@@ -1637,23 +1691,10 @@
       </div>
       <div class="detail-grid">
         <article class="detail-card wide">
-          <h3>维度视角</h3>
+          <h3>订阅质量拆解</h3>
           <div class="dimension-control" id="iapDimensionControl"></div>
           <div class="dimension-current" id="iapDimensionCurrent"></div>
           <div class="dimension-table" id="iapDimensionTable"></div>
-        </article>
-        <article class="detail-card wide">
-          <h3>L3 下钻入口</h3>
-          <div class="quick-row">
-            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','Unity')"><strong>Unity 细表</strong><span>计划 / 素材 / sites</span></button>
-            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','MTJ')"><strong>MTJ 细表</strong><span>计划 / 素材 / sites</span></button>
-            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','Apply')"><strong>Apply 细表</strong><span>计划 / 创意</span></button>
-            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','快渠道')"><strong>快渠道细表</strong><span>计划 / 广告组 / 素材</span></button>
-            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','Facebook')"><strong>Facebook 细表</strong><span>计划 / 广告组 / 素材</span></button>
-            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','TikTok')"><strong>TikTok 细表</strong><span>计划 / 广告组 / 素材</span></button>
-            <button class="workflow-button" type="button" onclick="openChannelDrilldown('IAP','Google')"><strong>Google 细表</strong><span>计划 / 广告组 / 素材</span></button>
-          </div>
-          <p class="dimension-note">L3 只能从 L2 的某个产品 + 渠道组合进入，不在 L2 页面直接展开。</p>
         </article>
       </div>
     </section>
@@ -1918,6 +1959,13 @@
         IAA: { product: true, channel: true, country: true },
         IAP: { product: true, channel: true, country: true }
       },
+      dimensionFilters: {
+        IAA: { product: "All", channel: "All", country: "All" },
+        IAP: { product: "All", channel: "All", country: "All" }
+      },
+      selectedRecoveryContext: null,
+      selectedChannelDetail: null,
+      channelFilters: {},
       dataCalendarYear: 2026,
       dataCalendarMonth: 5,
       dataRangeStart: "",
@@ -2969,75 +3017,92 @@
       "product-channel": "看产品和渠道是否匹配，判断某产品是不是只在某渠道表现差。",
       "product-country": "看产品和国家市场是否适配，判断某产品是不是只在某国家承压。",
       "channel-country": "看渠道在某国家的流量质量，判断是否存在国家定向、子渠道或竞价环境问题。",
-      "product-channel-country": "看最小二级经营组合，用来选择进入 L3 单渠道细表的具体对象。",
-      summary: "三个维度都汇总时，只看业务大盘。这个判断已经在首层展示，L2 通常不停留在这里。"
+      "product-channel-country": "看具体经营组合，选择是否进入单渠道细表继续排查。",
+      summary: "三个维度都汇总时，只看业务大盘。大盘判断已经在首页展示，这里通常继续展开至少一个维度。"
     };
+
+    const dimensionOptions = {
+      IAA: {
+        product: ["All", "CleanX", "PhotoLab"],
+        channel: ["All", "Unity", "MTJ", "Apply", "快渠道", "Facebook", "TikTok", "Google"],
+        country: ["All", "US", "PH", "JP"]
+      },
+      IAP: {
+        product: ["All", "CleanPro", "FitNote"],
+        channel: ["All", "Unity", "MTJ", "Apply", "快渠道", "Facebook", "TikTok", "Google"],
+        country: ["All", "US", "JP", "PH"]
+      }
+    };
+
+    function dimensionRow(label, metric, impact, status, context) {
+      return { label, metric, impact, status, context };
+    }
 
     const dimensionRows = {
       IAA: {
         product: [
-          ["CleanX", "D7 ROI 91%", "-$6.4k", "成本 +18%", "iaa:Unity"],
-          ["PhotoLab", "D7 ROI 108%", "$2.2k", "成本 -3%", "iaa:TikTok"]
+          dimensionRow("CleanX", "D7 ROI 91%", "-$6.4k", "成本 +18%", { product: "CleanX", channel: "Unity", country: "US" }),
+          dimensionRow("PhotoLab", "D7 ROI 108%", "$2.2k", "成本 -3%", { product: "PhotoLab", channel: "TikTok", country: "PH" })
         ],
         channel: [
-          ["Unity", "D7 ROI 88%", "-$5.2k", "成本 +24%", "iaa:Unity"],
-          ["TikTok", "D7 ROI 103%", "$1.1k", "成本 +6%", "iaa:TikTok"]
+          dimensionRow("Unity", "D7 ROI 88%", "-$5.2k", "成本 +24%", { product: "CleanX", channel: "Unity", country: "US" }),
+          dimensionRow("TikTok", "D7 ROI 103%", "$1.1k", "成本 +6%", { product: "PhotoLab", channel: "TikTok", country: "PH" })
         ],
         country: [
-          ["US", "D7 ROI 86%", "-$9.1k", "成本 +31%", "iaa:Unity"],
-          ["PH", "D7 ROI 101%", "$0.4k", "成本 +4%", "iaa:TikTok"]
+          dimensionRow("US", "D7 ROI 86%", "-$9.1k", "成本 +31%", { product: "CleanX", channel: "Unity", country: "US" }),
+          dimensionRow("PH", "D7 ROI 101%", "$0.4k", "成本 +4%", { product: "PhotoLab", channel: "TikTok", country: "PH" })
         ],
         "product-channel": [
-          ["CleanX x Unity", "D7 ROI 78%", "-$4.8k", "成本 +27%", "iaa:Unity"],
-          ["PhotoLab x TikTok", "D7 ROI 105%", "$1.0k", "成本 +5%", "iaa:TikTok"]
+          dimensionRow("CleanX x Unity", "D7 ROI 78%", "-$4.8k", "成本 +27%", { product: "CleanX", channel: "Unity", country: "US" }),
+          dimensionRow("PhotoLab x TikTok", "D7 ROI 105%", "$1.0k", "成本 +5%", { product: "PhotoLab", channel: "TikTok", country: "PH" })
         ],
         "product-country": [
-          ["CleanX x US", "D7 ROI 82%", "-$5.7k", "成本 +22%", "iaa:Unity"],
-          ["CleanX x PH", "D7 ROI 99%", "-$0.2k", "成本 +3%", "iaa:TikTok"]
+          dimensionRow("CleanX x US", "D7 ROI 82%", "-$5.7k", "成本 +22%", { product: "CleanX", channel: "Unity", country: "US" }),
+          dimensionRow("CleanX x PH", "D7 ROI 99%", "-$0.2k", "成本 +3%", { product: "CleanX", channel: "TikTok", country: "PH" })
         ],
         "channel-country": [
-          ["Unity x US", "D7 ROI 75%", "-$6.1k", "子渠道偏弱", "iaa:Unity"],
-          ["TikTok x PH", "D7 ROI 102%", "$0.6k", "结构正常", "iaa:TikTok"]
+          dimensionRow("Unity x US", "D7 ROI 75%", "-$6.1k", "子渠道偏弱", { product: "CleanX", channel: "Unity", country: "US" }),
+          dimensionRow("TikTok x PH", "D7 ROI 102%", "$0.6k", "结构正常", { product: "PhotoLab", channel: "TikTok", country: "PH" })
         ],
         "product-channel-country": [
-          ["CleanX x Unity x US", "D7 ROI 69%", "-$4.9k", "进 L3", "iaa:Unity"],
-          ["PhotoLab x TikTok x PH", "D7 ROI 104%", "$0.5k", "观察", "iaa:TikTok"]
+          dimensionRow("CleanX x Unity x US", "D7 ROI 69%", "-$4.9k", "进渠道细表", { product: "CleanX", channel: "Unity", country: "US" }),
+          dimensionRow("PhotoLab x TikTok x PH", "D7 ROI 104%", "$0.5k", "观察", { product: "PhotoLab", channel: "TikTok", country: "PH" })
         ],
         summary: [
-          ["IAA 大盘", "D7 ROI 106%", "$3.8k", "首层已展示", "iaa:Unity"]
+          dimensionRow("IAA 大盘", "D7 ROI 106%", "$3.8k", "首层已展示", { product: "CleanX", channel: "Unity", country: "US" })
         ]
       },
       IAP: {
         product: [
-          ["CleanPro", "D90 ROI 84%", "-$3.6k", "取消率 +6%", "iap:MTJ"],
-          ["FitNote", "D90 ROI 101%", "$0.8k", "结构正常", "iap:TikTok"]
+          dimensionRow("CleanPro", "D90 ROI 84%", "-$3.6k", "取消率 +6%", { product: "CleanPro", channel: "MTJ", country: "US" }),
+          dimensionRow("FitNote", "D90 ROI 101%", "$0.8k", "结构正常", { product: "FitNote", channel: "Apply", country: "JP" })
         ],
         channel: [
-          ["MTJ", "有效订阅 $24.8", "付费 1 / 20", "质量偏弱", "iap:MTJ"],
-          ["Apply", "有效订阅 $19.2", "付费 6 / 24", "正常", "iap:Apply"]
+          dimensionRow("MTJ", "有效订阅 $24.8", "付费 1 / 20", "质量偏弱", { product: "CleanPro", channel: "MTJ", country: "US" }),
+          dimensionRow("Apply", "有效订阅 $19.2", "付费 6 / 24", "正常", { product: "FitNote", channel: "Apply", country: "JP" })
         ],
         country: [
-          ["US", "取消率 +9%", "BR +11%", "D3 复查", "iap:MTJ"],
-          ["JP", "取消率 +1%", "BR +2%", "正常", "iap:Apply"]
+          dimensionRow("US", "取消率 +9%", "BR +11%", "D3 复查", { product: "CleanPro", channel: "MTJ", country: "US" }),
+          dimensionRow("JP", "取消率 +1%", "BR +2%", "正常", { product: "FitNote", channel: "Apply", country: "JP" })
         ],
         "product-channel": [
-          ["CleanPro x MTJ", "D90 ROI 72%", "-$3.1k", "付费偏弱", "iap:MTJ"],
-          ["FitNote x Apply", "D90 ROI 103%", "$0.7k", "正常", "iap:Apply"]
+          dimensionRow("CleanPro x MTJ", "D90 ROI 72%", "-$3.1k", "付费偏弱", { product: "CleanPro", channel: "MTJ", country: "US" }),
+          dimensionRow("FitNote x Apply", "D90 ROI 103%", "$0.7k", "正常", { product: "FitNote", channel: "Apply", country: "JP" })
         ],
         "product-country": [
-          ["CleanPro x US", "付费 1 / 20", "-$2.8k", "取消风险", "iap:MTJ"],
-          ["CleanPro x JP", "付费 5 / 18", "$0.2k", "观察", "iap:Apply"]
+          dimensionRow("CleanPro x US", "付费 1 / 20", "-$2.8k", "取消风险", { product: "CleanPro", channel: "MTJ", country: "US" }),
+          dimensionRow("CleanPro x JP", "付费 5 / 18", "$0.2k", "观察", { product: "CleanPro", channel: "Apply", country: "JP" })
         ],
         "channel-country": [
-          ["MTJ x US", "BR +11%", "-$2.4k", "疑似质量", "iap:MTJ"],
-          ["Apply x JP", "BR +2%", "$0.5k", "正常", "iap:Apply"]
+          dimensionRow("MTJ x US", "BR +11%", "-$2.4k", "疑似质量", { product: "CleanPro", channel: "MTJ", country: "US" }),
+          dimensionRow("Apply x JP", "BR +2%", "$0.5k", "正常", { product: "FitNote", channel: "Apply", country: "JP" })
         ],
         "product-channel-country": [
-          ["CleanPro x MTJ x US", "D90 ROI 64%", "-$2.9k", "进 L3", "iap:MTJ"],
-          ["FitNote x Apply x JP", "D90 ROI 105%", "$0.5k", "正常", "iap:Apply"]
+          dimensionRow("CleanPro x MTJ x US", "D90 ROI 64%", "-$2.9k", "进渠道细表", { product: "CleanPro", channel: "MTJ", country: "US" }),
+          dimensionRow("FitNote x Apply x JP", "D90 ROI 105%", "$0.5k", "正常", { product: "FitNote", channel: "Apply", country: "JP" })
         ],
         summary: [
-          ["IAP 大盘", "D90 ROI 92%", "-$1.4k", "首层已展示", "iap:MTJ"]
+          dimensionRow("IAP 大盘", "D90 ROI 92%", "-$1.4k", "首层已展示", { product: "CleanPro", channel: "MTJ", country: "US" })
         ]
       }
     };
@@ -3046,6 +3111,12 @@
       state.dimensionViews = state.dimensionViews || {};
       state.dimensionViews[business] = state.dimensionViews[business] || { product: true, channel: true, country: true };
       return state.dimensionViews[business];
+    }
+
+    function ensureDimensionFilters(business) {
+      state.dimensionFilters = state.dimensionFilters || {};
+      state.dimensionFilters[business] = state.dimensionFilters[business] || { product: "All", channel: "All", country: "All" };
+      return state.dimensionFilters[business];
     }
 
     function dimensionKey(view) {
@@ -3058,31 +3129,47 @@
       const control = document.getElementById(`${prefix}DimensionControl`);
       if (!control) return;
       const view = ensureDimensionState(business);
+      const filters = ensureDimensionFilters(business);
       const key = dimensionKey(view);
       const title = key === "summary" ? "大盘汇总" : key.split("-").map(item => dimensionLabels[item]).join(" x ");
       control.innerHTML = ["product", "channel", "country"].map(item => `
-        <button class="dimension-toggle ${view[item] ? "active" : ""}" type="button" onclick="toggleDimension('${business}','${item}')">
-          <strong>${dimensionLabels[item]}</strong>
-          <span>${view[item] ? "展开" : "汇总"}</span>
-        </button>
+        <div class="dimension-card ${view[item] ? "active" : ""}">
+          <button class="dimension-toggle" type="button" onclick="toggleDimension('${business}','${item}')">
+            <strong>${dimensionLabels[item]}</strong>
+            <span>${view[item] ? "展开参与视角" : "汇总为 All"}</span>
+          </button>
+          <select class="dimension-filter" aria-label="${dimensionLabels[item]}筛选" onchange="setDimensionFilter('${business}','${item}',this.value)">
+            ${dimensionOptions[business][item].map(option => `<option value="${option}" ${filters[item] === option ? "selected" : ""}>${option === "All" ? "全部" : option}</option>`).join("")}
+          </select>
+        </div>
       `).join("");
       document.getElementById(`${prefix}DimensionCurrent`).innerHTML = `
         <strong>${title}</strong>
         <span>${dimensionMeanings[key]}</span>
+        <div class="channel-context">
+          ${["product", "channel", "country"].map(item => `<span class="context-chip">${dimensionLabels[item]}：${filters[item] === "All" ? "全部" : filters[item]}</span>`).join("")}
+        </div>
       `;
-      const rows = dimensionRows[business][key] || dimensionRows[business].summary;
+      const rows = filterDimensionRows(dimensionRows[business][key] || dimensionRows[business].summary, filters);
       document.getElementById(`${prefix}DimensionTable`).innerHTML = `
-        <div class="dimension-table-row header"><span>对象</span><span>核心指标</span><span>影响</span><span>状态</span><span></span></div>
-        ${rows.map(row => `
+        <div class="dimension-table-row header"><span>对象</span><span>核心指标</span><span>影响</span><span>建议</span><span></span></div>
+        ${rows.length ? rows.map((row, index) => `
           <div class="dimension-table-row">
-            <strong>${row[0]}</strong>
-            <span>${row[1]}</span>
-            <span>${row[2]}</span>
-            <span>${row[3]}</span>
-            <button class="icon-button" type="button" aria-label="下钻" title="下钻" onclick="openDimensionRow('${business}','${row[4]}')">→</button>
+            <strong>${row.label}</strong>
+            <span>${row.metric}</span>
+            <span>${row.impact}</span>
+            <span>${row.status}</span>
+            <button class="icon-button" type="button" aria-label="进入渠道细表" title="进入渠道细表" onclick="openDimensionRow('${business}',${index})">→</button>
           </div>
-        `).join("")}
+        `).join("") : `<div class="dimension-table-row"><strong>没有匹配组合</strong><span>调整筛选</span><span>-</span><span>暂无动作</span><span></span></div>`}
       `;
+    }
+
+    function filterDimensionRows(rows, filters) {
+      return rows.filter(row => ["product", "channel", "country"].every(dim => {
+        const selected = filters[dim];
+        return selected === "All" || row.context[dim] === selected;
+      }));
     }
 
     function toggleDimension(business, dim) {
@@ -3092,120 +3179,160 @@
       renderDimensionExplorer(business);
     }
 
-    function openDimensionRow(business, target) {
-      const [, channel] = target.split(":");
-      openChannelDrilldown(business, channel || "Unity");
+    function setDimensionFilter(business, dim, value) {
+      const filters = ensureDimensionFilters(business);
+      filters[dim] = value;
+      saveState();
+      renderDimensionExplorer(business);
     }
 
-    function adsGroupChannelNodes(channel, sample) {
+    function openDimensionRow(business, rowIndex) {
+      const key = dimensionKey(ensureDimensionState(business));
+      const rows = filterDimensionRows(dimensionRows[business][key] || dimensionRows[business].summary, ensureDimensionFilters(business));
+      const row = rows[rowIndex];
+      if (!row) return toast("这个组合没有可进入的渠道细表");
+      openChannelDrilldown(business, row.context, row);
+    }
+
+    function channelRow(name, metric, cost, quality, impact, status) {
+      return { name, metric, cost, quality, impact, status };
+    }
+
+    function adGroupChannelRows(channel) {
+      const samples = {
+        "快渠道": ["K-US-Scale-09", "AdGroup-K3", "Video-K11", "ROI 77%", "CPI +19%", "CTR 0.34% / CLR 下降", "-$1.5k", "先看素材"],
+        Facebook: ["FB-US-AEO-14", "AdSet-5", "Video-F08", "ROI 81%", "CPI +15%", "CTR 0.39% / CVR 下降", "-$1.3k", "看广告组"],
+        TikTok: ["TT-US-Scale-21", "AdGroup-3", "Video-11", "ROI 79%", "CPI +22%", "CTR 0.31% / CLR 下降", "-$1.7k", "素材复查"],
+        Google: ["G-US-UAC-18", "AssetGroup-2", "Asset-G06", "ROI 83%", "CPI +12%", "CTR 0.36% / CVR 偏低", "-$1.1k", "资产组复查"]
+      };
+      const s = samples[channel] || samples.TikTok;
       return [
-        ["一维：计划", `${sample.plan} ROI ${sample.roi}。只看 ${channel} 的计划整体质量，不混入其他渠道。`],
-        ["一维：广告组", `${sample.adGroup} CPI ${sample.cpi}。看 ${channel} 广告组人群、出价或学习状态。`],
-        ["一维：素材", `${sample.creative} CTR ${sample.ctr}，CLR ${sample.clr}。看 ${channel} 素材吸引力和转化链路。`],
-        ["二维：计划 x 广告组", `${sample.plan} x ${sample.adGroup} ROI ${sample.comboRoi}。定位 ${channel} 单计划内的广告组异常。`],
-        ["二维：广告组 x 素材", `${sample.adGroup} x ${sample.creative} ROI ${sample.creativeRoi}。看素材在该广告组人群里的表现。`],
-        ["三维：国家 x 计划 x 素材", `${sample.country} x ${sample.plan} x ${sample.creative} 毛利 ${sample.margin}。定位 ${channel} 素材级排查。`],
-        ["注意", `${channel} 使用独立细表；即使结构类似，也不和 Facebook / TikTok / Google / 快渠道混在同一入口。`]
+        channelRow(s[0], s[3], s[4], s[5], s[6], s[7]),
+        channelRow(`${s[0]} / ${s[1]}`, "ROI 70%", "预算 +18%", "学习期波动", "-$0.9k", "暂不放量"),
+        channelRow(`${s[1]} / ${s[2]}`, "ROI 62%", "消耗 $2.4k", "转化链路弱", "-$0.7k", "换素材")
       ];
     }
 
-    function channelNodes(channel) {
-      const schemas = {
+    function channelTableRows(channel) {
+      const rows = {
         Unity: [
-          ["一维：计划", "U-US-Scale-12 ROI 72%，成本 $9.4k。看单计划是否拖累整体。"],
-          ["一维：sites / 子渠道", "site_483 ROI 61%，成本占比 18%。看子渠道质量，不把它放到素材下面。"],
-          ["二维：计划 x 素材", "U-US-Scale-12 x C-07 CTR 0.42%。看计划里哪条素材拉低点击或转化。"],
-          ["二维：国家 x sites", "US x site_483 ROI 58%。看某国家下的子渠道是否有质量问题。"],
-          ["三维：国家 x 计划 x 素材", "US x U-US-Scale-12 x C-07 毛利 -$2.1k。定位素材级排查。"],
-          ["三维：国家 x sites x 计划", "US x site_483 x U-US-Scale-12 毛利 -$1.8k。定位子渠道级排查。"],
-          ["注意", "sites / 子渠道不是素材下级，而是和计划 / 素材并列的分析入口。"]
+          channelRow("U-US-Scale-12", "ROI 72%", "成本 $9.4k", "回收低于均值", "-$2.1k", "看计划"),
+          channelRow("site_483", "ROI 61%", "成本占比 18%", "子渠道质量弱", "-$1.8k", "停弱源"),
+          channelRow("U-US-Scale-12 / C-07", "CTR 0.42%", "消耗 $1.9k", "点击正常但回收弱", "-$0.8k", "查转化")
         ],
         MTJ: [
-          ["一维：计划", "M-US-Sub-08 D90 ROI 68%，三日有效订阅成本 $26.1。看单计划质量。"],
-          ["一维：sites / 子渠道", "site_219 取消率 +13%。看子渠道订阅质量。"],
-          ["二维：计划 x 素材", "M-US-Sub-08 x Creative-3 直接付费 0 / 14。看素材是否带来弱付费用户。"],
-          ["二维：国家 x sites", "US x site_219 Billing Retry +15%。看某国家下子渠道是否假量或支付能力差。"],
-          ["三维：国家 x 计划 x 素材", "US x M-US-Sub-08 x Creative-3 D90 ROI 59%。定位素材级排查。"],
-          ["三维：国家 x sites x 计划", "US x site_219 x M-US-Sub-08 D90 ROI 55%。定位子渠道级排查。"],
-          ["注意", "没有广告组维度，不展示广告组入口。"]
+          channelRow("M-US-Sub-08", "D90 ROI 68%", "有效订阅 $26.1", "付费 1 / 20", "-$2.4k", "D3 复查"),
+          channelRow("site_219", "取消率 +13%", "BR +15%", "疑似弱质量", "-$1.6k", "查子渠道"),
+          channelRow("M-US-Sub-08 / Creative-3", "直接付费 0 / 14", "消耗 $1.2k", "素材带来弱付费", "-$0.7k", "换素材")
         ],
         Apply: [
-          ["一维：计划", "AP-US-01 ROI 81%，成本 +17%。看计划整体回收。"],
-          ["一维：创意", "Creative-A CTR 0.38%，CVR 下降。看创意是否拖累。"],
-          ["二维：计划 x 国家", "AP-US-01 x US ROI 76%。看计划在某国家是否失效。"],
-          ["二维：计划 x 创意", "AP-US-01 x Creative-A ROI 69%。看创意和计划组合。"],
-          ["三维：国家 x 计划 x 创意", "US x AP-US-01 x Creative-A 毛利 -$1.2k。定位创意级排查。"],
-          ["注意", "当前不单独设 sites / 子渠道分支。"]
+          channelRow("AP-US-01", "ROI 81%", "成本 +17%", "计划整体偏弱", "-$1.2k", "看计划"),
+          channelRow("Creative-A", "CTR 0.38%", "消耗 $1.4k", "CVR 下降", "-$0.8k", "换创意"),
+          channelRow("AP-US-01 / Creative-A", "ROI 69%", "成本 +12%", "组合不稳定", "-$0.6k", "暂停测试")
         ],
-        "快渠道": adsGroupChannelNodes("快渠道", {
-          plan: "K-US-Scale-09",
-          adGroup: "AdGroup-K3",
-          creative: "Video-K11",
-          country: "US",
-          roi: "77%",
-          cpi: "+19%",
-          ctr: "0.34%",
-          clr: "下降",
-          comboRoi: "66%",
-          creativeRoi: "62%",
-          margin: "-$1.5k"
-        }),
-        Facebook: adsGroupChannelNodes("Facebook", {
-          plan: "FB-US-AEO-14",
-          adGroup: "AdSet-5",
-          creative: "Video-F08",
-          country: "US",
-          roi: "81%",
-          cpi: "+15%",
-          ctr: "0.39%",
-          clr: "下降",
-          comboRoi: "70%",
-          creativeRoi: "65%",
-          margin: "-$1.3k"
-        }),
-        TikTok: adsGroupChannelNodes("TikTok", {
-          plan: "TT-US-Scale-21",
-          adGroup: "AdGroup-3",
-          creative: "Video-11",
-          country: "US",
-          roi: "79%",
-          cpi: "+22%",
-          ctr: "0.31%",
-          clr: "下降",
-          comboRoi: "67%",
-          creativeRoi: "61%",
-          margin: "-$1.7k"
-        }),
-        Google: adsGroupChannelNodes("Google", {
-          plan: "G-US-UAC-18",
-          adGroup: "AssetGroup-2",
-          creative: "Asset-G06",
-          country: "US",
-          roi: "83%",
-          cpi: "+12%",
-          ctr: "0.36%",
-          clr: "偏低",
-          comboRoi: "72%",
-          creativeRoi: "68%",
-          margin: "-$1.1k"
-        })
+        "快渠道": adGroupChannelRows("快渠道"),
+        Facebook: adGroupChannelRows("Facebook"),
+        TikTok: adGroupChannelRows("TikTok"),
+        Google: adGroupChannelRows("Google")
       };
-      return schemas[channel] || schemas.TikTok;
+      return rows[channel] || rows.TikTok;
     }
 
-    function openChannelDrilldown(business, channel) {
+    function channelFilterLabels(channel) {
+      if (["Unity", "MTJ"].includes(channel)) return ["计划", "素材", "sites / 子渠道"];
+      if (channel === "Apply") return ["计划", "创意", "国家"];
+      return ["计划", "广告组", "素材"];
+    }
+
+    function openChannelDrilldown(business, context, sourceRow) {
+      const channel = context.channel || "Unity";
       state.deepDiveBack = business === "IAA" ? "iaa-detail" : "iap-detail";
       state.navStack = ["home", state.deepDiveBack];
+      state.selectedRecoveryContext = { business, ...context };
+      state.selectedChannelDetail = { business, context, sourceRow };
+      state.channelFilters[channel] = state.channelFilters[channel] || {};
       saveState();
-      document.getElementById("deepDiveTitle").textContent = `${business} ${channel} 单渠道深挖`;
-      document.getElementById("deepDiveBody").textContent = "这里是从 L2 产品 x 渠道 x 国家组合继续下钻后的 L3 渠道专属状态表。";
-      document.getElementById("deepDiveNodes").innerHTML = [
-        ["L2 进入条件", "先在回收二级概况选定某产品 + 某渠道 + 某国家组合。"],
-        ...channelNodes(channel),
-        ["L4 执行建议层", "拿到 L3 渠道证据链后，再生成根因候选、反证、Action 草案和 Workflow 候选。"]
-      ].map(item => `<div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join("");
-      document.getElementById("deepDiveDecision").textContent = "这一层仍是分析层；只有证据链足够明确时，才进入执行建议层。";
+      renderChannelDetail();
       navigateTo("deep-dive", { preserveStack: true });
+    }
+
+    function renderChannelDetail() {
+      const detail = state.selectedChannelDetail;
+      if (!detail) return;
+      const { business, context, sourceRow } = detail;
+      const channel = context.channel || "Unity";
+      state.channelFilters = state.channelFilters || {};
+      state.channelFilters[channel] = state.channelFilters[channel] || {};
+      const activeFilters = state.channelFilters[channel];
+      document.getElementById("deepDiveTitle").textContent = `${business} / ${channel} 渠道细表`;
+      document.getElementById("deepDiveBody").innerHTML = `
+        <div class="channel-context">
+          <span class="context-chip">产品：${context.product || "全部"}</span>
+          <span class="context-chip">渠道：${channel}</span>
+          <span class="context-chip">国家：${context.country || "全部"}</span>
+          <span class="context-chip">来源：${sourceRow?.label || "回收拆解"}</span>
+        </div>
+      `;
+      const filters = channelFilterLabels(channel);
+      const allRows = channelTableRows(channel);
+      const rows = filterChannelRows(allRows, activeFilters);
+      document.getElementById("deepDiveNodes").innerHTML = `
+        <div class="dimension-control">
+          ${filters.map((label, index) => {
+            const options = channelFilterOptions(label, allRows);
+            const selected = activeFilters[label] || "全部";
+            return `
+            <div class="dimension-card active">
+              <button class="dimension-toggle" type="button">
+                <strong>${label}</strong>
+                <span>当前渠道字段</span>
+              </button>
+              <select class="dimension-filter" aria-label="${label}筛选" onchange="setChannelFilter('${channel}','${label}',this.value)">
+                ${options.map(option => `<option value="${option}" ${selected === option ? "selected" : ""}>${option}</option>`).join("")}
+              </select>
+            </div>
+          `}).join("")}
+        </div>
+        <div class="channel-table">
+          <div class="channel-table-row header"><span>对象</span><span>核心指标</span><span>成本</span><span>质量</span><span>利润影响</span></div>
+          ${rows.length ? rows.map(row => `
+            <div class="channel-table-row">
+              <strong>${row.name}</strong>
+              <span>${row.metric}</span>
+              <span>${row.cost}</span>
+              <span>${row.quality}</span>
+              <span>${row.impact}</span>
+            </div>
+          `).join("") : `<div class="channel-table-row"><strong>没有匹配对象</strong><span>调整筛选</span><span>-</span><span>-</span><span>-</span></div>`}
+        </div>
+        <div class="evidence-grid">
+          <div class="formula-node"><strong>证据链</strong><span>${sourceRow?.metric || allRows[0].metric}；${(rows[0] || allRows[0]).quality}；利润影响 ${sourceRow?.impact || (rows[0] || allRows[0]).impact}。</span></div>
+          <div class="formula-node"><strong>根因候选</strong><span>${channel} 当前更像 ${(rows[0] || allRows[0]).status}，先按渠道字段继续缩小范围。</span></div>
+          <div class="formula-node"><strong>Action 草案</strong><span>生成前先确认是否需要推进；确认后同步到 Action Hub。</span></div>
+        </div>
+      `;
+      document.getElementById("deepDiveDecision").textContent = "这一页只看当前渠道和当前组合；需要执行时再把建议转成 Action 草案。";
+    }
+
+    function channelFilterOptions(label, rows) {
+      if (label.includes("计划")) return ["全部", ...new Set(rows.map(row => row.name.split(" / ")[0]))];
+      if (label.includes("广告组") || label.includes("素材") || label.includes("创意")) return ["全部", ...new Set(rows.map(row => row.name.split(" / ")[1]).filter(Boolean))];
+      if (label.includes("sites")) return ["全部", ...new Set(rows.map(row => row.name).filter(name => name.includes("site_")))];
+      return ["全部", "US", "JP", "PH"];
+    }
+
+    function filterChannelRows(rows, filters) {
+      const values = Object.values(filters || {}).filter(value => value && value !== "全部");
+      if (!values.length) return rows;
+      return rows.filter(row => values.every(value => row.name.includes(value)));
+    }
+
+    function setChannelFilter(channel, label, value) {
+      state.channelFilters = state.channelFilters || {};
+      state.channelFilters[channel] = state.channelFilters[channel] || {};
+      state.channelFilters[channel][label] = value;
+      saveState();
+      renderChannelDetail();
     }
 
     function openDeepDive(kind, id, backScreen) {
