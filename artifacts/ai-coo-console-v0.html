@@ -596,12 +596,49 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      margin-bottom: 10px;
+      position: relative;
+      margin: -2px 0 14px;
+      padding: 10px 11px;
+      border-radius: 14px;
+      background: linear-gradient(90deg, var(--module-chip, var(--surface-blue)) 0, rgba(255,255,255,.58) 74%, rgba(255,255,255,0) 100%);
+    }
+
+    .module-head::after {
+      content: "";
+      position: absolute;
+      left: 11px;
+      right: 11px;
+      bottom: -7px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--module-accent, var(--blue)) 0, rgba(218,225,234,.2) 56%, transparent 100%);
+      opacity: .35;
+    }
+
+    .module-title-lockup {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .module-marker {
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      background: var(--module-accent, var(--blue));
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1;
     }
 
     .module-head h3 {
       margin: 0;
-      font-size: 17px;
+      font-size: 18px;
+      font-weight: 820;
       line-height: 1.2;
     }
 
@@ -1656,7 +1693,10 @@
         </article>
         <article class="detail-card wide home-module flow-panel module-flow">
           <div class="module-head">
-            <h3>流水利润</h3>
+            <div class="module-title-lockup">
+              <span class="module-marker">01</span>
+              <h3>流水利润</h3>
+            </div>
             <span class="module-kicker">经营总览</span>
           </div>
           <div id="flowProfitInsight"></div>
@@ -1676,7 +1716,10 @@
         </article>
         <article class="detail-card wide home-module module-iaa">
           <div class="module-head">
-            <h3>IAA：D7 回收判断</h3>
+            <div class="module-title-lockup">
+              <span class="module-marker">02</span>
+              <h3>IAA：D7 回收判断</h3>
+            </div>
             <span class="module-kicker">IAA 回收</span>
           </div>
           <div class="business-frame">
@@ -1696,7 +1739,10 @@
         </article>
         <article class="detail-card wide home-module module-iap">
           <div class="module-head">
-            <h3>IAP：D90+ 订阅质量</h3>
+            <div class="module-title-lockup">
+              <span class="module-marker">03</span>
+              <h3>IAP：D90+ 订阅质量</h3>
+            </div>
             <span class="module-kicker">IAP 订阅</span>
           </div>
           <div class="business-frame">
