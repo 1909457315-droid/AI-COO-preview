@@ -484,6 +484,13 @@
       background: transparent;
     }
 
+    .home-grid > .home-module {
+      margin-top: 8px;
+      padding: 18px 18px 18px 20px;
+      border-bottom: 1px solid rgba(218, 225, 234, .72);
+      background-image: linear-gradient(90deg, var(--module-bg, rgba(255,255,255,.7)) 0, rgba(255,255,255,.34) 38%, transparent 100%);
+    }
+
     .home-grid > .detail-card:first-child {
       padding: 0 4px 8px;
       border-bottom: 0;
@@ -560,6 +567,71 @@
 
     .business-frame .section-title {
       margin-bottom: 5px;
+    }
+
+    .home-module {
+      position: relative;
+      padding: 18px 18px 18px 20px;
+      border-left: 0;
+      background: linear-gradient(90deg, var(--module-bg, rgba(255,255,255,.7)) 0, rgba(255,255,255,.72) 28%, transparent 100%);
+    }
+
+    .home-module + .home-module {
+      margin-top: 2px;
+    }
+
+    .home-module::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 16px;
+      bottom: 16px;
+      width: 3px;
+      border-radius: 999px;
+      background: var(--module-accent, var(--blue));
+    }
+
+    .module-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .module-head h3 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .module-kicker {
+      flex: 0 0 auto;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--module-chip, var(--surface-blue));
+      color: var(--module-accent, var(--blue-strong));
+      font-size: 12px;
+      font-weight: 760;
+      line-height: 1;
+    }
+
+    .module-flow {
+      --module-accent: #2563eb;
+      --module-bg: rgba(232,240,254,.42);
+      --module-chip: rgba(232,240,254,.82);
+    }
+
+    .module-iaa {
+      --module-accent: #0f9d58;
+      --module-bg: rgba(230,244,234,.42);
+      --module-chip: rgba(230,244,234,.86);
+    }
+
+    .module-iap {
+      --module-accent: #a142f4;
+      --module-bg: rgba(243,232,255,.36);
+      --module-chip: rgba(243,232,255,.78);
     }
 
     .flow-panel > h3 {
@@ -1582,8 +1654,11 @@
             </div>
           </div>
         </article>
-        <article class="detail-card wide flow-panel">
-          <h3>流水利润</h3>
+        <article class="detail-card wide home-module flow-panel module-flow">
+          <div class="module-head">
+            <h3>流水利润</h3>
+            <span class="module-kicker">经营总览</span>
+          </div>
           <div id="flowProfitInsight"></div>
           <div class="metric-row flow-primary" id="profitMetricRow"></div>
           <div class="profit-subgrid">
@@ -1599,8 +1674,11 @@
             </section>
           </div>
         </article>
-        <article class="detail-card wide">
-          <h3>IAA：D7 回收判断</h3>
+        <article class="detail-card wide home-module module-iaa">
+          <div class="module-head">
+            <h3>IAA：D7 回收判断</h3>
+            <span class="module-kicker">IAA 回收</span>
+          </div>
           <div class="business-frame">
             <div class="business-workspace business-insight">
               <section>
@@ -1616,8 +1694,11 @@
             </div>
           </div>
         </article>
-        <article class="detail-card wide">
-          <h3>IAP：D90+ 订阅质量</h3>
+        <article class="detail-card wide home-module module-iap">
+          <div class="module-head">
+            <h3>IAP：D90+ 订阅质量</h3>
+            <span class="module-kicker">IAP 订阅</span>
+          </div>
           <div class="business-frame">
             <div class="business-workspace business-insight">
               <section>
