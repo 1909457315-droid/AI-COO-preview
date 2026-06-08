@@ -862,7 +862,7 @@
       font-weight: 650;
     }
 
-    .insight-card button {
+    .insight-card .insight-open {
       width: 28px;
       height: 28px;
       border: 0;
@@ -874,19 +874,28 @@
       line-height: 1;
     }
 
-    .insight-card button:hover {
+    .insight-card .insight-open:hover {
       background: #fff;
     }
 
     .source-link {
       border: 0;
+      width: auto;
+      height: auto;
+      min-height: 0;
+      display: inline-flex;
+      align-items: center;
+      margin-top: 4px;
       background: transparent;
       color: var(--module-accent, var(--blue-strong));
       cursor: pointer;
       font: inherit;
       font-size: 12px;
       font-weight: 760;
+      line-height: 1.25;
       padding: 0;
+      border-radius: 0;
+      max-width: 100%;
     }
 
     .source-link:hover {
@@ -3178,7 +3187,7 @@
             ${body ? `<p>${body}</p>` : ""}
             ${source ? `<button class="source-link" type="button" onclick="event.stopPropagation(); openRawDataSource('${source.id}', '首页判断证据')">来源：${source.name}</button>` : ""}
           </div>
-          <button type="button" aria-label="${actionLabel}" title="${actionLabel}" onclick="${onClick}">→</button>
+          <button class="insight-open" type="button" aria-label="${actionLabel}" title="${actionLabel}" onclick="${onClick}">→</button>
         </div>
       `;
     }
