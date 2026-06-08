@@ -1844,6 +1844,8 @@
         <article class="detail-card wide">
           <div class="time-toolbar">
             <button class="data-source-trigger" type="button" id="dataSourceButton" onclick="openDataSourceExplorer()" aria-label="打开数据源" title="打开数据源">数据源</button>
+            <button class="data-source-trigger" type="button" onclick="openMetricDefinitionExplorer()" aria-label="打开指标定义" title="打开指标定义">指标定义</button>
+            <button class="data-source-trigger" type="button" onclick="openHomeProfile()" aria-label="打开首页配置" title="打开首页配置">首页配置</button>
             <div class="calendar-filter">
               <button class="calendar-trigger" type="button" id="dataCalendarToggle" aria-label="选择数据日期" title="选择数据日期"></button>
               <div class="calendar-popover" id="dataCalendarPopover">
@@ -1945,6 +1947,10 @@
           <h3>下一步</h3>
           <div class="decision" id="profitFormulaDecision">继续看利润影响最大的产品和国家。</div>
         </article>
+        <article class="detail-card wide">
+          <h3 id="profitFormulaSchemaTitle">当前视角</h3>
+          <div class="formula-path" id="profitFormulaSchema"></div>
+        </article>
       </div>
     </section>
 
@@ -1963,6 +1969,10 @@
           <div class="dimension-current" id="iaaDimensionCurrent"></div>
           <div class="dimension-table" id="iaaDimensionTable"></div>
         </article>
+        <article class="detail-card wide">
+          <h3 id="iaaDetailSchemaTitle">当前视角</h3>
+          <div class="formula-path" id="iaaDetailSchema"></div>
+        </article>
       </div>
     </section>
 
@@ -1980,6 +1990,10 @@
           <div class="dimension-control" id="iapDimensionControl"></div>
           <div class="dimension-current" id="iapDimensionCurrent"></div>
           <div class="dimension-table" id="iapDimensionTable"></div>
+        </article>
+        <article class="detail-card wide">
+          <h3 id="iapDetailSchemaTitle">当前视角</h3>
+          <div class="formula-path" id="iapDetailSchema"></div>
         </article>
       </div>
     </section>
@@ -2171,6 +2185,8 @@
           <div class="quick-row">
             <button class="workflow-button" type="button" data-open="workflow"><strong>Workflow Monitor</strong><span>运行、确认、模板</span></button>
             <button class="workflow-button" type="button" data-open="realtime"><strong>Realtime Monitor</strong><span>实时信号、观察、异常</span></button>
+            <button class="workflow-button" type="button" onclick="openObjectGraph()"><strong>Object Graph</strong><span>Metric / Insight / Action / Watch</span></button>
+            <button class="workflow-button" type="button" onclick="openFrameworkStates()"><strong>状态样例</strong><span>空态、阻塞、同步失败</span></button>
           </div>
         </article>
         <article class="detail-card">
@@ -2914,6 +2930,53 @@
       return homeClickMatrix.find(item => item.element === element) || homeClickMatrix[0];
     }
 
+    const frameworkStates = [
+      ["指标无数据", "三日有效订阅成本 · PH 样本不足", "空态"],
+      ["缺少下钻配置", "自定义指标未绑定可看维度", "待补元数据"],
+      ["数据源不可用", "Camp 表同步延迟 42 分钟", "阻塞"],
+      ["Action 同步失败", "钉钉草案未写回 Action Hub", "待确认"],
+      ["Watch 到期未处理", "IAA 放量质量 D1 复查超时", "到期复查"],
+      ["Workflow 等确认", "IAP Subscription Triage 停在用户确认点", "待确认"]
+    ];
+
+    const homeProfile = {
+      role: "经营负责人",
+      defaultPeriod: "昨日",
+      pinnedMetrics: ["大盘流水利润", "IAA D7 ROI 达成率", "IAP 三日有效订阅成本"],
+      hiddenMetrics: ["素材 CTR", "支付页 CVR"],
+      thresholdProfile: ["D7 ROI < 90% 高风险", "D90+ 毛利下降超过 8% 进入观察"],
+      layoutRules: ["数据决策置顶", "Action Hub 显示待确认和阻塞", "Research Center 保留对象图入口"]
+    };
+
+    function sourceObjectForAction(action) {
+      const map = {
+        "data-iap-d3-review": {
+          metric: "IAP 三日有效订阅成本",
+          insight: "用户质量有风险",
+          reason: "直接付费 1 / 20，需等 D3 验证扣费质量。",
+          returnPath: "数据决策 / IAP 订阅质量 / IAP 三日有效订阅成本"
+        },
+        "data-iaa-quality": {
+          metric: "IAA D7 ROI 达成率",
+          insight: "放量账面承压",
+          reason: "成本 +38%，但 D7 ROI 仍达成，需复查放量质量。",
+          returnPath: "数据决策 / IAA 回收判断 / IAA D7 ROI 达成率"
+        },
+        "data-payment-sku": {
+          metric: "IAP 直接付费结构",
+          insight: "付费样本偏弱",
+          reason: "直接付费结构不足，需检查支付页 SKU 分流。",
+          returnPath: "数据决策 / IAP 订阅质量 / IAP 直接付费结构"
+        }
+      };
+      return map[action[0]] || {
+        metric: action[5] ? `${action[5]} 经营指标` : "通用 Action",
+        insight: "用户主动或 Action Hub 生成",
+        reason: "来源对象暂未绑定，正式版需要补齐 sourceObject。",
+        returnPath: action[2] || "Action Hub"
+      };
+    }
+
     let state = loadState();
 
     function loadState() {
@@ -3451,6 +3514,13 @@
           title: "大盘流水利润",
           path: ["数据决策", "流水利润", "大盘流水利润"],
           context: "大盘总览 · 真实利润口径",
+          schema: {
+            question: "哪条业务线、产品或国家正在拖累大盘利润？",
+            dimensions: "业务线 / 产品 / 国家 / 产品 x 国家",
+            sort: "利润影响降序",
+            sources: "流水利润表",
+            unavailable: "渠道、账户、计划、素材不属于真实利润口径"
+          },
           rows: period => [
             ["流水利润", period.metrics.profit],
             ["实际收入", period.metrics.revenue],
@@ -3469,6 +3539,13 @@
           title: "IAA 流水利润",
           path: ["数据决策", "流水利润", "IAA 流水利润"],
           context: "IAA 子账本 · 真实利润口径",
+          schema: {
+            question: "IAA 利润压力来自哪个产品或国家？",
+            dimensions: "产品 / 国家 / 产品 x 国家",
+            sort: "IAA 利润影响降序",
+            sources: "流水利润表",
+            unavailable: "渠道和素材需进入 IAA 回收拆解"
+          },
           rows: period => buildFlowMetrics(period.metrics, "IAA", 0.62).map(item => [item[1].label, item[1]]),
           breakdown: [
             ["按产品", "CleanX IAA 流水利润 -$6.8k；PhotoLab IAA 流水利润 +$1.2k。先看 IAA 产品结构。"],
@@ -3482,6 +3559,13 @@
           title: "IAP 流水利润",
           path: ["数据决策", "流水利润", "IAP 流水利润"],
           context: "IAP 子账本 · 真实利润口径",
+          schema: {
+            question: "IAP 利润压力来自哪个订阅产品或国家？",
+            dimensions: "产品 / 国家 / 产品 x 国家",
+            sort: "IAP 利润影响降序",
+            sources: "流水利润表",
+            unavailable: "SKU、支付页和取消原因进入订阅质量拆解"
+          },
           rows: period => buildFlowMetrics(period.metrics, "IAP", 0.38).map(item => [item[1].label, item[1]]),
           breakdown: [
             ["按产品", "CleanPro IAP 流水利润 -$4.3k；FitNote IAP 流水利润 +$0.8k。先看订阅产品结构。"],
@@ -3502,7 +3586,14 @@
           title: "IAA D7 ROI 达成率",
           path: ["数据决策", "IAA 回收判断", "IAA D7 ROI 达成率"],
           context: "IAA 回收判断 · 回收拆解",
-          primaryTitle: "IAA D7 ROI 达成率 · 回收拆解"
+          primaryTitle: "IAA D7 ROI 达成率 · 回收拆解",
+          schema: {
+            question: "哪个产品 / 渠道 / 国家拖累 D7 ROI？",
+            dimensions: "产品 / 渠道 / 国家",
+            sort: "ROI 缺口与利润影响降序",
+            sources: "回收表 / Camp 表 / 素材表",
+            unavailable: "真实利润口径不在这里拆"
+          }
         },
         iaaMargin: {
           screen: "iaa-detail",
@@ -3510,7 +3601,14 @@
           title: "IAA D7 预估毛利",
           path: ["数据决策", "IAA 回收判断", "IAA D7 预估毛利"],
           context: "IAA 回收判断 · 回收拆解",
-          primaryTitle: "IAA D7 预估毛利 · 回收拆解"
+          primaryTitle: "IAA D7 预估毛利 · 回收拆解",
+          schema: {
+            question: "哪个组合贡献或拖累 IAA D7 预估毛利？",
+            dimensions: "产品 / 渠道 / 国家",
+            sort: "预估毛利变化降序",
+            sources: "回收表 / Camp 表",
+            unavailable: "素材层需从渠道细表继续进入"
+          }
         },
         iaaCost: {
           screen: "iaa-detail",
@@ -3518,7 +3616,14 @@
           title: "IAA 投放成本",
           path: ["数据决策", "IAA 回收判断", "IAA 投放成本"],
           context: "IAA 回收判断 · 回收拆解",
-          primaryTitle: "IAA 投放成本 · 回收拆解"
+          primaryTitle: "IAA 投放成本 · 回收拆解",
+          schema: {
+            question: "哪个渠道或国家带来 IAA 成本增幅？",
+            dimensions: "产品 / 渠道 / 国家",
+            sort: "成本增幅降序",
+            sources: "回收表 / Camp 表",
+            unavailable: "素材成本归因需进入渠道细表"
+          }
         },
         iapSubCost: {
           screen: "iap-detail",
@@ -3526,7 +3631,14 @@
           title: "IAP 三日有效订阅成本",
           path: ["数据决策", "IAP 订阅质量", "IAP 三日有效订阅成本"],
           context: "IAP 订阅质量 · 订阅质量拆解",
-          primaryTitle: "IAP 三日有效订阅成本 · 订阅质量拆解"
+          primaryTitle: "IAP 三日有效订阅成本 · 订阅质量拆解",
+          schema: {
+            question: "哪个产品 / 渠道 / 国家把有效订阅成本拉高？",
+            dimensions: "产品 / 渠道 / 国家",
+            sort: "有效订阅成本增幅降序",
+            sources: "回收表 / Camp 表",
+            unavailable: "支付页和 SKU 需进入产品迭代或订阅细表"
+          }
         },
         iapPayMix: {
           screen: "iap-detail",
@@ -3534,7 +3646,14 @@
           title: "IAP 直接付费结构",
           path: ["数据决策", "IAP 订阅质量", "IAP 直接付费结构"],
           context: "IAP 订阅质量 · 订阅质量拆解",
-          primaryTitle: "IAP 直接付费结构 · 订阅质量拆解"
+          primaryTitle: "IAP 直接付费结构 · 订阅质量拆解",
+          schema: {
+            question: "哪个组合直接付费样本不足或结构异常？",
+            dimensions: "产品 / 渠道 / 国家",
+            sort: "直接付费样本缺口降序",
+            sources: "回收表",
+            unavailable: "取消原因和支付页事件需接订阅事件表"
+          }
         },
         iapMargin: {
           screen: "iap-detail",
@@ -3542,7 +3661,14 @@
           title: "IAP D90+ 预估毛利",
           path: ["数据决策", "IAP 订阅质量", "IAP D90+ 预估毛利"],
           context: "IAP 订阅质量 · 订阅质量拆解",
-          primaryTitle: "IAP D90+ 预估毛利 · 订阅质量拆解"
+          primaryTitle: "IAP D90+ 预估毛利 · 订阅质量拆解",
+          schema: {
+            question: "哪个订阅组合影响 D90+ 预估毛利？",
+            dimensions: "产品 / 渠道 / 国家",
+            sort: "D90+ 毛利变化降序",
+            sources: "回收表 / Camp 表",
+            unavailable: "用户留存细节需进入订阅质量后续模板"
+          }
         }
       };
       return configs[key] || configs.iaaRoi;
@@ -3577,6 +3703,8 @@
         <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>
       `).join("");
       document.getElementById("profitFormulaDecision").textContent = config.decision;
+      document.getElementById("profitFormulaSchemaTitle").textContent = `${config.title} · 当前视角`;
+      document.getElementById("profitFormulaSchema").innerHTML = renderSchemaNodes(config.schema);
     }
 
     function openMetricView(key) {
@@ -3595,6 +3723,20 @@
       title.textContent = config.title;
       document.getElementById(`${prefix}DetailContext`).textContent = config.context;
       document.getElementById(`${prefix}DetailPrimaryTitle`).textContent = config.primaryTitle;
+      const schemaTitle = document.getElementById(`${prefix}DetailSchemaTitle`);
+      if (schemaTitle) schemaTitle.textContent = `${config.title} · 当前视角`;
+      const schema = document.getElementById(`${prefix}DetailSchema`);
+      if (schema) schema.innerHTML = renderSchemaNodes(config.schema);
+    }
+
+    function renderSchemaNodes(schema = {}) {
+      return [
+        ["页面问题", schema.question || "这个指标当前应该回答什么问题？"],
+        ["可看维度", schema.dimensions || "待配置"],
+        ["默认排序", schema.sort || "按影响降序"],
+        ["数据来源", schema.sources || "待绑定"],
+        ["不可用维度", schema.unavailable || "暂无"]
+      ].map(item => `<div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join("");
     }
 
     function compactInsightTitle(text) {
@@ -3668,6 +3810,62 @@
       navigateTo("deep-dive", { preserveStack: true });
     }
 
+    function openMetricDefinitionExplorer() {
+      state.navStack = ["home"];
+      applyDeepDiveContract({
+        routeType: "metric-registry",
+        intent: "查看当前首页指标如何定义和下钻",
+        back: "home",
+        path: ["数据决策", "指标定义"],
+        context: ["指标来自 registry", "首页只是 placement"],
+        primaryTitle: "当前首页指标",
+        decisionTitle: "缺失状态",
+        next: "缺元数据的指标不能进入完整下钻"
+      });
+      saveState();
+      const metricRows = [
+        ["大盘流水利润", "profit-detail", "业务线 / 产品 / 国家", "流水利润表"],
+        ["IAA D7 ROI 达成率", "recovery-breakdown", "产品 / 渠道 / 国家", "回收表 / Camp 表 / 素材表"],
+        ["IAP 三日有效订阅成本", "subscription-quality", "产品 / 渠道 / 国家", "回收表 / Camp 表"],
+        ["自定义：美国 Android D7 毛利", "recovery-breakdown", "产品 / 渠道 / 国家 / 平台", "待绑定"]
+      ];
+      document.getElementById("deepDiveTitle").textContent = "指标定义";
+      document.getElementById("deepDiveBody").textContent = "这里不是后台管理页，而是让原型显性展示：首页指标由定义和 placement 生成。";
+      document.getElementById("deepDiveNodes").innerHTML = metricRows.map(item => `
+        <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]} · ${item[2]} · 来源：${item[3]}</span></div>
+      `).join("");
+      document.getElementById("deepDiveDecision").innerHTML = frameworkStates.slice(0, 3).map(item => `
+        <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]} · ${item[2]}</span></div>
+      `).join("");
+      navigateTo("deep-dive", { preserveStack: true });
+    }
+
+    function openHomeProfile() {
+      state.navStack = ["home"];
+      applyDeepDiveContract({
+        routeType: "placement-profile",
+        intent: "查看首页展示如何按用户配置生成",
+        back: "home",
+        path: ["数据决策", "首页配置"],
+        context: [`角色：${homeProfile.role}`, `默认周期：${homeProfile.defaultPeriod}`],
+        primaryTitle: "Pinned Metrics / Layout",
+        decisionTitle: "阈值和隐藏项",
+        next: "正式版支持不同用户配置不同首页"
+      });
+      saveState();
+      document.getElementById("deepDiveTitle").textContent = "首页配置";
+      document.getElementById("deepDiveBody").textContent = "首页保持经营视角；配置只决定哪些指标和模块被放到首页。";
+      document.getElementById("deepDiveNodes").innerHTML = [
+        ["置顶指标", homeProfile.pinnedMetrics.join(" / ")],
+        ["隐藏指标", homeProfile.hiddenMetrics.join(" / ")],
+        ["布局规则", homeProfile.layoutRules.join("；")]
+      ].map(item => `<div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join("");
+      document.getElementById("deepDiveDecision").innerHTML = homeProfile.thresholdProfile.map(item => `
+        <div class="formula-node"><strong>阈值</strong><span>${item}</span></div>
+      `).join("");
+      navigateTo("deep-dive", { preserveStack: true });
+    }
+
     function openRawDataSource(sourceId, contextLabel = "当前证据上下文") {
       const source = rawDataSources.find(item => item.id === sourceId) || rawDataSources[0];
       const fromGlobal = contextLabel === "全局数据源入口";
@@ -3684,9 +3882,8 @@
       document.getElementById("deepDiveTitle").textContent = source.name;
       document.getElementById("deepDiveBody").innerHTML = `
         <div class="channel-context">
-          <span class="context-chip">当前证据上下文：${contextLabel}</span>
+          <span class="context-chip">打开原因：${contextLabel}</span>
           <span class="context-chip">粒度：${source.grain}</span>
-          <span class="context-chip">全量字段</span>
         </div>
       `;
       document.getElementById("deepDiveNodes").innerHTML = `
@@ -4304,6 +4501,7 @@
       const action = data.globalActions.find(item => item[0] === id);
       if (!action) return toast("这个 Action 草案不存在");
       const current = state.actions[id] || "待确认";
+      const sourceObject = sourceObjectForAction(action);
       state.deepDiveBack = "home";
       const fromActionHub = state.screen === "action";
       const route = matrixEntry("Action 草案箭头");
@@ -4328,6 +4526,10 @@
       document.getElementById("deepDiveTitle").textContent = action[1];
       document.getElementById("deepDiveBody").textContent = "Action 草案是待确认的执行项，确认后同步进入 Action Hub 的项目管理状态。";
       document.getElementById("deepDiveNodes").innerHTML = [
+        ["来源指标", sourceObject.metric],
+        ["触发洞察", sourceObject.insight],
+        ["触发原因", sourceObject.reason],
+        ["反向路径", sourceObject.returnPath],
         ["来源模块", action[2]],
         ["业务线", action[5] || "通用"],
         ["优先级", action[6] || "P1"],
@@ -4465,6 +4667,62 @@
       `).join("");
       document.getElementById("deepDiveDecision").textContent = "完整日程表在 Action Hub 中查看。";
       navigateTo("deep-dive");
+    }
+
+    function openObjectGraph() {
+      state.navStack = ["research"];
+      applyDeepDiveContract({
+        routeType: "object-graph",
+        intent: "查看经营对象之间的来源关系",
+        back: "research",
+        path: ["Research Center", "Object Graph"],
+        context: ["对象不是后台表", "用于解释来源和反向路径"],
+        primaryTitle: "对象关系",
+        decisionTitle: "当前风险",
+        next: "从任一对象回到来源模块或 Action Hub"
+      });
+      saveState();
+      document.getElementById("deepDiveTitle").textContent = "Object Graph";
+      document.getElementById("deepDiveBody").textContent = "这里把 Metric、Insight、Action、Watch、Issue、Workflow Run 串起来，避免动作和判断脱节。";
+      document.getElementById("deepDiveNodes").innerHTML = [
+        ["Metric -> Insight", "IAA D7 ROI 达成率 -> 放量账面承压"],
+        ["Insight -> Action", "用户质量有风险 -> 复查 IAP D3 扣费"],
+        ["Action -> Watch", "确认 IAA 放量质量 -> 明天 09:00 D1 复查"],
+        ["Watch -> Issue", "D3 后仍异常 -> 升级为回收 Issue"],
+        ["Workflow Run -> Memory", "IAP Subscription Triage -> 沉淀订阅质量判断"]
+      ].map(item => `<div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join("");
+      document.getElementById("deepDiveDecision").innerHTML = [
+        ["孤立 Action", "没有 sourceObject 的 Action 不能解释为什么存在"],
+        ["断链 Watch", "Watch 到期后必须回写 Issue / Action / Memory"],
+        ["缺少 Metric", "自定义指标没有 registry 元数据时只允许浅层展示"]
+      ].map(item => `<div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join("");
+      navigateTo("deep-dive", { preserveStack: true });
+    }
+
+    function openFrameworkStates() {
+      state.navStack = ["research"];
+      applyDeepDiveContract({
+        routeType: "state-gallery",
+        intent: "查看未来必须覆盖的异常态和空态",
+        back: "research",
+        path: ["Research Center", "状态样例"],
+        context: ["原型必须画出状态", "避免实现时漏掉"],
+        primaryTitle: "状态覆盖",
+        decisionTitle: "处理规则",
+        next: "每个状态都需要用户可理解的下一步"
+      });
+      saveState();
+      document.getElementById("deepDiveTitle").textContent = "状态样例";
+      document.getElementById("deepDiveBody").textContent = "这里不是告警中心，而是把未来实现必须覆盖的状态先画出来。";
+      document.getElementById("deepDiveNodes").innerHTML = frameworkStates.map(item => `
+        <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]} · ${item[2]}</span></div>
+      `).join("");
+      document.getElementById("deepDiveDecision").innerHTML = [
+        ["空态", "告诉用户缺什么数据，而不是显示空白。"],
+        ["阻塞", "说明卡在哪里、需要谁处理。"],
+        ["同步失败", "保留重试、取消和手动处理入口。"]
+      ].map(item => `<div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join("");
+      navigateTo("deep-dive", { preserveStack: true });
     }
 
     function renderReminders() {
