@@ -548,8 +548,8 @@
 
     .business-frame {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(260px, .36fr);
-      gap: 12px;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, .3fr);
+      gap: 10px;
       align-items: start;
     }
 
@@ -818,10 +818,10 @@
     .insight-card {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
-      margin-top: 8px;
-      padding: 10px 11px;
+      margin-top: 6px;
+      padding: 9px 10px;
       border-radius: 12px;
       background: var(--surface-blue);
       color: #174ea6;
@@ -836,7 +836,7 @@
 
     .insight-card strong {
       display: block;
-      margin-bottom: 4px;
+      margin-bottom: 0;
       color: var(--blue-strong);
       font-size: 13px;
     }
@@ -851,7 +851,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
       color: var(--blue-strong);
       font-size: 12px;
       font-weight: 720;
@@ -863,8 +863,8 @@
     }
 
     .insight-card button {
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       border: 0;
       border-radius: 999px;
       background: rgba(255,255,255,.62);
@@ -906,8 +906,23 @@
 
     .business-workspace {
       display: grid;
-      gap: 10px;
-      margin-top: 10px;
+      gap: 8px;
+      margin-top: 0;
+    }
+
+    .action-row-compact {
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 8px;
+      padding: 8px 0;
+    }
+
+    .action-row-compact h4 {
+      margin-bottom: 0;
+      font-size: 13px;
+    }
+
+    .action-row-compact .button-row {
+      margin-top: 7px;
     }
 
     .period-strip {
@@ -1731,7 +1746,6 @@
             <div class="metric-row" id="iaaMetricRow"></div>
             <div class="business-workspace">
               <section>
-                <div class="section-title">Action 草案</div>
                 <div class="list" id="iaaActionList"></div>
               </section>
             </div>
@@ -1754,7 +1768,6 @@
             <div class="metric-row" id="iapMetricRow"></div>
             <div class="business-workspace">
               <section>
-                <div class="section-title">Action 草案</div>
                 <div class="list" id="iapActionList"></div>
               </section>
             </div>
@@ -2984,11 +2997,11 @@
       const costDiff = cost.value - cost.compare;
       let text;
       if (profit.value < profit.compare && costDiff > revenueDiff) {
-        text = "流水利润承压主要来自投放成本增幅高于实际收入增幅，先判断是否为放量导致的账面压力。";
+        text = "成本增幅高于收入，账面利润承压。";
       } else if (profit.value >= profit.compare) {
-        text = "流水利润较上周期改善，实际收入与投放成本结构暂时可接受，继续观察回收质量。";
+        text = "利润较上周期改善，结构暂稳。";
       } else {
-        text = "流水利润低于上周期，但成本和收入变化接近，需要结合 IAA / IAP 预估回收继续判断。";
+        text = "利润低于上周期，继续看回收。";
       }
       return renderInsightCard({
         label: title,
@@ -3022,21 +3035,30 @@
       const iaaFlowRows = buildFlowMetrics(metrics, "IAA", 0.62);
       const iapFlowRows = buildFlowMetrics(metrics, "IAP", 0.38);
       document.getElementById("profitMetricRow").innerHTML = totalFlowRows.map(item => renderMetricButton(item, { showInsight: false, link: true })).join("");
-      document.getElementById("flowProfitInsight").innerHTML = renderFlowInsight("Agent 综合洞察", totalFlowRows, "total");
+      document.getElementById("flowProfitInsight").innerHTML = renderFlowInsight("判断", totalFlowRows, "total");
       document.getElementById("iaaProfitMetricRow").innerHTML = iaaFlowRows.map(item => renderMetricButton(item, { showInsight: false, link: true })).join("");
-      document.getElementById("iaaFlowProfitInsight").innerHTML = renderFlowInsight("IAA 综合洞察", iaaFlowRows, "iaa");
+      document.getElementById("iaaFlowProfitInsight").innerHTML = "";
       document.getElementById("iapProfitMetricRow").innerHTML = iapFlowRows.map(item => renderMetricButton(item, { showInsight: false, link: true })).join("");
-      document.getElementById("iapFlowProfitInsight").innerHTML = renderFlowInsight("IAP 综合洞察", iapFlowRows, "iap");
+      document.getElementById("iapFlowProfitInsight").innerHTML = "";
       document.getElementById("iaaMetricRow").innerHTML = [
         ["iaaRoi", metrics.iaaRoi],
         ["iaaMargin", metrics.iaaMargin],
         ["iaaCost", metrics.iaaCost]
-      ].map(renderMetricButton).join("");
+      ].map(item => renderMetricButton(item, { showInsight: false })).join("");
       document.getElementById("iapMetricRow").innerHTML = [
         ["iapSubCost", metrics.iapSubCost],
         ["iapPayMix", metrics.iapPayMix],
         ["iapMargin", metrics.iapMargin]
-      ].map(renderMetricButton).join("");
+      ].map(item => renderMetricButton(item, { showInsight: false })).join("");
+    }
+
+    function compactInsightTitle(text) {
+      return text
+        .replace("流水利润下降更像", "")
+        .replace("成本正常但", "")
+        .replace("，先判断是否为放量导致的账面压力。", "")
+        .replace("，继续观察回收质量。", "")
+        .replace("，需要结合 IAA / IAP 预估回收继续判断。", "");
     }
 
     function renderInsights(business) {
@@ -3046,14 +3068,12 @@
       const extra = Math.max(insights.length - 1, 0);
       return `
         ${renderInsightCard({
-          label: "综合洞察",
-          title: top.title,
-          body: top.evidence,
-          meta: `${top.type} · ${top.confidence}`,
+          label: business === "IAA" ? "判断" : "风险",
+          title: compactInsightTitle(top.title),
+          body: "",
           actionLabel: "查看证据",
           onClick: `openInsight('${top.id}')`
         })}
-        ${extra ? `<button class="micro-link" type="button" aria-label="查看更多洞察" title="查看更多洞察" onclick="openBusinessInsights('${business}')">其他洞察 ${extra} 条 →</button>` : ""}
       `;
     }
 
@@ -3064,10 +3084,9 @@
       const rows = p0Items.map(item => {
         const current = state.actions[item[0]] || "待确认";
         return `
-          <div class="row">
+          <div class="row action-row-compact">
             <div>
               <h4>${item[1]}</h4>
-              <p>${item[3]} · ${item[4]}</p>
               <div class="button-row">
                 <button class="action-button primary" type="button" onclick="setStatus('actions','${item[0]}','进行中')">确认推进</button>
                 <button class="action-button" type="button" onclick="setStatus('actions','${item[0]}','暂缓')">暂缓</button>
@@ -3078,7 +3097,7 @@
           </div>
         `;
       }).join("");
-      return rows + (lowerCount ? `<button class="micro-link" type="button" aria-label="查看更多草案" title="查看更多草案" onclick="openBusinessActions('${business}')">低优先级草案 ${lowerCount} 条 →</button>` : "");
+      return rows;
     }
 
     function renderActionRows(items, compact = false) {
