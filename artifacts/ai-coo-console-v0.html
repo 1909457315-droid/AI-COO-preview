@@ -1951,13 +1951,14 @@
     <section class="screen" id="screen-iaa-detail">
       <div class="detail-head">
         <div>
-          <h2>IAA 回收视角</h2>
+          <h2 id="iaaDetailTitle">IAA D7 ROI 达成率</h2>
+          <p id="iaaDetailContext">IAA 回收判断 · 回收拆解</p>
         </div>
         <button class="back" type="button" data-open="home">返回昨日数据</button>
       </div>
       <div class="detail-grid">
         <article class="detail-card wide">
-          <h3>回收拆解</h3>
+          <h3 id="iaaDetailPrimaryTitle">IAA D7 ROI 达成率 · 回收拆解</h3>
           <div class="dimension-control" id="iaaDimensionControl"></div>
           <div class="dimension-current" id="iaaDimensionCurrent"></div>
           <div class="dimension-table" id="iaaDimensionTable"></div>
@@ -1968,13 +1969,14 @@
     <section class="screen" id="screen-iap-detail">
       <div class="detail-head">
         <div>
-          <h2>IAP 回收视角</h2>
+          <h2 id="iapDetailTitle">IAP 三日有效订阅成本</h2>
+          <p id="iapDetailContext">IAP 订阅质量 · 订阅质量拆解</p>
         </div>
         <button class="back" type="button" data-open="home">返回昨日数据</button>
       </div>
       <div class="detail-grid">
         <article class="detail-card wide">
-          <h3>订阅质量拆解</h3>
+          <h3 id="iapDetailPrimaryTitle">IAP 三日有效订阅成本 · 订阅质量拆解</h3>
           <div class="dimension-control" id="iapDimensionControl"></div>
           <div class="dimension-current" id="iapDimensionCurrent"></div>
           <div class="dimension-table" id="iapDimensionTable"></div>
@@ -3005,8 +3007,6 @@
     function routePathForScreen(name) {
       const staticPaths = {
         home: ["数据决策"],
-        "iaa-detail": ["数据决策", "IAA 回收判断", "回收拆解"],
-        "iap-detail": ["数据决策", "IAP 订阅质量", "订阅质量拆解"],
         initiate: ["主动发起"],
         "workflow-detail": ["主动发起", "Workflow 草案"],
         action: ["Action Hub"],
@@ -3019,6 +3019,9 @@
       if (name === "profit-formula") {
         const scope = profitScopeConfig(state.selectedProfitScope || "total");
         return scope.path;
+      }
+      if (name === "iaa-detail" || name === "iap-detail") {
+        return metricViewConfig(state.selectedMetricKey || (name === "iaa-detail" ? "iaaRoi" : "iapSubCost")).path;
       }
       if (name === "deep-dive" && Array.isArray(state.routePath) && state.routePath.length) {
         return state.routePath;
@@ -3140,6 +3143,7 @@
       document.getElementById("iapActionList").innerHTML = renderSourceActionRows("IAP");
       document.getElementById("iaaInsightList").innerHTML = renderInsights("IAA");
       document.getElementById("iapInsightList").innerHTML = renderInsights("IAP");
+      renderMetricViewHeader(metricViewConfig(state.selectedMetricKey || "iaaRoi"));
     }
 
     function getSelectedDataPeriod() {
@@ -3339,6 +3343,8 @@
         `查看${profitScopeConfig(metric.profitScope || "total").title}`;
       const openAttr = link && metric.target === "profit-formula"
         ? ` role="button" tabindex="0" onclick="openProfitView('${metric.profitScope || "total"}')" aria-label="${intentTitle}" title="${intentTitle}"`
+        : link && (metric.target === "iaa-detail" || metric.target === "iap-detail")
+          ? ` role="button" tabindex="0" onclick="openMetricView('${key}')" aria-label="查看${metricViewConfig(key).title}" title="查看${metricViewConfig(key).title}"`
         : link ? ` role="button" tabindex="0" data-open="${metric.target}" aria-label="${intentTitle}" title="${intentTitle}"` : "";
       const className = link ? "metric metric-link" : "metric";
       return `
@@ -3488,6 +3494,60 @@
       return configs[scope] || configs.total;
     }
 
+    function metricViewConfig(key = "iaaRoi") {
+      const configs = {
+        iaaRoi: {
+          screen: "iaa-detail",
+          business: "IAA",
+          title: "IAA D7 ROI 达成率",
+          path: ["数据决策", "IAA 回收判断", "IAA D7 ROI 达成率"],
+          context: "IAA 回收判断 · 回收拆解",
+          primaryTitle: "IAA D7 ROI 达成率 · 回收拆解"
+        },
+        iaaMargin: {
+          screen: "iaa-detail",
+          business: "IAA",
+          title: "IAA D7 预估毛利",
+          path: ["数据决策", "IAA 回收判断", "IAA D7 预估毛利"],
+          context: "IAA 回收判断 · 回收拆解",
+          primaryTitle: "IAA D7 预估毛利 · 回收拆解"
+        },
+        iaaCost: {
+          screen: "iaa-detail",
+          business: "IAA",
+          title: "IAA 投放成本",
+          path: ["数据决策", "IAA 回收判断", "IAA 投放成本"],
+          context: "IAA 回收判断 · 回收拆解",
+          primaryTitle: "IAA 投放成本 · 回收拆解"
+        },
+        iapSubCost: {
+          screen: "iap-detail",
+          business: "IAP",
+          title: "IAP 三日有效订阅成本",
+          path: ["数据决策", "IAP 订阅质量", "IAP 三日有效订阅成本"],
+          context: "IAP 订阅质量 · 订阅质量拆解",
+          primaryTitle: "IAP 三日有效订阅成本 · 订阅质量拆解"
+        },
+        iapPayMix: {
+          screen: "iap-detail",
+          business: "IAP",
+          title: "IAP 直接付费结构",
+          path: ["数据决策", "IAP 订阅质量", "IAP 直接付费结构"],
+          context: "IAP 订阅质量 · 订阅质量拆解",
+          primaryTitle: "IAP 直接付费结构 · 订阅质量拆解"
+        },
+        iapMargin: {
+          screen: "iap-detail",
+          business: "IAP",
+          title: "IAP D90+ 预估毛利",
+          path: ["数据决策", "IAP 订阅质量", "IAP D90+ 预估毛利"],
+          context: "IAP 订阅质量 · 订阅质量拆解",
+          primaryTitle: "IAP D90+ 预估毛利 · 订阅质量拆解"
+        }
+      };
+      return configs[key] || configs.iaaRoi;
+    }
+
     function openProfitView(scope = "total") {
       state.selectedProfitScope = scope;
       state.navStack = ["home"];
@@ -3517,6 +3577,24 @@
         <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>
       `).join("");
       document.getElementById("profitFormulaDecision").textContent = config.decision;
+    }
+
+    function openMetricView(key) {
+      const config = metricViewConfig(key);
+      state.selectedMetricKey = key;
+      state.navStack = ["home"];
+      saveState();
+      renderMetricViewHeader(config);
+      navigateTo(config.screen, { preserveStack: true });
+    }
+
+    function renderMetricViewHeader(config = metricViewConfig(state.selectedMetricKey)) {
+      const prefix = config.business.toLowerCase();
+      const title = document.getElementById(`${prefix}DetailTitle`);
+      if (!title) return;
+      title.textContent = config.title;
+      document.getElementById(`${prefix}DetailContext`).textContent = config.context;
+      document.getElementById(`${prefix}DetailPrimaryTitle`).textContent = config.primaryTitle;
     }
 
     function compactInsightTitle(text) {
