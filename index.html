@@ -2948,6 +2948,13 @@
       layoutRules: ["数据决策置顶", "Action Hub 显示待确认和阻塞", "Research Center 保留对象图入口"]
     };
 
+    const metricDefinitionRows = [
+      ["profit", "大盘流水利润", "profit-detail", "业务线 / 产品 / 国家", "流水利润表", "已配置", "total"],
+      ["iaaRoi", "IAA D7 ROI 达成率", "recovery-breakdown", "产品 / 渠道 / 国家", "回收表 / Camp 表 / 素材表", "已配置", "iaaRoi"],
+      ["iapSubCost", "IAP 三日有效订阅成本", "subscription-quality", "产品 / 渠道 / 国家", "回收表 / Camp 表", "已配置", "iapSubCost"],
+      ["customUsAndroid", "自定义：美国 Android D7 毛利", "recovery-breakdown", "产品 / 渠道 / 国家 / 平台", "待绑定", "缺元数据", "iaaMargin"]
+    ];
+
     function sourceObjectForAction(action) {
       const map = {
         "data-iap-d3-review": {
@@ -3823,16 +3830,18 @@
         next: "缺元数据的指标不能进入完整下钻"
       });
       saveState();
-      const metricRows = [
-        ["大盘流水利润", "profit-detail", "业务线 / 产品 / 国家", "流水利润表"],
-        ["IAA D7 ROI 达成率", "recovery-breakdown", "产品 / 渠道 / 国家", "回收表 / Camp 表 / 素材表"],
-        ["IAP 三日有效订阅成本", "subscription-quality", "产品 / 渠道 / 国家", "回收表 / Camp 表"],
-        ["自定义：美国 Android D7 毛利", "recovery-breakdown", "产品 / 渠道 / 国家 / 平台", "待绑定"]
-      ];
       document.getElementById("deepDiveTitle").textContent = "指标定义";
       document.getElementById("deepDiveBody").textContent = "这里不是后台管理页，而是让原型显性展示：首页指标由定义和 placement 生成。";
-      document.getElementById("deepDiveNodes").innerHTML = metricRows.map(item => `
-        <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]} · ${item[2]} · 来源：${item[3]}</span></div>
+      document.getElementById("deepDiveNodes").innerHTML = metricDefinitionRows.map(item => `
+        <div class="formula-node">
+          <strong>${item[1]}</strong>
+          <span>${item[2]} · ${item[3]} · 来源：${item[4]} · ${state.metricDefinitionStatus?.[item[0]] || item[5]}</span>
+          <div class="button-row">
+            <button class="action-button primary" type="button" onclick="previewMetricDefinition('${item[0]}')">预览下钻</button>
+            <button class="action-button" type="button" onclick="pinMetricFromDefinition('${item[1]}')">设为首页指标</button>
+            <button class="action-button" type="button" onclick="completeMetricMetadata('${item[0]}')">补元数据</button>
+          </div>
+        </div>
       `).join("");
       document.getElementById("deepDiveDecision").innerHTML = frameworkStates.slice(0, 3).map(item => `
         <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]} · ${item[2]}</span></div>
@@ -3847,7 +3856,7 @@
         intent: "查看首页展示如何按用户配置生成",
         back: "home",
         path: ["数据决策", "首页配置"],
-        context: [`角色：${homeProfile.role}`, `默认周期：${homeProfile.defaultPeriod}`],
+        context: [`角色：${homeProfile.role}`, `默认周期：${state.profileDefaultPeriod || homeProfile.defaultPeriod}`],
         primaryTitle: "Pinned Metrics / Layout",
         decisionTitle: "阈值和隐藏项",
         next: "正式版支持不同用户配置不同首页"
@@ -3856,13 +3865,28 @@
       document.getElementById("deepDiveTitle").textContent = "首页配置";
       document.getElementById("deepDiveBody").textContent = "首页保持经营视角；配置只决定哪些指标和模块被放到首页。";
       document.getElementById("deepDiveNodes").innerHTML = [
-        ["置顶指标", homeProfile.pinnedMetrics.join(" / ")],
-        ["隐藏指标", homeProfile.hiddenMetrics.join(" / ")],
-        ["布局规则", homeProfile.layoutRules.join("；")]
-      ].map(item => `<div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join("");
+        ["置顶指标", currentPinnedMetrics().join(" / "), "pin"],
+        ["隐藏指标", currentHiddenMetrics().join(" / "), "hide"],
+        ["布局规则", homeProfile.layoutRules.join("；"), "layout"]
+      ].map(item => `
+        <div class="formula-node">
+          <strong>${item[0]}</strong>
+          <span>${item[1]}</span>
+          <div class="button-row">
+            ${item[2] === "pin" ? `<button class="action-button primary" type="button" onclick="simulateProfileAction('pin')">置顶 IAP D90+ 毛利</button>` : ""}
+            ${item[2] === "hide" ? `<button class="action-button" type="button" onclick="simulateProfileAction('hide')">隐藏 IAA 投放成本</button>` : ""}
+            ${item[2] === "layout" ? `<button class="action-button" type="button" onclick="simulateProfileAction('period')">默认周期改为 7 天</button>` : ""}
+          </div>
+        </div>
+      `).join("");
       document.getElementById("deepDiveDecision").innerHTML = homeProfile.thresholdProfile.map(item => `
         <div class="formula-node"><strong>阈值</strong><span>${item}</span></div>
-      `).join("");
+      `).join("") + `
+        <div class="button-row">
+          <button class="action-button primary" type="button" onclick="saveHomeProfileDraft()">保存配置草案</button>
+          <button class="action-button" type="button" onclick="openMetricDefinitionExplorer()">去指标定义</button>
+        </div>
+      `;
       navigateTo("deep-dive", { preserveStack: true });
     }
 
@@ -3899,6 +3923,71 @@
       `;
       document.getElementById("deepDiveDecision").textContent = "原始表只负责校验证据，不替代首页判断流。";
       navigateTo("deep-dive", { preserveStack: true });
+    }
+
+    function currentPinnedMetrics() {
+      return state.profilePinnedMetrics || homeProfile.pinnedMetrics;
+    }
+
+    function currentHiddenMetrics() {
+      return state.profileHiddenMetrics || homeProfile.hiddenMetrics;
+    }
+
+    function previewMetricDefinition(metricId) {
+      const metric = metricDefinitionRows.find(item => item[0] === metricId) || metricDefinitionRows[0];
+      state.metricDefinitionStatus = state.metricDefinitionStatus || {};
+      state.metricDefinitionStatus[metricId] = metric[4] === "待绑定" ? "缺元数据，先补齐再完整下钻" : "已预览";
+      saveState();
+      toast(`预览：${metric[1]}`);
+      if (metric[2] === "profit-detail") {
+        openProfitView(metric[6] || "total");
+      } else {
+        openMetricView(metric[6] || "iaaRoi");
+      }
+    }
+
+    function pinMetricFromDefinition(label) {
+      const pinned = new Set(currentPinnedMetrics());
+      pinned.add(label);
+      state.profilePinnedMetrics = [...pinned];
+      saveState();
+      openHomeProfile();
+      toast(`已加入首页指标：${label}`);
+    }
+
+    function completeMetricMetadata(metricId) {
+      state.metricDefinitionStatus = state.metricDefinitionStatus || {};
+      state.metricDefinitionStatus[metricId] = "元数据已补齐";
+      saveState();
+      openMetricDefinitionExplorer();
+      toast("指标元数据已补齐");
+    }
+
+    function simulateProfileAction(kind) {
+      if (kind === "pin") {
+        const pinned = new Set(currentPinnedMetrics());
+        pinned.add("IAP D90+ 预估毛利");
+        state.profilePinnedMetrics = [...pinned];
+        toast("已置顶 IAP D90+ 预估毛利");
+      }
+      if (kind === "hide") {
+        const hidden = new Set(currentHiddenMetrics());
+        hidden.add("IAA 投放成本");
+        state.profileHiddenMetrics = [...hidden];
+        toast("已隐藏 IAA 投放成本");
+      }
+      if (kind === "period") {
+        state.profileDefaultPeriod = "过去 7 天";
+        toast("默认周期已改为过去 7 天");
+      }
+      saveState();
+      openHomeProfile();
+    }
+
+    function saveHomeProfileDraft() {
+      state.profileDraftSaved = true;
+      saveState();
+      toast("首页配置草案已保存");
     }
 
     function renderActionRows(items, compact = false) {
