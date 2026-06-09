@@ -972,6 +972,44 @@
       white-space: nowrap;
     }
 
+    .action-done-note {
+      align-self: center;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 720;
+      white-space: nowrap;
+    }
+
+    .action-pause-panel {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      margin-top: 2px;
+      padding: 10px;
+      border-radius: 12px;
+      background: var(--surface-amber);
+    }
+
+    .action-pause-panel strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--amber);
+      font-size: 13px;
+    }
+
+    .action-pause-panel span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .action-pause-panel .button-row {
+      margin-top: 0;
+      justify-content: flex-end;
+    }
+
     .business-action {
       grid-column: 1 / -1;
       padding-top: 0;
@@ -1904,6 +1942,10 @@
       .row.action-row-compact .button-row {
         justify-content: flex-start;
       }
+      .row.action-row-compact,
+      .action-pause-panel {
+        grid-template-columns: minmax(0, 1fr);
+      }
       .module-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .row { grid-template-columns: 1fr; }
       .micro-link {
@@ -2382,6 +2424,7 @@
         "review-iaa-scale": "待确认",
         "research-subscription-rule": "待确认"
       },
+      pendingActionPause: null,
       messages: {
         "msg-iap-owner": "待确认",
         "msg-ua-owner": "待确认",
@@ -3265,9 +3308,103 @@
 
     function setStatus(group, id, value) {
       state[group][id] = value;
+      if (group === "actions" && state.pendingActionPause?.id === id) {
+        state.pendingActionPause = null;
+      }
       saveState();
       render();
       toast("状态已更新：" + value);
+    }
+
+    function requestActionPause(id, fromStatus) {
+      state.pendingActionPause = { id, fromStatus };
+      saveState();
+      render();
+      toast(fromStatus === "进行中" ? "请确认暂缓原因和复查时间" : "请选择暂缓复查时间");
+    }
+
+    function confirmActionPause(id, reason = "等数据", review = "明天复查") {
+      state.pendingActionPause = null;
+      state.actionPauseMeta = state.actionPauseMeta || {};
+      state.actionPauseMeta[id] = { reason, review };
+      setStatus("actions", id, "暂缓");
+    }
+
+    function cancelActionPause() {
+      state.pendingActionPause = null;
+      saveState();
+      render();
+      toast("已取消暂缓");
+    }
+
+    function renderActionPausePanel(id, fromStatus) {
+      if (state.pendingActionPause?.id !== id) return "";
+      const requiresReason = fromStatus === "进行中";
+      return `
+        <div class="action-pause-panel">
+          <div>
+            <strong>${requiresReason ? "暂缓进行中的 Action？" : "暂缓这个 Action？"}</strong>
+            <span>${requiresReason ? "进行中的动作暂停前需要留下原因和复查时间。" : "先放入暂缓队列，并设置默认复查时间。"}</span>
+          </div>
+          <div class="button-row">
+            <button class="action-button" type="button" onclick="confirmActionPause('${id}','等数据','明天复查')">等数据 · 明天</button>
+            <button class="action-button" type="button" onclick="confirmActionPause('${id}','等人','3 天后复查')">等人 · 3 天后</button>
+            <button class="action-button primary" type="button" onclick="confirmActionPause('${id}','策略变化','自选日期')">确认暂缓</button>
+            <button class="action-button" type="button" onclick="cancelActionPause()">取消</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderActionControls(id, current) {
+      if (["待确认", "观察中"].includes(current)) {
+        return `
+          <div class="button-row">
+            <button class="action-button primary" type="button" onclick="setStatus('actions','${id}','进行中')">确认推进</button>
+            <button class="action-button" type="button" onclick="requestActionPause('${id}','${current}')">暂缓</button>
+          </div>
+        `;
+      }
+      if (current === "进行中") {
+        return `
+          <div class="button-row">
+            <button class="action-button primary" type="button" onclick="setStatus('actions','${id}','已完成')">标记完成</button>
+            <button class="action-button" type="button" onclick="requestActionPause('${id}','进行中')">暂缓</button>
+            <button class="action-button" type="button" onclick="setStatus('actions','${id}','阻塞')">标记阻塞</button>
+          </div>
+        `;
+      }
+      if (current === "暂缓") {
+        return `
+          <div class="button-row">
+            <button class="action-button primary" type="button" onclick="setStatus('actions','${id}','进行中')">恢复推进</button>
+            <button class="action-button" type="button" onclick="requestActionPause('${id}','暂缓')">调整复查</button>
+          </div>
+        `;
+      }
+      if (current === "阻塞") {
+        return `
+          <div class="button-row">
+            <button class="action-button primary" type="button" onclick="setStatus('actions','${id}','进行中')">解除阻塞</button>
+            <button class="action-button" type="button" onclick="requestActionPause('${id}','阻塞')">暂缓</button>
+          </div>
+        `;
+      }
+      if (current === "待复盘") {
+        return `
+          <div class="button-row">
+            <button class="action-button primary" type="button" onclick="setStatus('actions','${id}','进行中')">开始复盘</button>
+          </div>
+        `;
+      }
+      if (current === "已完成") {
+        return `<span class="action-done-note">已完成，无需重复推进</span>`;
+      }
+      return `
+        <div class="button-row">
+          <button class="action-button primary" type="button" onclick="setStatus('actions','${id}','进行中')">确认推进</button>
+        </div>
+      `;
     }
 
     function renderAgenda() {
@@ -3890,11 +4027,9 @@
               <h4>${item[1]}</h4>
             </div>
             <span class="status ${statusClass(current)}">${current}</span>
-            <div class="button-row">
-              <button class="action-button primary" type="button" onclick="setStatus('actions','${item[0]}','进行中')">确认推进</button>
-              <button class="action-button" type="button" onclick="setStatus('actions','${item[0]}','暂缓')">暂缓</button>
-            </div>
+            ${renderActionControls(item[0], current)}
             <button class="icon-button" type="button" aria-label="查看草案" title="查看草案" onclick="openActionDraft('${item[0]}')">→</button>
+            ${renderActionPausePanel(item[0], current)}
           </div>
         `;
       }).join("");
@@ -4786,11 +4921,9 @@
         ["当前状态", current]
       ].map(item => `<div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join("");
       document.getElementById("deepDiveDecision").innerHTML = `
-        <div class="button-row">
-          <button class="action-button primary" type="button" onclick="setStatus('actions','${id}','进行中')">确认推进</button>
-          <button class="action-button" type="button" onclick="setStatus('actions','${id}','暂缓')">暂缓</button>
-          <button class="action-button" type="button" onclick="navigateTo('action')">去 Action Hub</button>
-        </div>
+        ${renderActionControls(id, current)}
+        <div class="button-row"><button class="action-button" type="button" onclick="navigateTo('action')">去 Action Hub</button></div>
+        ${renderActionPausePanel(id, current)}
       `;
       navigateTo("deep-dive", { preserveStack: true });
     }
