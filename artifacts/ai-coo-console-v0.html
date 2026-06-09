@@ -560,7 +560,7 @@
 
     .business-frame {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(220px, .3fr);
+      grid-template-columns: minmax(0, 1fr);
       gap: 10px;
       align-items: start;
     }
@@ -946,19 +946,36 @@
       margin-top: 0;
     }
 
-    .action-row-compact {
-      grid-template-columns: minmax(0, 1fr) auto auto;
-      gap: 8px;
-      padding: 8px 0;
+    .row.action-row-compact {
+      grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.56);
+      border-radius: 14px;
     }
 
-    .action-row-compact h4 {
+    .row.action-row-compact h4 {
       margin-bottom: 0;
       font-size: 13px;
     }
 
-    .action-row-compact .button-row {
-      margin-top: 7px;
+    .row.action-row-compact .button-row {
+      margin-top: 0;
+      justify-content: flex-end;
+    }
+
+    .action-eyebrow {
+      align-self: center;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 780;
+      white-space: nowrap;
+    }
+
+    .business-action {
+      grid-column: 1 / -1;
+      padding-top: 2px;
+      border-top: 1px solid rgba(218, 225, 234, .62);
     }
 
     .period-strip {
@@ -1879,6 +1896,9 @@
       .metric-library-row .button-row {
         justify-content: flex-start;
       }
+      .row.action-row-compact .button-row {
+        justify-content: flex-start;
+      }
       .module-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .row { grid-template-columns: 1fr; }
       .micro-link {
@@ -1965,7 +1985,7 @@
               </section>
             </div>
             <div class="metric-row" id="iaaMetricRow"></div>
-            <div class="business-workspace">
+            <div class="business-workspace business-action">
               <section>
                 <div class="list" id="iaaActionList"></div>
               </section>
@@ -1987,7 +2007,7 @@
               </section>
             </div>
             <div class="metric-row" id="iapMetricRow"></div>
-            <div class="business-workspace">
+            <div class="business-workspace business-action">
               <section>
                 <div class="list" id="iapActionList"></div>
               </section>
@@ -3860,14 +3880,15 @@
         const current = state.actions[item[0]] || "待确认";
         return `
           <div class="row action-row-compact">
+            <span class="action-eyebrow">P0 Action</span>
             <div>
               <h4>${item[1]}</h4>
-              <div class="button-row">
-                <button class="action-button primary" type="button" onclick="setStatus('actions','${item[0]}','进行中')">确认推进</button>
-                <button class="action-button" type="button" onclick="setStatus('actions','${item[0]}','暂缓')">暂缓</button>
-              </div>
             </div>
             <span class="status ${statusClass(current)}">${current}</span>
+            <div class="button-row">
+              <button class="action-button primary" type="button" onclick="setStatus('actions','${item[0]}','进行中')">确认推进</button>
+              <button class="action-button" type="button" onclick="setStatus('actions','${item[0]}','暂缓')">暂缓</button>
+            </div>
             <button class="icon-button" type="button" aria-label="查看草案" title="查看草案" onclick="openActionDraft('${item[0]}')">→</button>
           </div>
         `;
