@@ -956,7 +956,28 @@
 
     .row.action-row-compact h4 {
       margin-bottom: 0;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .row.action-row-compact .action-button {
+      min-height: 32px;
+      padding: 6px 10px;
       font-size: 13px;
+      font-weight: 650;
+      line-height: 1.25;
+    }
+
+    .row.action-row-compact .action-button.primary {
+      font-weight: 720;
+    }
+
+    .row.action-row-compact .icon-button {
+      width: 28px;
+      height: 28px;
+      font-size: 17px;
+      background: rgba(255,255,255,.5);
     }
 
     .row.action-row-compact .button-row {
@@ -968,7 +989,7 @@
       align-self: center;
       color: var(--muted);
       font-size: 12px;
-      font-weight: 780;
+      font-weight: 720;
       white-space: nowrap;
     }
 
@@ -4022,7 +4043,7 @@
         const current = state.actions[item[0]] || "待确认";
         return `
           <div class="row action-row-compact">
-            <span class="action-eyebrow">P0 Action</span>
+            <span class="action-eyebrow">P0 动作</span>
             <div>
               <h4>${item[1]}</h4>
             </div>
