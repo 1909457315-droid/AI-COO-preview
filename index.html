@@ -1594,6 +1594,59 @@
       margin-top: 12px;
     }
 
+    .report-table-wrap {
+      width: 100%;
+      margin-top: 12px;
+      overflow-x: auto;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .report-table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    .report-table th,
+    .report-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      white-space: nowrap;
+    }
+
+    .report-table th {
+      color: var(--muted);
+      background: rgba(248, 250, 252, .72);
+      font-size: 12px;
+      font-weight: 780;
+    }
+
+    .report-table td {
+      color: var(--ink);
+      font-weight: 560;
+    }
+
+    .report-table td.report-text {
+      min-width: 220px;
+      white-space: normal;
+      line-height: 1.42;
+    }
+
+    .report-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .report-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
     .raw-table-row {
       display: grid;
       grid-template-columns: minmax(128px, .7fr) repeat(4, minmax(86px, 1fr));
@@ -5979,9 +6032,10 @@
         </div>
       `).join("");
       document.getElementById("profitFormulaTableTitle").textContent = `${config.title} · 影响组合`;
-      document.getElementById("profitFormulaBreakdown").innerHTML = config.breakdown.map(item => `
-        <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>
-      `).join("");
+      document.getElementById("profitFormulaBreakdown").innerHTML = renderReportTable([
+        { key: "object", label: "对象" },
+        { key: "detail", label: "数据 / 判断", wrap: true }
+      ], config.breakdown.map(item => ({ object: item[0], detail: item[1] })), { minWidth: 820 });
       document.getElementById("profitFormulaDecision").textContent = config.decision;
       document.getElementById("profitFormulaSchemaTitle").textContent = `${config.title} · 当前视角`;
       document.getElementById("profitFormulaSchema").innerHTML = renderSchemaNodes(config.schema);
@@ -6010,13 +6064,49 @@
     }
 
     function renderSchemaNodes(schema = {}) {
-      return [
+      return renderReportTable([
+        { key: "field", label: "字段" },
+        { key: "value", label: "内容", wrap: true }
+      ], [
         ["页面问题", schema.question || "这个指标当前应该回答什么问题？"],
         ["可看维度", schema.dimensions || "待配置"],
         ["默认排序", schema.sort || "按影响降序"],
         ["数据来源", schema.sources || "待绑定"],
         ["不可用维度", schema.unavailable || "暂无"]
-      ].map(item => `<div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join("");
+      ].map(item => ({ field: item[0], value: item[1] })), { minWidth: 780 });
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function renderReportTable(columns, rows, options = {}) {
+      const minWidth = options.minWidth || Math.max(720, columns.length * 132);
+      const body = rows.length
+        ? rows.map(row => `
+          <tr>
+            ${columns.map((column, index) => {
+              const value = Array.isArray(row) ? row[index] : row[column.key];
+              const klass = column.wrap ? " class=\"report-text\"" : "";
+              return `<td${klass}>${escapeHtml(value)}</td>`;
+            }).join("")}
+          </tr>
+        `).join("")
+        : `<tr><td class="report-text" colspan="${columns.length}">${escapeHtml(options.empty || "暂无匹配数据")}</td></tr>`;
+      return `
+        <div class="report-table-wrap">
+          <table class="report-table" style="min-width:${minWidth}px">
+            <thead>
+              <tr>${columns.map(column => `<th>${escapeHtml(column.label || column)}</th>`).join("")}</tr>
+            </thead>
+            <tbody>${body}</tbody>
+          </table>
+        </div>
+      `;
     }
 
     function compactInsightTitle(text) {
@@ -6236,15 +6326,12 @@
         </div>
       `;
       document.getElementById("deepDiveNodes").innerHTML = `
-        <div class="raw-table">
-          <div class="raw-table-row header">${source.fields.slice(0, 5).map(field => `<span>${field}</span>`).join("")}</div>
-          ${source.rows.map(row => `<div class="raw-table-row">${row.slice(0, 5).map(value => `<span>${value}</span>`).join("")}</div>`).join("")}
-        </div>
-        <div class="evidence-grid">
-          <div class="formula-node"><strong>字段口径</strong><span>${source.fields.join(" / ")}</span></div>
-          <div class="formula-node"><strong>打开原因</strong><span>当你不信任首页证据或需要确认下一步 Workflow 时，查看这张原始表。</span></div>
-          <div class="formula-node"><strong>下一步</strong><span>确认数据可信后回到证据或 Action；不可信则发起数据口径排查。</span></div>
-        </div>
+        ${renderReportTable(
+          source.fields.map(field => ({ key: field, label: field, wrap: String(field).length > 10 })),
+          source.rows.map(row => Object.fromEntries(source.fields.map((field, index) => [field, row[index] || ""]))),
+          { minWidth: Math.max(920, source.fields.length * 120), empty: "这张表当前没有样例行" }
+        )}
+        <p class="report-note">字段口径：${source.fields.join(" / ")}。打开原因：${contextLabel}。确认数据可信后回到证据或 Action；不可信则发起数据口径排查。</p>
       `;
       document.getElementById("deepDiveDecision").textContent = "原始表只负责校验证据，不替代首页判断流。";
       navigateTo("deep-dive", { preserveStack: true });
@@ -6711,11 +6798,14 @@
             </div>
           `).join("") : `<div class="channel-table-row"><span>-</span><strong>没有匹配对象</strong><span>调整筛选</span><span>-</span><span>-</span><span>-</span></div>`}
         </div>
-        <div class="evidence-grid">
-          <div class="formula-node"><strong>证据链</strong><span>${sourceRow?.metric || allRows[0].metric}；${(rows[0] || allRows[0]).country} ${(rows[0] || allRows[0]).quality}；利润影响 ${sourceRow?.impact || (rows[0] || allRows[0]).impact}。</span></div>
-          <div class="formula-node"><strong>根因候选</strong><span>${channel} 当前更像 ${(rows[0] || allRows[0]).status}，先按渠道字段继续缩小范围。</span></div>
-          <div class="formula-node"><strong>Action 草案</strong><span>生成前先确认是否需要推进；确认后同步到 Action Hub。</span></div>
-        </div>
+        ${renderReportTable([
+          { key: "item", label: "判断项" },
+          { key: "content", label: "内容", wrap: true }
+        ], [
+          { item: "证据链", content: `${sourceRow?.metric || allRows[0].metric}；${(rows[0] || allRows[0]).country} ${(rows[0] || allRows[0]).quality}；利润影响 ${sourceRow?.impact || (rows[0] || allRows[0]).impact}。` },
+          { item: "根因候选", content: `${channel} 当前更像 ${(rows[0] || allRows[0]).status}，先按渠道字段继续缩小范围。` },
+          { item: "Action 草案", content: "生成前先确认是否需要推进；确认后同步到 Action Hub。" }
+        ], { minWidth: 820 })}
       `;
       document.getElementById("deepDiveDecision").textContent = "这一页只看当前渠道和当前组合；需要执行时再把建议转成 Action 草案。";
     }
@@ -6762,9 +6852,10 @@
       saveState();
       document.getElementById("deepDiveTitle").textContent = detail.title;
       document.getElementById("deepDiveBody").textContent = detail.body;
-      document.getElementById("deepDiveNodes").innerHTML = detail.nodes.map(item => `
-        <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>
-      `).join("");
+      document.getElementById("deepDiveNodes").innerHTML = renderReportTable([
+        { key: "field", label: "字段" },
+        { key: "value", label: "内容", wrap: true }
+      ], detail.nodes.map(item => ({ field: item[0], value: item[1] })), { minWidth: 780 });
       document.getElementById("deepDiveDecision").textContent = detail.decision;
       navigateTo("deep-dive", { preserveStack: true });
     }
@@ -6791,12 +6882,15 @@
       saveState();
       document.getElementById("deepDiveTitle").textContent = insight.title;
       document.getElementById("deepDiveBody").textContent = `${insight.business} Agent 洞察用于解释判断，不直接等同于执行动作。`;
-      document.getElementById("deepDiveNodes").innerHTML = [
+      document.getElementById("deepDiveNodes").innerHTML = renderReportTable([
+        { key: "field", label: "字段" },
+        { key: "value", label: "内容", wrap: true }
+      ], [
         ["洞察类型", insight.type],
         ["证据", insight.evidence],
         ["置信度", insight.confidence],
         ["下一步", "如果需要执行动作，必须转成 Action 草案并由用户确认。"]
-      ].map(item => `<div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join("");
+      ].map(item => ({ field: item[0], value: item[1] })), { minWidth: 780 });
       document.getElementById("deepDiveDecision").textContent = "先作为判断依据展示；是否创建或推进 Action，由用户确认。";
       navigateTo("deep-dive", { preserveStack: true });
     }
@@ -6823,9 +6917,19 @@
       saveState();
       document.getElementById("deepDiveTitle").textContent = `${metric?.label || "指标"}洞察`;
       document.getElementById("deepDiveBody").textContent = "这里只展示和当前指标强绑定的 Agent 洞察；跨指标判断仍放在模块综合洞察。";
-      document.getElementById("deepDiveNodes").innerHTML = items.map(item => `
-        <div class="formula-node"><strong>${item.priority || "P1"} · ${item.title}</strong><span>${item.type} · ${item.confidence} · ${item.evidence}</span></div>
-      `).join("");
+      document.getElementById("deepDiveNodes").innerHTML = renderReportTable([
+        { key: "priority", label: "优先级" },
+        { key: "title", label: "洞察", wrap: true },
+        { key: "type", label: "类型" },
+        { key: "confidence", label: "置信度" },
+        { key: "evidence", label: "证据", wrap: true }
+      ], items.map(item => ({
+        priority: item.priority || "P1",
+        title: item.title,
+        type: item.type,
+        confidence: item.confidence,
+        evidence: item.evidence
+      })), { minWidth: 1040, empty: "当前没有更多指标洞察" });
       document.getElementById("deepDiveDecision").textContent = "如果需要执行，必须再转成 Action 草案并同步到 Action Hub。";
       navigateTo("deep-dive", { preserveStack: true });
     }
@@ -6861,9 +6965,15 @@
       saveState();
       document.getElementById("deepDiveTitle").textContent = titleMap[id] || titleMap.total;
       document.getElementById("deepDiveBody").textContent = "流水利润洞察只做板块综合判断，不拆成单指标洞察。";
-      document.getElementById("deepDiveNodes").innerHTML = rows.map(([label, metric]) => `
-        <div class="formula-node"><strong>${label}</strong><span>${formatMetric(metric)} · ${formatDelta(metric, period.compareLabel)}</span></div>
-      `).join("");
+      document.getElementById("deepDiveNodes").innerHTML = renderReportTable([
+        { key: "metric", label: "指标" },
+        { key: "value", label: "数值" },
+        { key: "compare", label: "对比 / 来源", wrap: true }
+      ], rows.map(([label, metric]) => ({
+        metric: label,
+        value: formatMetric(metric),
+        compare: formatDelta(metric, period.compareLabel)
+      })), { minWidth: 820 });
       document.getElementById("deepDiveDecision").textContent = "下一层进入流水利润视角，按产品、国家、产品 x 国家继续看真实利润口径。";
       navigateTo("deep-dive", { preserveStack: true });
     }
@@ -6883,9 +6993,19 @@
       saveState();
       document.getElementById("deepDiveTitle").textContent = `${business} Agent 洞察`;
       document.getElementById("deepDiveBody").textContent = "这里是该业务线的洞察列表，首页只展示 Top1。";
-      document.getElementById("deepDiveNodes").innerHTML = items.map(item => `
-        <div class="formula-node"><strong>${item.priority || "P1"} · ${item.title}</strong><span>${item.type} · ${item.confidence} · ${item.evidence}</span></div>
-      `).join("");
+      document.getElementById("deepDiveNodes").innerHTML = renderReportTable([
+        { key: "priority", label: "优先级" },
+        { key: "title", label: "洞察", wrap: true },
+        { key: "type", label: "类型" },
+        { key: "confidence", label: "置信度" },
+        { key: "evidence", label: "证据", wrap: true }
+      ], items.map(item => ({
+        priority: item.priority || "P1",
+        title: item.title,
+        type: item.type,
+        confidence: item.confidence,
+        evidence: item.evidence
+      })), { minWidth: 1040, empty: "当前业务线没有更多洞察" });
       document.getElementById("deepDiveDecision").textContent = "洞察只用于判断；需要执行时再转成 Action 草案。";
       navigateTo("deep-dive", { preserveStack: true });
     }
@@ -6905,10 +7025,19 @@
       saveState();
       document.getElementById("deepDiveTitle").textContent = `${business} Action 草案`;
       document.getElementById("deepDiveBody").textContent = "首页只展示 P0，低优先级草案在这里集中查看。";
-      document.getElementById("deepDiveNodes").innerHTML = items.map(item => {
-        const current = state.actions[item[0]] || "待确认";
-        return `<div class="formula-node"><strong>${item[6] || "P1"} · ${item[1]}</strong><span>${item[3]} · ${item[4]} · ${current}</span></div>`;
-      }).join("");
+      document.getElementById("deepDiveNodes").innerHTML = renderReportTable([
+        { key: "priority", label: "优先级" },
+        { key: "title", label: "Action", wrap: true },
+        { key: "type", label: "类型" },
+        { key: "deadline", label: "复查 / 截止" },
+        { key: "status", label: "状态" }
+      ], items.map(item => ({
+        priority: item[6] || "P1",
+        title: item[1],
+        type: item[3],
+        deadline: item[4],
+        status: state.actions[item[0]] || "待确认"
+      })), { minWidth: 920, empty: "当前业务线没有 Action 草案" });
       document.getElementById("deepDiveDecision").textContent = "需要推进的草案在来源模块或 Action Hub 中确认状态。";
       navigateTo("deep-dive", { preserveStack: true });
     }
@@ -6937,12 +7066,31 @@
       });
       saveState();
       document.getElementById("deepDiveTitle").textContent = result.title;
-      document.getElementById("deepDiveBody").textContent = result.summary;
-      document.getElementById("deepDiveNodes").innerHTML = (result.evidence || []).map((item, index) => `
-        <div class="formula-node"><strong>证据 ${index + 1}</strong><span>${item}</span></div>
-      `).join("");
+      document.getElementById("deepDiveBody").textContent = "";
+      document.getElementById("deepDiveNodes").innerHTML = `
+        ${renderReportTable([
+          { key: "action", label: "Action", wrap: true },
+          { key: "status", label: "状态" },
+          { key: "source", label: "来源" },
+          { key: "business", label: "业务线" },
+          { key: "summary", label: "结果摘要", wrap: true }
+        ], [{
+          action: action?.[1] || result.title,
+          status: current,
+          source: action?.[2] || "Action Hub",
+          business: action?.[5] || "通用",
+          summary: result.summary
+        }], { minWidth: 980 })}
+        ${renderReportTable([
+          { key: "index", label: "证据" },
+          { key: "content", label: "证据内容", wrap: true }
+        ], (result.evidence || []).map((item, index) => ({
+          index: `证据 ${index + 1}`,
+          content: item
+        })), { minWidth: 760, empty: "这个 Action 暂无结果证据" })}
+      `;
       document.getElementById("deepDiveDecision").innerHTML = `
-        <div class="formula-node"><strong>下一步</strong><span>${result.next}</span></div>
+        <p class="report-note">下一步：${result.next}</p>
         <div class="button-row">
           <button class="action-button primary" type="button" onclick="setStatus('actions','${id}','已确认结果')">确认结果</button>
           <button class="action-button" type="button" onclick="navigateTo('action')">去 Action Hub</button>
@@ -6979,7 +7127,10 @@
       saveState();
       document.getElementById("deepDiveTitle").textContent = action[1];
       document.getElementById("deepDiveBody").textContent = "Action 草案是待确认的执行项，确认后同步进入 Action Hub 的项目管理状态。";
-      document.getElementById("deepDiveNodes").innerHTML = [
+      document.getElementById("deepDiveNodes").innerHTML = renderReportTable([
+        { key: "field", label: "字段" },
+        { key: "value", label: "内容", wrap: true }
+      ], [
         ["来源指标", sourceObject.metric],
         ["触发洞察", sourceObject.insight],
         ["触发原因", sourceObject.reason],
@@ -6991,7 +7142,7 @@
         ["复查 / 截止", action[4]],
         ["当前状态", current],
         ["完成结果", actionResults[id] ? actionResults[id].summary : "尚未产生结果记录"]
-      ].map(item => `<div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join("");
+      ].map(item => ({ field: item[0], value: item[1] })), { minWidth: 780 });
       document.getElementById("deepDiveDecision").innerHTML = `
         ${renderActionControls(id, current)}
         ${actionResults[id] ? `<div class="button-row"><button class="action-button" type="button" onclick="openActionResult('${id}')">查看结果</button></div>` : ""}
@@ -7117,10 +7268,20 @@
       });
       saveState();
       document.getElementById("deepDiveTitle").textContent = `${day.label} · ${day.date}`;
-      document.getElementById("deepDiveBody").textContent = "日期快照用于回看当天 App / AI / 用户推进过哪些 Action，以及每个 Action 的状态。";
-      document.getElementById("deepDiveNodes").innerHTML = items.map(item => `
-        <div class="formula-node"><strong>${item.status} · ${item.title}</strong><span>${item.business} · ${item.source}${item.result ? ` · ${item.result}` : ""}</span></div>
-      `).join("");
+      document.getElementById("deepDiveBody").textContent = "";
+      document.getElementById("deepDiveNodes").innerHTML = renderReportTable([
+        { key: "title", label: "Action", wrap: true },
+        { key: "status", label: "状态" },
+        { key: "business", label: "业务线" },
+        { key: "source", label: "来源" },
+        { key: "result", label: "结果", wrap: true }
+      ], items.map(item => ({
+        title: item.title,
+        status: item.status,
+        business: item.business,
+        source: item.source,
+        result: item.result || "尚未产生结果记录"
+      })), { minWidth: 960, empty: "这一天没有 Action 记录" });
       document.getElementById("deepDiveDecision").textContent = "完整日程表在 Action Hub 中查看。";
       navigateTo("deep-dive");
     }
