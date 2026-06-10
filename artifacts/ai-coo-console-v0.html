@@ -2479,7 +2479,7 @@
       screen: "home",
       navStack: [],
       selectedActionDate: "2026-06-07",
-      selectedDataPeriod: "yesterday",
+      selectedDataPeriod: "today",
       dimensionViews: {
         IAA: { product: true, channel: true, country: true },
         IAP: { product: true, channel: true, country: true }
@@ -2507,7 +2507,11 @@
         "data-iaa-quality": "观察中",
         "data-payment-sku": "暂缓",
         "review-iaa-scale": "待确认",
-        "research-subscription-rule": "待确认"
+        "research-subscription-rule": "待确认",
+        "real-camp-margin-review": "待确认",
+        "real-site-quality-review": "已完成",
+        "real-creative-review": "待确认结果",
+        "real-profit-ledger": "已确认结果"
       },
       pendingActionPause: null,
       messages: {
@@ -2976,7 +2980,1932 @@
       }
     };
 
-    const rawDataSources = [
+    const REAL_PREVIEW_DATA = {
+      "data": {
+        "dataPeriods": [
+          {
+            "id": "today",
+            "label": "真实数据",
+            "date": "2026-06-07",
+            "compareLabel": "真实表",
+            "metrics": {
+              "revenue": {
+                "label": "实际收入",
+                "value": 24.55,
+                "compare": 24.55,
+                "unit": "$",
+                "target": "profit-formula",
+                "tone": "default",
+                "deltaText": "流水利润表数据示例.csv"
+              },
+              "cost": {
+                "label": "投放成本",
+                "value": 28.37,
+                "compare": 28.37,
+                "unit": "$",
+                "target": "profit-formula",
+                "tone": "default",
+                "deltaText": "投放成本字段"
+              },
+              "profit": {
+                "label": "流水利润",
+                "value": -4.1,
+                "compare": 0,
+                "unit": "$",
+                "target": "profit-formula",
+                "tone": "red",
+                "deltaText": "ROI 0.86"
+              },
+              "iaaRoi": {
+                "label": "D7 ROI 达成率",
+                "value": 33,
+                "compare": 100,
+                "unit": "%",
+                "target": "iaa-detail",
+                "tone": "amber",
+                "deltaText": "首日 ROI 代观察"
+              },
+              "iaaMargin": {
+                "label": "D7 预估毛利",
+                "value": 20.8,
+                "compare": 0,
+                "unit": "$",
+                "target": "iaa-detail",
+                "tone": "default",
+                "deltaText": "Camp 衍生"
+              },
+              "iaaCost": {
+                "label": "投放成本",
+                "value": 8785,
+                "compare": 0,
+                "unit": "$",
+                "target": "iaa-detail",
+                "tone": "default",
+                "deltaText": "Top6 汇总"
+              },
+              "iapSubCost": {
+                "label": "三日有效订阅成本",
+                "value": 0.3,
+                "compare": 0,
+                "unit": "$",
+                "target": "iap-detail",
+                "tone": "amber",
+                "deltaText": "Camp CPI 代理"
+              },
+              "iapPayMix": {
+                "label": "直接付费结构",
+                "value": 34,
+                "compare": 0,
+                "unit": "%",
+                "target": "iap-detail",
+                "tone": "amber",
+                "deltaText": "首日 ROI 代理"
+              },
+              "iapMargin": {
+                "label": "D90+ 预估毛利",
+                "value": -52.2,
+                "compare": 0,
+                "unit": "$",
+                "target": "iap-detail",
+                "tone": "red",
+                "deltaText": "Camp 衍生"
+              }
+            }
+          }
+        ],
+        "watch": [
+          {
+            "id": "real-camp-margin-watch",
+            "title": "Camp 衍生毛利需要复核",
+            "body": "635458_BR_DramaFun_2188_Kwai_D7ROAS47_JF_260522_1 预估毛利 $20.8，样本来自 camp表衍生-预估毛利、预估D7ROI等计算.csv。",
+            "next": "等下一次 Camp 衍生刷新后确认是否转 Action。",
+            "level": "watch"
+          },
+          {
+            "id": "real-site-quality-watch",
+            "title": "Site 子渠道质量待确认",
+            "body": "mtg1172007592 消耗 $32.8，D7 ROI 72%。",
+            "next": "进入渠道细表确认是否停弱源。",
+            "level": "risk"
+          }
+        ],
+        "globalActions": [
+          [
+            "real-camp-margin-review",
+            "复核 Camp 衍生预估毛利",
+            "数据决策",
+            "结果确认",
+            "今天 15:00",
+            "IAA",
+            "P0"
+          ],
+          [
+            "real-site-quality-review",
+            "确认 Site 子渠道质量",
+            "数据决策",
+            "渠道复查",
+            "今天 16:00",
+            "IAA",
+            "P0"
+          ],
+          [
+            "real-creative-review",
+            "复盘高消耗素材表现",
+            "Research Center",
+            "素材复盘",
+            "待确认结果",
+            "IAA",
+            "P1"
+          ],
+          [
+            "real-profit-ledger",
+            "确认流水利润口径",
+            "Action Hub",
+            "口径确认",
+            "已完成",
+            "通用",
+            "P1"
+          ]
+        ],
+        "actionDates": [
+          {
+            "date": "2026-06-07",
+            "label": "真实数据日",
+            "actions": [
+              "real-camp-margin-review",
+              "real-site-quality-review",
+              "real-creative-review",
+              "real-profit-ledger"
+            ]
+          },
+          {
+            "date": "2026-06-06",
+            "label": "昨天",
+            "actions": [
+              [
+                "real-prev-ledger",
+                "历史流水口径复核",
+                "已完成",
+                "通用",
+                "结果：无口径异常"
+              ],
+              [
+                "real-prev-watch",
+                "回收 Watch 复查",
+                "已确认结果",
+                "IAA",
+                "结果：继续观察"
+              ]
+            ]
+          },
+          {
+            "date": "2026-06-08",
+            "label": "明天",
+            "actions": [
+              [
+                "real-next-d7",
+                "Camp 衍生 D7 刷新后复查",
+                "待确认",
+                "IAA"
+              ]
+            ]
+          }
+        ],
+        "insights": [
+          {
+            "id": "real-profit-risk",
+            "business": "IAA",
+            "scope": "module",
+            "priority": "Top1",
+            "title": "真实流水利润为 -$4.1，先定位成本和 App 结构",
+            "type": "风险",
+            "evidence": "流水利润表数据示例.csv 汇总收入 $24.6，投放成本 $28.4，ROI 0.86。",
+            "confidence": "高"
+          },
+          {
+            "id": "real-iap-watch",
+            "business": "IAP",
+            "scope": "module",
+            "priority": "Top1",
+            "title": "IAP 暂无独立订阅表，先用 Camp / 素材 / Site 证据做观察",
+            "type": "待观察",
+            "evidence": "当前真实数据源更完整覆盖 IAA / 投放回收；IAP 订阅质量需后续接入订阅明细。",
+            "confidence": "中"
+          },
+          {
+            "id": "real-profit-metric",
+            "business": "IAA",
+            "scope": "metric",
+            "metric": "profit",
+            "priority": "Top1",
+            "title": "真实流水利润为负",
+            "type": "指标洞察",
+            "evidence": "iOS Plot Drama 毛利 -$3.3 拖累最大。",
+            "confidence": "高"
+          },
+          {
+            "id": "real-revenue-metric",
+            "business": "IAA",
+            "scope": "metric",
+            "metric": "revenue",
+            "priority": "Top1",
+            "title": "收入集中在少数 App",
+            "type": "指标洞察",
+            "evidence": "iOS Bounce Bliss:$14.9；iOS Plot Drama:$8.0；iOS Cafe Crush Saga:$1.6",
+            "confidence": "高"
+          },
+          {
+            "id": "real-cost-metric",
+            "business": "IAA",
+            "scope": "metric",
+            "metric": "cost",
+            "priority": "Top1",
+            "title": "投放成本高于收入",
+            "type": "指标洞察",
+            "evidence": "汇总投放成本 $28.4，总收入 $24.6。",
+            "confidence": "高"
+          },
+          {
+            "id": "real-iaa-roi-metric",
+            "business": "IAA",
+            "scope": "metric",
+            "metric": "iaaRoi",
+            "priority": "Top1",
+            "title": "首日 ROI 用于短期代理",
+            "type": "指标洞察",
+            "evidence": "Drama Fun / Kwai 首日 ROI 33%。",
+            "confidence": "中"
+          },
+          {
+            "id": "real-iaa-margin-metric",
+            "business": "IAA",
+            "scope": "metric",
+            "metric": "iaaMargin",
+            "priority": "Top1",
+            "title": "Camp 衍生毛利可作为计划层证据",
+            "type": "指标洞察",
+            "evidence": "635458_BR_DramaFun_2188_Kwai_D7ROAS47_JF_260522_1 预估毛利 $20.8。",
+            "confidence": "高"
+          },
+          {
+            "id": "real-iaa-cost-metric",
+            "business": "IAA",
+            "scope": "metric",
+            "metric": "iaaCost",
+            "priority": "Top1",
+            "title": "回收表 Top 成本集中",
+            "type": "指标洞察",
+            "evidence": "Drama Fun/Kwai:$3475；Drama Fun/Facebook:$1581；Rich Shorts/Kwai:$1284",
+            "confidence": "高"
+          },
+          {
+            "id": "real-iap-sub-metric",
+            "business": "IAP",
+            "scope": "metric",
+            "metric": "iapSubCost",
+            "priority": "Top1",
+            "title": "订阅成本需后续真实订阅表补齐",
+            "type": "指标洞察",
+            "evidence": "当前用 Camp CPI 做占位代理，不直接生成订阅动作。",
+            "confidence": "低"
+          },
+          {
+            "id": "real-iap-pay-metric",
+            "business": "IAP",
+            "scope": "metric",
+            "metric": "iapPayMix",
+            "priority": "Top1",
+            "title": "直接付费结构暂无真实字段",
+            "type": "指标洞察",
+            "evidence": "当前真实 CSV 未包含订阅付费结构字段，进入 Research / Watch 而非 Action。",
+            "confidence": "低"
+          },
+          {
+            "id": "real-iap-margin-metric",
+            "business": "IAP",
+            "scope": "metric",
+            "metric": "iapMargin",
+            "priority": "Top1",
+            "title": "D90+ 毛利暂无专表",
+            "type": "指标洞察",
+            "evidence": "Camp 衍生只有预估 D7 ROI / 预估毛利，D90+ 需要后续订阅表补齐。",
+            "confidence": "低"
+          }
+        ],
+        "researchQuestions": [
+          [
+            "真实 IAP 订阅表缺口",
+            "Question",
+            "待补数据源"
+          ],
+          [
+            "Camp 预估毛利与实际流水利润关系",
+            "Question",
+            "进行中"
+          ],
+          [
+            "Site 子渠道弱质判断",
+            "Issue 候选",
+            "Watch"
+          ]
+        ],
+        "researchIssues": [
+          [
+            "Site 高消耗低 ROI",
+            "Issue 候选",
+            "待确认"
+          ],
+          [
+            "素材高消耗但 D7 缺失",
+            "Watch",
+            "观察"
+          ],
+          [
+            "IAP 指标代理口径",
+            "Issue",
+            "待补表"
+          ]
+        ],
+        "researchExperiments": [
+          [
+            "用 Camp 衍生预估毛利做 Action 触发阈值",
+            "Hypothesis",
+            "验证中"
+          ],
+          [
+            "Site 停弱源后 D7 ROI 变化",
+            "Experiment 候选",
+            "待确认"
+          ]
+        ],
+        "researchMemories": [
+          [
+            "旧 BI AI 文本字段不进入前台",
+            "Memory",
+            "已沉淀"
+          ],
+          [
+            "Camp 衍生只保留计算指标",
+            "Memory",
+            "已沉淀"
+          ],
+          [
+            "IAP 订阅质量需要专门订阅表",
+            "Evidence",
+            "待补齐"
+          ]
+        ]
+      },
+      "rawDataSources": [
+        {
+          "id": "profit",
+          "name": "流水利润表数据示例.csv",
+          "grain": "日期 / App / 国家",
+          "use": "验证流水利润、实际收入、总成本、投放成本和收入来源。",
+          "fields": [
+            "日期",
+            "App",
+            "国家",
+            "ROI",
+            "CPI",
+            "预估毛利",
+            "总收入",
+            "总成本",
+            "Kwai收入",
+            "其他收入占比",
+            "茄子H5收入",
+            "flexH5收入"
+          ],
+          "rows": [
+            [
+              "汇总",
+              "汇总",
+              "null",
+              "0.86",
+              "0",
+              "-4.1",
+              "24.55",
+              "28.65",
+              "0",
+              "0%",
+              "0",
+              "0"
+            ],
+            [
+              "20260607",
+              "iOS Bounce Bliss",
+              "汇总",
+              "0.94",
+              "0",
+              "-1.09",
+              "14.9",
+              "16",
+              "0",
+              "0%",
+              "0",
+              "0"
+            ],
+            [
+              "20260607",
+              "iOS Plot Drama",
+              "汇总",
+              "0.71",
+              "0",
+              "-3.33",
+              "8.03",
+              "11.36",
+              "0",
+              "0%",
+              "0",
+              "0"
+            ],
+            [
+              "20260607",
+              "iOS Cafe Crush Saga",
+              "汇总",
+              "1.26",
+              "0",
+              "0.32",
+              "1.62",
+              "1.3",
+              "0",
+              "0%",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "id": "recovery",
+          "name": "IAA产品回收数据.csv",
+          "grain": "日期 / App / 国家 / 渠道",
+          "use": "验证 IAA 回收、成本、CPI、首日 ROI 和留存。",
+          "fields": [
+            "日期",
+            "App",
+            "国家",
+            "渠道",
+            "新增",
+            "总成本",
+            "投放成本",
+            "提现成本",
+            "归因成本",
+            "累计回收",
+            "CPI",
+            "首日LTV"
+          ],
+          "rows": [
+            [
+              "20260607",
+              "Drama Fun",
+              "汇总",
+              "\n                             \n                                    kwai\n                                    40%45%\n                            ",
+              "6299",
+              "3474.92",
+              "3419.66",
+              "45.69",
+              "9.57",
+              "1148.56",
+              "0.54",
+              "0.18"
+            ],
+            [
+              "20260607",
+              "Drama Fun",
+              "汇总",
+              "\n                             \n                                    facebook\n                                    65%70%\n                            ",
+              "6321",
+              "1581.05",
+              "1543.56",
+              "27.88",
+              "9.61",
+              "879.14",
+              "0.24",
+              "0.14"
+            ],
+            [
+              "20260607",
+              "Rich Shorts",
+              "汇总",
+              "\n                             \n                                    kwai\n                                    40%45%\n                            ",
+              "2969",
+              "1284.41",
+              "1279.90",
+              "",
+              "4.51",
+              "405.09",
+              "0.43",
+              "0.14"
+            ],
+            [
+              "20260607",
+              "Drama Fun",
+              "汇总",
+              "\n                             \n                                    tiktok\n                                    60%65%\n                            ",
+              "4752",
+              "1122.51",
+              "1065.94",
+              "49.35",
+              "7.22",
+              "608.21",
+              "0.22",
+              "0.13"
+            ],
+            [
+              "20260607",
+              "Drama Fun",
+              "汇总",
+              "\n                             \n                                    google\n                                    60%65%\n                            ",
+              "3373",
+              "684.00",
+              "663.98",
+              "14.89",
+              "5.13",
+              "349.90",
+              "0.20",
+              "0.10"
+            ],
+            [
+              "20260607",
+              "Drama Fun",
+              "汇总",
+              "\n                             \n                                    unity\n                                    55%60%\n                            ",
+              "1022",
+              "638.28",
+              "619.30",
+              "17.43",
+              "1.55",
+              "377.17",
+              "0.61",
+              "0.37"
+            ]
+          ]
+        },
+        {
+          "id": "camp",
+          "name": "camp表原始数据.csv",
+          "grain": "日期 / App / 国家 / 渠道 / 账号 / campaign",
+          "use": "验证计划事实层成本、回收、CPI、CTR、CVR、ROI。",
+          "fields": [
+            "日期",
+            "App",
+            "国家",
+            "渠道",
+            "账号",
+            "代投",
+            "campaign",
+            "总成本",
+            "首日ROI",
+            "消耗",
+            "回收",
+            "提现"
+          ],
+          "rows": [
+            [
+              "20260601",
+              "Drama Fun",
+              "印度尼西亚",
+              "\n                             \n                                    kwai\n                                    35%40%\n                            ",
+              "77511677",
+              "空",
+              "635458_ID_DramaFun_1677_Kwai_LM_D7ROAS50_JF_260421_1",
+              "498.13",
+              "0.34",
+              "485.98",
+              "166.66",
+              "9.92"
+            ],
+            [
+              "20260601",
+              "Drama Fun",
+              "巴西",
+              "\n                             \n                                    kwai\n                                    40%45%\n                            ",
+              "76942188",
+              "空",
+              "635458_BR_DramaFun_2188_Kwai_D7ROAS47_JF_260522_1",
+              "395.49",
+              "0.38",
+              "389.39",
+              "148.66",
+              "5.20"
+            ],
+            [
+              "20260601",
+              "Drama Fun",
+              "印度尼西亚",
+              "\n                             \n                                    kwai\n                                    35%40%\n                            ",
+              "77511677",
+              "空",
+              "635458_ID_DramaFun_1677_Kwai_Feed_D7ROAS45_JF_260402",
+              "336.68",
+              "0.35",
+              "330.95",
+              "117.08",
+              "4.42"
+            ],
+            [
+              "20260601",
+              "Rich Shorts",
+              "印度尼西亚",
+              "\n                             \n                                    kwai\n                                    35%40%\n                            ",
+              "77700133",
+              "空",
+              "670402_ID_RichShorts_0133_Kwai_LM_D7ROAS50_JF_260421_1",
+              "299.21",
+              "0.29",
+              "297.32",
+              "86.65",
+              "0.00"
+            ],
+            [
+              "20260601",
+              "Rich Shorts",
+              "印度尼西亚",
+              "\n                             \n                                    kwai\n                                    35%40%\n                            ",
+              "77700130",
+              "空",
+              "670402_ID_RichShorts_0130_Kwai_onlyLM_VO_QL_260318",
+              "276.21",
+              "0.32",
+              "274.85",
+              "87.44",
+              "0.00"
+            ],
+            [
+              "20260601",
+              "Rave Foxy",
+              "泰国",
+              "\n                             \n                                    mintegral\n                                    65%70%\n                            ",
+              "",
+              "空",
+              "649410_RaveFoxa_MTG_D0ROAS_251121",
+              "271.86",
+              "0.68",
+              "271.03",
+              "183.37",
+              "0.00"
+            ]
+          ]
+        },
+        {
+          "id": "derived",
+          "name": "camp表衍生-预估毛利、预估D7ROI等计算.csv",
+          "grain": "Camp 原始表的计算衍生层",
+          "use": "只保留预估7日ROI、预估毛利、近7日预估均值作为 Agent 参考。",
+          "fields": [
+            "日期",
+            "App",
+            "渠道",
+            "国家",
+            "账号",
+            "campaign",
+            "总成本",
+            "预估7日ROI",
+            "预估毛利",
+            "近7日预估均值"
+          ],
+          "rows": [
+            [
+              "20260607",
+              "Drama Fun",
+              "kwai",
+              "巴西",
+              "76942188",
+              "635458_BR_DramaFun_2188_Kwai_D7ROAS47_JF_260522_1",
+              "$713.51",
+              "63.91%",
+              "$20.76",
+              "62.25%"
+            ],
+            [
+              "20260607",
+              "Drama Fun",
+              "kwai",
+              "印度尼西亚",
+              "77511677",
+              "635458_ID_DramaFun_1677_Kwai_LM_D7ROAS50_JF_260421_1",
+              "$509.96",
+              "50.76%",
+              "$-52.22",
+              "51.38%"
+            ],
+            [
+              "20260607",
+              "Drama Fun",
+              "kwai",
+              "印度尼西亚",
+              "77511677",
+              "635458_ID_DramaFun_1677_Kwai_Feed_D7ROAS45_JF_260402",
+              "$312.17",
+              "52.84%",
+              "$-6.73",
+              "54.15%"
+            ],
+            [
+              "20260607",
+              "Rich Shorts",
+              "kwai",
+              "印度尼西亚",
+              "77700133",
+              "670402_ID_RichShorts_0133_Kwai_LM_D7ROAS50_JF_260421_1",
+              "$295.06",
+              "53.34%",
+              "$-22.59",
+              "48.83%"
+            ],
+            [
+              "20260607",
+              "Drama Fun",
+              "kwai",
+              "巴西",
+              "76942188",
+              "635458_BR_DramaFun_2188_Kwai_D7ROAS47_JF_260528_1",
+              "$282.30",
+              "53.14%",
+              "$-22.20",
+              "59.25%"
+            ],
+            [
+              "20260607",
+              "Drama Fun",
+              "kwai",
+              "印度尼西亚",
+              "77511677",
+              "635458_ID_DramaFun_1677_Kwai_Feed_D7ROAS33_JF_260418_2",
+              "$206.25",
+              "56.83%",
+              "$3.77",
+              "50.22%"
+            ]
+          ]
+        },
+        {
+          "id": "creative",
+          "name": "MTG素材数据-回收.csv",
+          "grain": "vp_日期 / vp_country / vp_campaign / vp_creative_set",
+          "use": "验证素材消耗、D0 / D7 ROI、CTR、CVR、IR。",
+          "fields": [
+            "时间",
+            "vp_日期",
+            "vp_country",
+            "vp_campaign",
+            "vp_creative_set",
+            "消耗",
+            "新增",
+            "CPI",
+            "D0 ROI",
+            "D7 ROI",
+            "首日LTV",
+            "首日IPU"
+          ],
+          "rows": [
+            [
+              "2026-06-01至2026-06-07",
+              "20260607",
+              "",
+              "635458_DramaFun_MTG_D0ROAS_251229",
+              "DM_ID_0511_qiepian_chuliangwangzhuan_1_Drama Fun_20260310_JL_SP_ID_3_ID-03_SG_DramaFun_ZJF_MTG_ID_260507_1",
+              "-",
+              "1",
+              "0",
+              "-",
+              "-",
+              "0.29",
+              "28"
+            ],
+            [
+              "2026-06-01至2026-06-07",
+              "20260603",
+              "TH",
+              "635458_DramaFun_MTG_TH_D0ROAS60_260521",
+              "TH_JL_01_DramaFun_20260521_gzsg_1003570_0_TH_JL_01_DramaFun_20260312_gzsg_1003570_6_DM_TH-0410_01_SG_DramaFun_ZJF_MTG_TH_260508_1",
+              "0.58",
+              "1",
+              "0.58",
+              "5.84%",
+              "5.84%",
+              "0.03",
+              "2"
+            ],
+            [
+              "2026-06-01至2026-06-07",
+              "20260601",
+              "BR",
+              "635458_DramaFun_MTG_D0ROAS_251229",
+              "DramaFun_20251224_wzfx_Drama_20251226_CK_SP_PT_1_BR1",
+              "0.98",
+              "2",
+              "0.49",
+              "21.79%",
+              "21.79%",
+              "0.11",
+              "21.5"
+            ],
+            [
+              "2026-06-01至2026-06-07",
+              "20260602",
+              "TH",
+              "635458_DramaFun_MTG_TH_D0ROAS60_260521",
+              "DM_TH_tiktokbaqu_zhongduWZ0521_635458_TH_DramaFun_0225_TT_D0ROAS60_DT_20260508_55_SG_DramaFun_ZJF_MTG_TH_260508_3",
+              "1.12",
+              "4",
+              "0.28",
+              "158.76%",
+              "164.95%",
+              "0.44",
+              "110.25"
+            ],
+            [
+              "2026-06-01至2026-06-07",
+              "20260602",
+              "TH",
+              "635458_DramaFun_MTG_TH_D0ROAS60_260521",
+              "TH_JL_01_DramaFun_20260521_gzsg_1003570_0_TH_JL_01_DramaFun_20260312_gzsg_1003570_6_DM_TH-0410_02_SG_DramaFun_ZJF_MTG_TH_260508_3",
+              "0.2",
+              "2",
+              "0.1",
+              "53.79%",
+              "53.79%",
+              "0.05",
+              "4.5"
+            ],
+            [
+              "2026-06-01至2026-06-07",
+              "20260606",
+              "ID",
+              "635458_DramaFun_MTG_ID_D0ROAS65_260413",
+              "DM_ID_0511_qiepian_chuliangwangzhuan_1_Drama Fun_20260310_JL_SP_ID_6_ID-01_SG_DramaFun_ZJF_MTG_ID_260507_2",
+              "-",
+              "1",
+              "0",
+              "-",
+              "-",
+              "0.31",
+              "52"
+            ]
+          ]
+        },
+        {
+          "id": "sites",
+          "name": "MTG-Site数据-回收_20260601-20260609.csv",
+          "grain": "vp_日期 / vp_campaign / vp_country / vp_site",
+          "use": "验证 MTG / Site 子渠道消耗、ROI 和流量质量。",
+          "fields": [
+            "日期",
+            "vp_日期",
+            "vp_campaign",
+            "vp_country",
+            "vp_site",
+            "消耗",
+            "新增",
+            "CPI",
+            "D0 ROI",
+            "D7 ROI",
+            "首日LTV",
+            "首日IPU"
+          ],
+          "rows": [
+            [
+              "2026-06-01(一)至2026-06-09(二)",
+              "20260603",
+              "635458_DramaFun_MTG_D0ROAS_251229",
+              "ID",
+              "mtg1172007592",
+              "32.76",
+              "74",
+              "0.4",
+              "36.24%",
+              "72.22%",
+              "0.16",
+              "33.26"
+            ],
+            [
+              "2026-06-01(一)至2026-06-09(二)",
+              "20260603",
+              "635458_DramaFun_MTG_ID_D0ROAS65_260413",
+              "ID",
+              "mtg1172007592",
+              "22.34",
+              "77",
+              "0.29",
+              "78.53%",
+              "128.97%",
+              "0.23",
+              "46.51"
+            ],
+            [
+              "2026-06-01(一)至2026-06-09(二)",
+              "20260601",
+              "635458_DramaFun_MTG_ID_D0ROAS65_260413",
+              "ID",
+              "mtg1172007592",
+              "21.2",
+              "48",
+              "0.4",
+              "45.67%",
+              "85.75%",
+              "0.2",
+              "37.79"
+            ],
+            [
+              "2026-06-01(一)至2026-06-09(二)",
+              "20260602",
+              "635458_DramaFun_MTG_ID_D0ROAS65_260413",
+              "ID",
+              "mtg1172007592",
+              "20.55",
+              "75",
+              "0.25",
+              "73.12%",
+              "109.65%",
+              "0.2",
+              "37.27"
+            ],
+            [
+              "2026-06-01(一)至2026-06-09(二)",
+              "20260601",
+              "635458_DramaFun_MTG_D0ROAS_251229",
+              "ID",
+              "mtg1172007592",
+              "18.2",
+              "58",
+              "0.3",
+              "67.5%",
+              "130.31%",
+              "0.21",
+              "49.19"
+            ],
+            [
+              "2026-06-01(一)至2026-06-09(二)",
+              "20260602",
+              "635458_DramaFun_MTG_D0ROAS_251229",
+              "ID",
+              "mtg1172007592",
+              "14.83",
+              "61",
+              "0.22",
+              "92.22%",
+              "102.93%",
+              "0.22",
+              "41.07"
+            ]
+          ]
+        }
+      ],
+      "dimensionRows": {
+        "IAA": {
+          "product": [
+            {
+              "label": "Drama Fun",
+              "metric": "回收 $3947",
+              "impact": "成本 $7530",
+              "status": "承压",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "汇总"
+              }
+            },
+            {
+              "label": "Rich Shorts",
+              "metric": "回收 $623",
+              "impact": "成本 $1472",
+              "status": "承压",
+              "context": {
+                "product": "Rich Shorts",
+                "channel": "Kwai",
+                "country": "汇总"
+              }
+            },
+            {
+              "label": "Rave Foxy",
+              "metric": "回收 $521",
+              "impact": "成本 $403",
+              "status": "机会",
+              "context": {
+                "product": "Rave Foxy",
+                "channel": "Kwai",
+                "country": "汇总"
+              }
+            },
+            {
+              "label": "Dana Drama",
+              "metric": "回收 $67",
+              "impact": "成本 $318",
+              "status": "承压",
+              "context": {
+                "product": "Dana Drama",
+                "channel": "Kwai",
+                "country": "汇总"
+              }
+            }
+          ],
+          "channel": [
+            {
+              "label": "Kwai",
+              "metric": "回收 $1616",
+              "impact": "成本 $5077",
+              "status": "进渠道细表",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "汇总"
+              }
+            },
+            {
+              "label": "Facebook",
+              "metric": "回收 $886",
+              "impact": "成本 $1585",
+              "status": "进渠道细表",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Facebook",
+                "country": "汇总"
+              }
+            },
+            {
+              "label": "Unity",
+              "metric": "回收 $704",
+              "impact": "成本 $1141",
+              "status": "进渠道细表",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Unity",
+                "country": "汇总"
+              }
+            },
+            {
+              "label": "TikTok",
+              "metric": "回收 $608",
+              "impact": "成本 $1123",
+              "status": "进渠道细表",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "TikTok",
+                "country": "汇总"
+              }
+            }
+          ],
+          "country": [
+            {
+              "label": "汇总",
+              "metric": "回收 $5184",
+              "impact": "成本 $9745",
+              "status": "市场承压",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "汇总"
+              }
+            }
+          ],
+          "product-channel": [
+            {
+              "label": "Drama Fun x Kwai x 汇总",
+              "metric": "D0 ROI 33%",
+              "impact": "成本 $3475",
+              "status": "进入渠道细表",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "汇总"
+              }
+            },
+            {
+              "label": "Drama Fun x Facebook x 汇总",
+              "metric": "D0 ROI 56%",
+              "impact": "成本 $1581",
+              "status": "观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Facebook",
+                "country": "汇总"
+              }
+            },
+            {
+              "label": "Rich Shorts x Kwai x 汇总",
+              "metric": "D0 ROI 32%",
+              "impact": "成本 $1284",
+              "status": "进入渠道细表",
+              "context": {
+                "product": "Rich Shorts",
+                "channel": "Kwai",
+                "country": "汇总"
+              }
+            }
+          ],
+          "product-country": [
+            {
+              "label": "Drama Fun x Kwai x 汇总",
+              "metric": "D0 ROI 33%",
+              "impact": "成本 $3475",
+              "status": "进入渠道细表",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "汇总"
+              }
+            },
+            {
+              "label": "Drama Fun x Facebook x 汇总",
+              "metric": "D0 ROI 56%",
+              "impact": "成本 $1581",
+              "status": "观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Facebook",
+                "country": "汇总"
+              }
+            },
+            {
+              "label": "Rich Shorts x Kwai x 汇总",
+              "metric": "D0 ROI 32%",
+              "impact": "成本 $1284",
+              "status": "进入渠道细表",
+              "context": {
+                "product": "Rich Shorts",
+                "channel": "Kwai",
+                "country": "汇总"
+              }
+            }
+          ],
+          "channel-country": [
+            {
+              "label": "Drama Fun x Kwai x 汇总",
+              "metric": "D0 ROI 33%",
+              "impact": "成本 $3475",
+              "status": "进入渠道细表",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "汇总"
+              }
+            },
+            {
+              "label": "Drama Fun x Facebook x 汇总",
+              "metric": "D0 ROI 56%",
+              "impact": "成本 $1581",
+              "status": "观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Facebook",
+                "country": "汇总"
+              }
+            },
+            {
+              "label": "Rich Shorts x Kwai x 汇总",
+              "metric": "D0 ROI 32%",
+              "impact": "成本 $1284",
+              "status": "进入渠道细表",
+              "context": {
+                "product": "Rich Shorts",
+                "channel": "Kwai",
+                "country": "汇总"
+              }
+            }
+          ],
+          "product-channel-country": [
+            {
+              "label": "Drama Fun x Kwai x 汇总",
+              "metric": "D0 ROI 33%",
+              "impact": "成本 $3475",
+              "status": "进入渠道细表",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "汇总"
+              }
+            },
+            {
+              "label": "Drama Fun x Facebook x 汇总",
+              "metric": "D0 ROI 56%",
+              "impact": "成本 $1581",
+              "status": "观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Facebook",
+                "country": "汇总"
+              }
+            },
+            {
+              "label": "Rich Shorts x Kwai x 汇总",
+              "metric": "D0 ROI 32%",
+              "impact": "成本 $1284",
+              "status": "进入渠道细表",
+              "context": {
+                "product": "Rich Shorts",
+                "channel": "Kwai",
+                "country": "汇总"
+              }
+            }
+          ],
+          "summary": [
+            {
+              "label": "IAA 真实回收汇总",
+              "metric": "样本 33 行",
+              "impact": "Top 成本 $3475",
+              "status": "展开维度",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "汇总"
+              }
+            }
+          ]
+        },
+        "IAP": {
+          "product": [
+            {
+              "label": "Drama Fun x Kwai x 巴西",
+              "metric": "预估 D7 64%",
+              "impact": "预估毛利 $20.8",
+              "status": "机会确认",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "巴西"
+              }
+            },
+            {
+              "label": "Drama Fun x Kwai x 印度尼西亚",
+              "metric": "预估 D7 51%",
+              "impact": "预估毛利 -$52.2",
+              "status": "待观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "印度尼西亚"
+              }
+            },
+            {
+              "label": "Drama Fun x Google x 印度尼西亚",
+              "metric": "预估 D7 78%",
+              "impact": "预估毛利 -$76.2",
+              "status": "待观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Google",
+                "country": "印度尼西亚"
+              }
+            }
+          ],
+          "channel": [
+            {
+              "label": "Kwai",
+              "metric": "预估 D7 64%",
+              "impact": "毛利 $20.8",
+              "status": "正常",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "巴西"
+              }
+            },
+            {
+              "label": "Kwai",
+              "metric": "预估 D7 51%",
+              "impact": "毛利 -$52.2",
+              "status": "待观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "印度尼西亚"
+              }
+            },
+            {
+              "label": "Google",
+              "metric": "预估 D7 78%",
+              "impact": "毛利 -$76.2",
+              "status": "待观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Google",
+                "country": "印度尼西亚"
+              }
+            },
+            {
+              "label": "Unity",
+              "metric": "预估 D7 107%",
+              "impact": "毛利 $45.7",
+              "status": "正常",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Unity",
+                "country": "美国"
+              }
+            }
+          ],
+          "country": [
+            {
+              "label": "巴西",
+              "metric": "近7日均值 62%",
+              "impact": "毛利 $20.8",
+              "status": "观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "巴西"
+              }
+            },
+            {
+              "label": "印度尼西亚",
+              "metric": "近7日均值 51%",
+              "impact": "毛利 -$52.2",
+              "status": "观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "印度尼西亚"
+              }
+            },
+            {
+              "label": "印度尼西亚",
+              "metric": "近7日均值 102%",
+              "impact": "毛利 -$76.2",
+              "status": "观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Google",
+                "country": "印度尼西亚"
+              }
+            },
+            {
+              "label": "美国",
+              "metric": "近7日均值 104%",
+              "impact": "毛利 $45.7",
+              "status": "观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Unity",
+                "country": "美国"
+              }
+            }
+          ],
+          "product-channel": [
+            {
+              "label": "Drama Fun x Kwai x 巴西",
+              "metric": "预估 D7 64%",
+              "impact": "预估毛利 $20.8",
+              "status": "机会确认",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "巴西"
+              }
+            },
+            {
+              "label": "Drama Fun x Kwai x 印度尼西亚",
+              "metric": "预估 D7 51%",
+              "impact": "预估毛利 -$52.2",
+              "status": "待观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "印度尼西亚"
+              }
+            },
+            {
+              "label": "Drama Fun x Google x 印度尼西亚",
+              "metric": "预估 D7 78%",
+              "impact": "预估毛利 -$76.2",
+              "status": "待观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Google",
+                "country": "印度尼西亚"
+              }
+            }
+          ],
+          "product-country": [
+            {
+              "label": "Drama Fun x Kwai x 巴西",
+              "metric": "预估 D7 64%",
+              "impact": "预估毛利 $20.8",
+              "status": "机会确认",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "巴西"
+              }
+            },
+            {
+              "label": "Drama Fun x Kwai x 印度尼西亚",
+              "metric": "预估 D7 51%",
+              "impact": "预估毛利 -$52.2",
+              "status": "待观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "印度尼西亚"
+              }
+            },
+            {
+              "label": "Drama Fun x Google x 印度尼西亚",
+              "metric": "预估 D7 78%",
+              "impact": "预估毛利 -$76.2",
+              "status": "待观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Google",
+                "country": "印度尼西亚"
+              }
+            }
+          ],
+          "channel-country": [
+            {
+              "label": "Drama Fun x Kwai x 巴西",
+              "metric": "预估 D7 64%",
+              "impact": "预估毛利 $20.8",
+              "status": "机会确认",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "巴西"
+              }
+            },
+            {
+              "label": "Drama Fun x Kwai x 印度尼西亚",
+              "metric": "预估 D7 51%",
+              "impact": "预估毛利 -$52.2",
+              "status": "待观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "印度尼西亚"
+              }
+            },
+            {
+              "label": "Drama Fun x Google x 印度尼西亚",
+              "metric": "预估 D7 78%",
+              "impact": "预估毛利 -$76.2",
+              "status": "待观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Google",
+                "country": "印度尼西亚"
+              }
+            }
+          ],
+          "product-channel-country": [
+            {
+              "label": "Drama Fun x Kwai x 巴西",
+              "metric": "预估 D7 64%",
+              "impact": "预估毛利 $20.8",
+              "status": "机会确认",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "巴西"
+              }
+            },
+            {
+              "label": "Drama Fun x Kwai x 印度尼西亚",
+              "metric": "预估 D7 51%",
+              "impact": "预估毛利 -$52.2",
+              "status": "待观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "印度尼西亚"
+              }
+            },
+            {
+              "label": "Drama Fun x Google x 印度尼西亚",
+              "metric": "预估 D7 78%",
+              "impact": "预估毛利 -$76.2",
+              "status": "待观察",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Google",
+                "country": "印度尼西亚"
+              }
+            }
+          ],
+          "summary": [
+            {
+              "label": "IAP 代理视角",
+              "metric": "Camp 衍生 408 行",
+              "impact": "缺订阅专表",
+              "status": "进入 Research",
+              "context": {
+                "product": "Drama Fun",
+                "channel": "Kwai",
+                "country": "巴西"
+              }
+            }
+          ]
+        }
+      },
+      "dimensionOptions": {
+        "IAA": {
+          "product": [
+            "All",
+            "Drama Fun",
+            "Rich Shorts",
+            "Rave Foxy",
+            "Dana Drama"
+          ],
+          "channel": [
+            "All",
+            "Kwai",
+            "Facebook",
+            "TikTok",
+            "Google",
+            "Unity"
+          ],
+          "country": [
+            "All",
+            "汇总"
+          ]
+        },
+        "IAP": {
+          "product": [
+            "All",
+            "Drama Fun",
+            "Rich Shorts"
+          ],
+          "channel": [
+            "All",
+            "Kwai"
+          ],
+          "country": [
+            "All",
+            "巴西",
+            "印度尼西亚"
+          ]
+        }
+      },
+      "channelRows": {
+        "Kwai": [
+          {
+            "name": "635458_ID_DramaFun_1677_Kwai_LM_D7ROAS50_JF_260421_1",
+            "country": "印度尼西亚",
+            "metric": "ROI 34%",
+            "cost": "$498.1",
+            "quality": "CPI $0.33",
+            "impact": "承压",
+            "status": "看计划"
+          },
+          {
+            "name": "635458_BR_DramaFun_2188_Kwai_D7ROAS47_JF_260522_1",
+            "country": "巴西",
+            "metric": "ROI 38%",
+            "cost": "$395.5",
+            "quality": "CPI $0.66",
+            "impact": "承压",
+            "status": "看计划"
+          },
+          {
+            "name": "635458_ID_DramaFun_1677_Kwai_Feed_D7ROAS45_JF_260402",
+            "country": "印度尼西亚",
+            "metric": "ROI 35%",
+            "cost": "$336.7",
+            "quality": "CPI $0.38",
+            "impact": "承压",
+            "status": "看计划"
+          },
+          {
+            "name": "670402_ID_RichShorts_0133_Kwai_LM_D7ROAS50_JF_260421_1",
+            "country": "印度尼西亚",
+            "metric": "ROI 29%",
+            "cost": "$299.2",
+            "quality": "CPI $0.24",
+            "impact": "承压",
+            "status": "看计划"
+          },
+          {
+            "name": "670402_ID_RichShorts_0130_Kwai_onlyLM_VO_QL_260318",
+            "country": "印度尼西亚",
+            "metric": "ROI 32%",
+            "cost": "$276.2",
+            "quality": "CPI $0.31",
+            "impact": "承压",
+            "status": "看计划"
+          }
+        ],
+        "MTG": [
+          {
+            "name": "mtg1172007592",
+            "country": "ID",
+            "metric": "D7 ROI 72%",
+            "cost": "$32.8",
+            "quality": "CTR 16.11%",
+            "impact": "观察",
+            "status": "看 Site"
+          },
+          {
+            "name": "mtg1172007592",
+            "country": "ID",
+            "metric": "D7 ROI 129%",
+            "cost": "$22.3",
+            "quality": "CTR 37.77%",
+            "impact": "观察",
+            "status": "看 Site"
+          },
+          {
+            "name": "mtg1172007592",
+            "country": "ID",
+            "metric": "D7 ROI 86%",
+            "cost": "$21.2",
+            "quality": "CTR 35.82%",
+            "impact": "观察",
+            "status": "看 Site"
+          },
+          {
+            "name": "mtg1172007592",
+            "country": "ID",
+            "metric": "D7 ROI 110%",
+            "cost": "$20.6",
+            "quality": "CTR 37.02%",
+            "impact": "观察",
+            "status": "看 Site"
+          },
+          {
+            "name": "mtg1172007592",
+            "country": "ID",
+            "metric": "D7 ROI 130%",
+            "cost": "$18.2",
+            "quality": "CTR 16.81%",
+            "impact": "观察",
+            "status": "看 Site"
+          }
+        ],
+        "Unity": [
+          {
+            "name": "mtg1172007592",
+            "country": "ID",
+            "metric": "D7 ROI 72%",
+            "cost": "$32.8",
+            "quality": "CVR 3.64%",
+            "impact": "观察",
+            "status": "停弱源候选"
+          },
+          {
+            "name": "mtg1172007592",
+            "country": "ID",
+            "metric": "D7 ROI 129%",
+            "cost": "$22.3",
+            "quality": "CVR 4.10%",
+            "impact": "观察",
+            "status": "停弱源候选"
+          },
+          {
+            "name": "mtg1172007592",
+            "country": "ID",
+            "metric": "D7 ROI 86%",
+            "cost": "$21.2",
+            "quality": "CVR 4.25%",
+            "impact": "观察",
+            "status": "停弱源候选"
+          },
+          {
+            "name": "mtg1172007592",
+            "country": "ID",
+            "metric": "D7 ROI 110%",
+            "cost": "$20.6",
+            "quality": "CVR 3.61%",
+            "impact": "观察",
+            "status": "停弱源候选"
+          },
+          {
+            "name": "mtg1172007592",
+            "country": "ID",
+            "metric": "D7 ROI 130%",
+            "cost": "$18.2",
+            "quality": "CVR 2.95%",
+            "impact": "观察",
+            "status": "停弱源候选"
+          }
+        ],
+        "TikTok": [
+          {
+            "name": "DM_ID_0511_qiepian_chuliangwangzhuan_1_Drama Fera Ganhe ",
+            "country": "ID",
+            "metric": "D7 ROI 110%",
+            "cost": "$20.4",
+            "quality": "CTR 37.61%",
+            "impact": "观察",
+            "status": "素材复查"
+          },
+          {
+            "name": "DM_ID_0511_qiepian_chuliangwangzhuan_1_Drama Fera Ganhe ",
+            "country": "ID",
+            "metric": "D7 ROI 82%",
+            "cost": "$18.9",
+            "quality": "CTR 39.42%",
+            "impact": "观察",
+            "status": "素材复查"
+          },
+          {
+            "name": "DM_ID_0511_qiepian_chuliangwangzhuan_1_Drama Fera Ganhe ",
+            "country": "ID",
+            "metric": "D7 ROI 100%",
+            "cost": "$16.4",
+            "quality": "CTR 40.05%",
+            "impact": "观察",
+            "status": "素材复查"
+          },
+          {
+            "name": "DramaFun_20251224_wzfx_Drama_20251226_CK_SP_PT_1_Drama_2",
+            "country": "BR",
+            "metric": "D7 ROI 65%",
+            "cost": "$12.1",
+            "quality": "CTR 39.71%",
+            "impact": "观察",
+            "status": "素材复查"
+          },
+          {
+            "name": "DramaFun_20251224_wzfx_Drama_20251226_CK_SP_PT_1_Drama_2",
+            "country": "BR",
+            "metric": "D7 ROI 62%",
+            "cost": "$11.3",
+            "quality": "CTR 38.20%",
+            "impact": "观察",
+            "status": "素材复查"
+          }
+        ],
+        "Facebook": [
+          {
+            "name": "DM_ID_0511_qiepian_chuliangwangzhuan_1_Drama Fera Ganhe ",
+            "country": "ID",
+            "metric": "D7 ROI 110%",
+            "cost": "$20.4",
+            "quality": "CVR 4.69%",
+            "impact": "观察",
+            "status": "广告组复查"
+          },
+          {
+            "name": "DM_ID_0511_qiepian_chuliangwangzhuan_1_Drama Fera Ganhe ",
+            "country": "ID",
+            "metric": "D7 ROI 82%",
+            "cost": "$18.9",
+            "quality": "CVR 4.06%",
+            "impact": "观察",
+            "status": "广告组复查"
+          },
+          {
+            "name": "DM_ID_0511_qiepian_chuliangwangzhuan_1_Drama Fera Ganhe ",
+            "country": "ID",
+            "metric": "D7 ROI 100%",
+            "cost": "$16.4",
+            "quality": "CVR 3.87%",
+            "impact": "观察",
+            "status": "广告组复查"
+          },
+          {
+            "name": "DramaFun_20251224_wzfx_Drama_20251226_CK_SP_PT_1_Drama_2",
+            "country": "BR",
+            "metric": "D7 ROI 65%",
+            "cost": "$12.1",
+            "quality": "CVR 6.05%",
+            "impact": "观察",
+            "status": "广告组复查"
+          },
+          {
+            "name": "DramaFun_20251224_wzfx_Drama_20251226_CK_SP_PT_1_Drama_2",
+            "country": "BR",
+            "metric": "D7 ROI 62%",
+            "cost": "$11.3",
+            "quality": "CVR 5.26%",
+            "impact": "观察",
+            "status": "广告组复查"
+          }
+        ],
+        "Google": [
+          {
+            "name": "DM_ID_0511_qiepian_chuliangwangzhuan_1_Drama Fera Ganhe ",
+            "country": "ID",
+            "metric": "D7 ROI 110%",
+            "cost": "$20.4",
+            "quality": "CTR 37.61%",
+            "impact": "观察",
+            "status": "资产组复查"
+          },
+          {
+            "name": "DM_ID_0511_qiepian_chuliangwangzhuan_1_Drama Fera Ganhe ",
+            "country": "ID",
+            "metric": "D7 ROI 82%",
+            "cost": "$18.9",
+            "quality": "CTR 39.42%",
+            "impact": "观察",
+            "status": "资产组复查"
+          },
+          {
+            "name": "DM_ID_0511_qiepian_chuliangwangzhuan_1_Drama Fera Ganhe ",
+            "country": "ID",
+            "metric": "D7 ROI 100%",
+            "cost": "$16.4",
+            "quality": "CTR 40.05%",
+            "impact": "观察",
+            "status": "资产组复查"
+          },
+          {
+            "name": "DramaFun_20251224_wzfx_Drama_20251226_CK_SP_PT_1_Drama_2",
+            "country": "BR",
+            "metric": "D7 ROI 65%",
+            "cost": "$12.1",
+            "quality": "CTR 39.71%",
+            "impact": "观察",
+            "status": "资产组复查"
+          },
+          {
+            "name": "DramaFun_20251224_wzfx_Drama_20251226_CK_SP_PT_1_Drama_2",
+            "country": "BR",
+            "metric": "D7 ROI 62%",
+            "cost": "$11.3",
+            "quality": "CTR 38.20%",
+            "impact": "观察",
+            "status": "资产组复查"
+          }
+        ],
+        "Apply": [
+          {
+            "name": "DM_ID_0511_qiepian_chuliangwangzhuan_1_Drama Fera Ganhe ",
+            "country": "ID",
+            "metric": "D7 ROI 110%",
+            "cost": "$20.4",
+            "quality": "CVR 4.69%",
+            "impact": "观察",
+            "status": "创意复查"
+          },
+          {
+            "name": "DM_ID_0511_qiepian_chuliangwangzhuan_1_Drama Fera Ganhe ",
+            "country": "ID",
+            "metric": "D7 ROI 82%",
+            "cost": "$18.9",
+            "quality": "CVR 4.06%",
+            "impact": "观察",
+            "status": "创意复查"
+          },
+          {
+            "name": "DM_ID_0511_qiepian_chuliangwangzhuan_1_Drama Fera Ganhe ",
+            "country": "ID",
+            "metric": "D7 ROI 100%",
+            "cost": "$16.4",
+            "quality": "CVR 3.87%",
+            "impact": "观察",
+            "status": "创意复查"
+          },
+          {
+            "name": "DramaFun_20251224_wzfx_Drama_20251226_CK_SP_PT_1_Drama_2",
+            "country": "BR",
+            "metric": "D7 ROI 65%",
+            "cost": "$12.1",
+            "quality": "CVR 6.05%",
+            "impact": "观察",
+            "status": "创意复查"
+          },
+          {
+            "name": "DramaFun_20251224_wzfx_Drama_20251226_CK_SP_PT_1_Drama_2",
+            "country": "BR",
+            "metric": "D7 ROI 62%",
+            "cost": "$11.3",
+            "quality": "CVR 5.26%",
+            "impact": "观察",
+            "status": "创意复查"
+          }
+        ]
+      },
+      "actionResults": {
+        "real-camp-margin-review": {
+          "title": "查看结果：计划毛利复核",
+          "status": "已确认结果",
+          "summary": "已复核 camp表衍生-预估毛利、预估D7ROI等计算.csv：高成本计划中 3 个预估毛利为负，优先进入 Watch，不直接放量。",
+          "evidence": [
+            "635458_BR_DramaFun_2188_Kwai_D7ROAS47_JF_260522_1：预估毛利 $20.8 / 预估 D7 64%",
+            "635458_ID_DramaFun_1677_Kwai_LM_D7ROAS50_JF_260421_1：预估毛利 -$52.2 / 预估 D7 51%",
+            "635458_ID_DramaFun_Google_ROAS70_QL_5394_same_SP_TP_CWZ_260515_1：预估毛利 -$76.2 / 预估 D7 78%"
+          ],
+          "next": "保留 Watch，等次日 Camp 衍生指标刷新后再决定是否转 Action。"
+        },
+        "real-site-quality-review": {
+          "title": "查看结果：Site 质量复查",
+          "status": "已完成",
+          "summary": "已抽查 MTG-Site数据-回收_20260601-20260609.csv：高消耗 Site 覆盖 6 个样例，低 D7 ROI 的 Site 需要继续看国家和计划组合。",
+          "evidence": [
+            "mtg1172007592 / ID：消耗 $32.8，D7 ROI 72%",
+            "mtg1172007592 / ID：消耗 $22.3，D7 ROI 129%",
+            "mtg1172007592 / ID：消耗 $21.2，D7 ROI 86%"
+          ],
+          "next": "进入渠道细表确认是否停弱源或限预算。"
+        },
+        "real-creative-review": {
+          "title": "查看结果：素材表现复盘",
+          "status": "待确认结果",
+          "summary": "已读取 MTG素材数据-回收.csv：高消耗素材存在 CTR / CVR 分化，不能只凭素材消耗生成 Action。",
+          "evidence": [
+            "DM_ID_0511_qiepian_chuliangwangzhuan_1_Dra：消耗 $20.4，D7 ROI 110%",
+            "DM_ID_0511_qiepian_chuliangwangzhuan_1_Dra：消耗 $18.9，D7 ROI 82%",
+            "DM_ID_0511_qiepian_chuliangwangzhuan_1_Dra：消耗 $16.4，D7 ROI 100%"
+          ],
+          "next": "确认是否创建 Creative Workflow 做素材 Hook / CTA 复盘。"
+        }
+      }
+    };
+    Object.assign(data, REAL_PREVIEW_DATA.data);
+    const actionResults = REAL_PREVIEW_DATA.actionResults || {};
+    
+    const rawDataSources = REAL_PREVIEW_DATA.rawDataSources || [
       {
         id: "profit",
         name: "流水利润表",
@@ -3243,8 +5172,8 @@
     }
 
     function statusClass(value) {
-      if (["正常", "已确认", "已完成", "观察中"].includes(value)) return "ok";
-      if (["到期复查", "待确认", "暂缓", "待复盘"].includes(value)) return "watch";
+      if (["正常", "已确认", "已完成", "观察中", "已确认结果"].includes(value)) return "ok";
+      if (["到期复查", "待确认", "暂缓", "待复盘", "待确认结果"].includes(value)) return "watch";
       if (["高风险", "已升级", "阻塞"].includes(value)) return "risk";
       return "info";
     }
@@ -3482,8 +5411,24 @@
           </div>
         `;
       }
+      if (current === "待确认结果") {
+        return `
+          <div class="button-row">
+            <button class="action-button primary" type="button" onclick="setStatus('actions','${id}','已确认结果')">确认结果</button>
+            <button class="action-button" type="button" onclick="openActionResult('${id}')">查看结果</button>
+          </div>
+        `;
+      }
+      if (current === "已确认结果") {
+        return `<div class="button-row"><button class="action-button" type="button" onclick="openActionResult('${id}')">查看结果</button></div>`;
+      }
       if (current === "已完成") {
-        return `<span class="action-done-note">已完成，无需重复推进</span>`;
+        return `
+          <div class="button-row">
+            <button class="action-button primary" type="button" onclick="setStatus('actions','${id}','已确认结果')">确认结果</button>
+            <button class="action-button" type="button" onclick="openActionResult('${id}')">查看结果</button>
+          </div>
+        `;
       }
       return `
         <div class="button-row">
@@ -3696,6 +5641,7 @@
     }
 
     function formatDelta(metric, compareLabel) {
+      if (metric.deltaText) return `${compareLabel} ${metric.deltaText}`;
       const diff = metric.value - metric.compare;
       const sign = diff > 0 ? "+" : "";
       let text;
@@ -4378,7 +6324,8 @@
               <h4>${item[1]}</h4>
               <p>${item[6] || "P1"} · ${item[3]} · ${item[4]}</p>
               ${compact ? "" : `<div class="button-row">
-                ${["待确认", "进行中", "已完成", "待复盘", "阻塞", "暂缓"].map(v => `<button class="action-button ${current === v ? "active" : ""}" type="button" onclick="setStatus('actions','${item[0]}','${v}')">${v}</button>`).join("")}
+                ${["待确认", "进行中", "已完成", "待确认结果", "已确认结果", "待复盘", "阻塞", "暂缓"].map(v => `<button class="action-button ${current === v ? "active" : ""}" type="button" onclick="setStatus('actions','${item[0]}','${v}')">${v}</button>`).join("")}
+                ${actionResults[item[0]] ? `<button class="action-button" type="button" onclick="openActionResult('${item[0]}')">查看结果</button>` : ""}
               </div>`}
             </div>
             <span class="status ${statusClass(current)}">${current}</span>
@@ -4436,7 +6383,7 @@
       summary: "三个维度都汇总时，只看业务大盘。大盘判断已经在首页展示，这里通常继续展开至少一个维度。"
     };
 
-    const dimensionOptions = {
+    const dimensionOptions = REAL_PREVIEW_DATA.dimensionOptions || {
       IAA: {
         product: ["All", "CleanX", "PhotoLab"],
         channel: ["All", "Unity", "MTJ", "Apply", "快渠道", "Facebook", "TikTok", "Google"],
@@ -4453,7 +6400,7 @@
       return { label, metric, impact, status, context };
     }
 
-    const dimensionRows = {
+    const dimensionRows = REAL_PREVIEW_DATA.dimensionRows || {
       IAA: {
         product: [
           dimensionRow("CleanX", "D7 ROI 91%", "-$6.4k", "成本 +18%", { product: "CleanX", channel: "Unity", country: "US" }),
@@ -4641,6 +6588,7 @@
     }
 
     function channelTableRows(channel) {
+      if (REAL_PREVIEW_DATA.channelRows?.[channel]) return REAL_PREVIEW_DATA.channelRows[channel];
       const rows = {
         Unity: [
           channelRow("U-US-Scale-12", "US", "ROI 72%", "成本 $9.4k", "回收低于均值", "-$2.1k", "看计划"),
@@ -4965,6 +6913,44 @@
       navigateTo("deep-dive", { preserveStack: true });
     }
 
+    function openActionResult(id) {
+      const action = data.globalActions.find(item => item[0] === id);
+      const result = actionResults[id];
+      if (!result) return toast("这个 Action 还没有结果记录");
+      const current = state.actions[id] || result.status || "已完成";
+      state.deepDiveBack = state.screen === "action" ? "action" : "home";
+      applyDeepDiveContract({
+        routeType: "action-result",
+        intent: "查看 Action 完成后的结果和证据",
+        back: state.deepDiveBack,
+        path: action
+          ? ["Action Hub", "结果确认", action[1]]
+          : ["Action Hub", "结果确认", result.title],
+        context: [
+          `Action ID：${id}`,
+          `状态：${current}`,
+          `结果状态：${result.status}`
+        ],
+        primaryTitle: "完成结果",
+        decisionTitle: "确认结果",
+        next: "确认后沉淀到 Memory 或继续 Watch"
+      });
+      saveState();
+      document.getElementById("deepDiveTitle").textContent = result.title;
+      document.getElementById("deepDiveBody").textContent = result.summary;
+      document.getElementById("deepDiveNodes").innerHTML = (result.evidence || []).map((item, index) => `
+        <div class="formula-node"><strong>证据 ${index + 1}</strong><span>${item}</span></div>
+      `).join("");
+      document.getElementById("deepDiveDecision").innerHTML = `
+        <div class="formula-node"><strong>下一步</strong><span>${result.next}</span></div>
+        <div class="button-row">
+          <button class="action-button primary" type="button" onclick="setStatus('actions','${id}','已确认结果')">确认结果</button>
+          <button class="action-button" type="button" onclick="navigateTo('action')">去 Action Hub</button>
+        </div>
+      `;
+      navigateTo("deep-dive", { preserveStack: true });
+    }
+
     function openActionDraft(id) {
       const action = data.globalActions.find(item => item[0] === id);
       if (!action) return toast("这个 Action 草案不存在");
@@ -5003,10 +6989,12 @@
         ["优先级", action[6] || "P1"],
         ["动作类型", action[3]],
         ["复查 / 截止", action[4]],
-        ["当前状态", current]
+        ["当前状态", current],
+        ["完成结果", actionResults[id] ? actionResults[id].summary : "尚未产生结果记录"]
       ].map(item => `<div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join("");
       document.getElementById("deepDiveDecision").innerHTML = `
         ${renderActionControls(id, current)}
+        ${actionResults[id] ? `<div class="button-row"><button class="action-button" type="button" onclick="openActionResult('${id}')">查看结果</button></div>` : ""}
         <div class="button-row"><button class="action-button" type="button" onclick="navigateTo('action')">去 Action Hub</button></div>
         ${renderActionPausePanel(id, current)}
       `;
@@ -5038,6 +7026,7 @@
             status: state.actions[action[0]] || "待确认",
             business: action[5] || "通用",
             source: action[2],
+            result: actionResults[action[0]]?.summary || "",
             live: true
           };
         }
@@ -5046,6 +7035,7 @@
           title: item[1],
           status: item[2],
           business: item[3] || "通用",
+          result: item[4] || "",
           source: day.date > "2026-06-07" ? "计划" : "历史快照",
           live: false
         };
@@ -5054,9 +7044,9 @@
 
     function summarizeActionDate(day) {
       const items = getActionDateItems(day);
-      const done = items.filter(item => item.status === "已完成").length;
+      const done = items.filter(item => ["已完成", "已确认结果"].includes(item.status)).length;
       const doing = items.filter(item => item.status === "进行中").length;
-      const pending = items.filter(item => ["待确认", "待复盘", "暂缓", "阻塞", "观察中"].includes(item.status)).length;
+      const pending = items.filter(item => ["待确认", "待确认结果", "待复盘", "暂缓", "阻塞", "观察中"].includes(item.status)).length;
       return { items, done, doing, pending };
     }
 
@@ -5129,7 +7119,7 @@
       document.getElementById("deepDiveTitle").textContent = `${day.label} · ${day.date}`;
       document.getElementById("deepDiveBody").textContent = "日期快照用于回看当天 App / AI / 用户推进过哪些 Action，以及每个 Action 的状态。";
       document.getElementById("deepDiveNodes").innerHTML = items.map(item => `
-        <div class="formula-node"><strong>${item.status} · ${item.title}</strong><span>${item.business} · ${item.source}</span></div>
+        <div class="formula-node"><strong>${item.status} · ${item.title}</strong><span>${item.business} · ${item.source}${item.result ? ` · ${item.result}` : ""}</span></div>
       `).join("");
       document.getElementById("deepDiveDecision").textContent = "完整日程表在 Action Hub 中查看。";
       navigateTo("deep-dive");
