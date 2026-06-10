@@ -1633,6 +1633,69 @@
       margin-top: 12px;
     }
 
+    .operating-map-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .operating-map-card {
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 8px;
+      background: rgba(248, 250, 252, 0.72);
+      padding: 14px;
+    }
+
+    .operating-map-card h4 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: var(--ink);
+    }
+
+    .map-flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .map-node {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      white-space: nowrap;
+    }
+
+    .map-arrow {
+      color: var(--soft);
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .map-node-button {
+      cursor: pointer;
+    }
+
+    .map-node-button:hover {
+      color: var(--accent);
+      border-color: rgba(37, 99, 235, 0.26);
+      background: rgba(239, 246, 255, 0.82);
+    }
+
+    .map-link-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
     .list {
       display: grid;
       gap: 8px;
@@ -1945,7 +2008,7 @@
         grid-column: 1;
         grid-row: 2;
       }
-      .metric-row, .profit-subgrid, .workflow-picker, .quick-row, .dimension-grid, .dimension-control, .evidence-grid, .raw-source-grid { grid-template-columns: 1fr; }
+      .metric-row, .profit-subgrid, .workflow-picker, .quick-row, .dimension-grid, .dimension-control, .evidence-grid, .raw-source-grid, .operating-map-grid, .map-link-row { grid-template-columns: 1fr; }
       .dimension-table-row { grid-template-columns: minmax(0, 1fr) auto; }
       .dimension-table-row.header { display: none; }
       .dimension-table-row span { font-size: 12px; }
@@ -2344,6 +2407,7 @@
           <div class="quick-row">
             <button class="workflow-button" type="button" data-open="workflow"><strong>Workflow Monitor</strong><span>运行、确认、模板</span></button>
             <button class="workflow-button" type="button" data-open="realtime"><strong>Realtime Monitor</strong><span>实时信号、观察、异常</span></button>
+            <button class="workflow-button" type="button" onclick="openOperatingMap()"><strong>系统图谱</strong><span>Operating Map / 经营链路</span></button>
             <button class="workflow-button" type="button" onclick="openObjectGraph()"><strong>Object Graph</strong><span>Metric / Insight / Action / Watch</span></button>
             <button class="workflow-button" type="button" onclick="openFrameworkStates()"><strong>状态样例</strong><span>空态、阻塞、同步失败</span></button>
           </div>
@@ -5069,6 +5133,97 @@
       `).join("");
       document.getElementById("deepDiveDecision").textContent = "完整日程表在 Action Hub 中查看。";
       navigateTo("deep-dive");
+    }
+
+    function renderMapFlow(items) {
+      return `<div class="map-flow">${items.map((item, index) => {
+        const node = typeof item === "string"
+          ? `<span class="map-node">${item}</span>`
+          : `<button class="map-node map-node-button" type="button" onclick="${item.action}">${item.label}</button>`;
+        return `${index ? `<span class="map-arrow">→</span>` : ""}${node}`;
+      }).join("")}</div>`;
+    }
+
+    function openOperatingMap() {
+      state.navStack = ["research"];
+      applyDeepDiveContract({
+        routeType: "operating-map",
+        intent: "查看 AI COO 主框架图谱",
+        back: "research",
+        path: ["Research Center", "系统图谱"],
+        context: ["轻入口", "框架校验", "不进入一级侧栏"],
+        primaryTitle: "Operating Map",
+        decisionTitle: "可跳转对象",
+        next: "从图谱回到对应模块继续验证"
+      });
+      saveState();
+      document.getElementById("deepDiveTitle").textContent = "系统图谱";
+      document.getElementById("deepDiveBody").textContent = "这不是日常经营首页，而是把主文档的核心框架转成可视化校验入口。";
+      document.getElementById("deepDiveNodes").innerHTML = `
+        <div class="operating-map-grid">
+          <section class="operating-map-card">
+            <h4>经营判断链路</h4>
+            ${renderMapFlow([
+              "时间上下文",
+              "经营状态",
+              "影响范围",
+              "驱动拆解",
+              { label: "证据反证", action: "openDataSourceExplorer()" },
+              "Agent 判断",
+              "分流闭环"
+            ])}
+          </section>
+          <section class="operating-map-card">
+            <h4>Console 四工作区</h4>
+            ${renderMapFlow([
+              { label: "数据决策", action: "navigateTo('home')" },
+              { label: "主动发起", action: "navigateTo('initiate')" },
+              { label: "Action Hub", action: "navigateTo('action')" },
+              { label: "Research Center", action: "navigateTo('research')" }
+            ])}
+          </section>
+          <section class="operating-map-card">
+            <h4>对象关系图</h4>
+            ${renderMapFlow([
+              "Metric",
+              "Insight",
+              "Action",
+              "Watch",
+              "Research",
+              "Experiment",
+              "Memory",
+              "Workflow Run"
+            ])}
+            <div class="map-link-row">
+              <button class="action-button" type="button" onclick="openObjectGraph()">打开 Object Graph</button>
+            </div>
+          </section>
+          <section class="operating-map-card">
+            <h4>Action 生命周期</h4>
+            ${renderMapFlow([
+              "待确认",
+              "进行中",
+              "暂缓",
+              "阻塞",
+              "已完成",
+              "待复盘",
+              "已归档"
+            ])}
+            <div class="map-link-row">
+              <button class="action-button" type="button" onclick="navigateTo('action')">去 Action Hub</button>
+            </div>
+          </section>
+        </div>
+      `;
+      document.getElementById("deepDiveDecision").innerHTML = `
+        <div class="map-link-row">
+          <button class="action-button primary" type="button" onclick="openDataSourceExplorer()">数据源 / 证据</button>
+          <button class="action-button" type="button" onclick="openObjectGraph()">Object Graph</button>
+          <button class="action-button" type="button" onclick="navigateTo('action')">Action Hub</button>
+          <button class="action-button" type="button" onclick="openFrameworkStates()">状态样例</button>
+        </div>
+      `;
+      navigateTo("deep-dive", { preserveStack: true });
     }
 
     function openObjectGraph() {
