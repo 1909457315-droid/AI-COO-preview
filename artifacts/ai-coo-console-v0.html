@@ -2313,9 +2313,42 @@
         <article class="detail-card">
           <h3>快捷入口</h3>
           <div class="quick-row">
+            <button class="workflow-button" type="button" data-open="ai-ua-expert"><strong>AI投放专家</strong><span>Camp 数据源 / Campaign 判断</span></button>
             <button class="workflow-button" type="button" onclick="selectWorkflow('Requirement Workflow','新需求、PRD、UI、开发、测试、上线验证')"><strong>需求</strong><span>PRD / UI</span></button>
             <button class="workflow-button" type="button" onclick="selectWorkflow('Product Iteration Workflow','产品漏斗、支付页、版本、活动迭代')"><strong>迭代</strong><span>产品 / 支付页</span></button>
           </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-ai-ua-expert">
+      <div class="detail-head">
+        <div>
+          <h2>AI投放专家</h2>
+          <p>Camp 数据源接口接入状态。</p>
+        </div>
+        <button class="back" type="button" data-open="initiate">返回主动发起</button>
+      </div>
+      <div class="detail-grid">
+        <article class="detail-card wide">
+          <h3>Camp 数据源</h3>
+          <div class="module-bar" id="aiUaCampSummary"></div>
+          <div class="button-row">
+            <button class="action-button primary" type="button" id="syncCampPrototype">刷新 Camp 数据</button>
+            <button class="action-button" type="button" onclick="toast('正式接口：GET /api/ai-ua-expert/camp/sync/:jobId')">查看同步状态</button>
+          </div>
+        </article>
+        <article class="detail-card">
+          <h3>同步状态</h3>
+          <div class="list" id="aiUaCampStatus"></div>
+        </article>
+        <article class="detail-card">
+          <h3>接口契约</h3>
+          <div class="formula-path" id="aiUaCampEndpoints"></div>
+        </article>
+        <article class="detail-card wide">
+          <h3>接入原则</h3>
+          <div id="aiUaCampRules"></div>
         </article>
       </div>
     </section>
@@ -2582,7 +2615,16 @@
       selectedWorkflowName: "",
       selectedWorkflowDesc: "",
       deepDiveBack: "home",
-      quickNote: ""
+      quickNote: "",
+      aiUaCamp: {
+        status: "正常",
+        lastSync: "2026-06-22 09:09",
+        dateRange: "2026-05-22 ~ 2026-06-21",
+        products: 18,
+        rows: 12938,
+        pages: 33,
+        message: "本地接口缓存可用"
+      }
     };
 
     const data = {
@@ -5226,7 +5268,7 @@
 
     function statusClass(value) {
       if (["正常", "已确认", "已完成", "观察中", "已确认结果"].includes(value)) return "ok";
-      if (["到期复查", "待确认", "暂缓", "待复盘", "待确认结果"].includes(value)) return "watch";
+      if (["到期复查", "待确认", "暂缓", "待复盘", "待确认结果", "同步中"].includes(value)) return "watch";
       if (["高风险", "已升级", "阻塞"].includes(value)) return "risk";
       return "info";
     }
@@ -5251,6 +5293,7 @@
         watch: "action",
         "deep-dive": state.deepDiveBack === "watch" ? "action" : (state.deepDiveBack || "home"),
         initiate: "initiate",
+        "ai-ua-expert": "initiate",
         "workflow-detail": "initiate",
         action: "action",
         notify: "action",
@@ -5273,6 +5316,7 @@
         "iaa-detail": "IAA 回收分析",
         "iap-detail": "IAP 订阅质量",
         initiate: "主动发起",
+        "ai-ua-expert": "AI投放专家",
         "workflow-detail": "Workflow 草案",
         action: "Action Hub",
         watch: "观察期",
@@ -5293,6 +5337,7 @@
       const staticPaths = {
         home: ["数据决策"],
         initiate: ["主动发起"],
+        "ai-ua-expert": ["主动发起", "AI投放专家"],
         "workflow-detail": ["主动发起", "Workflow 草案"],
         action: ["Action Hub"],
         watch: ["Action Hub", "观察期"],
@@ -6453,6 +6498,78 @@
       `).join("");
     }
 
+    function renderAiUaExpert() {
+      const summary = document.getElementById("aiUaCampSummary");
+      if (!summary) return;
+      const camp = { ...seedState.aiUaCamp, ...(state.aiUaCamp || {}) };
+      state.aiUaCamp = camp;
+      summary.innerHTML = [
+        ["状态", camp.status],
+        ["产品", camp.products],
+        ["行数", Number(camp.rows || 0).toLocaleString("zh-CN")],
+        ["分页", `${camp.pages} 页`]
+      ].map(item => `
+        <div class="mini-stat"><b>${item[0]}</b><strong>${item[1]}</strong></div>
+      `).join("");
+
+      document.getElementById("aiUaCampStatus").innerHTML = [
+        ["最近同步", camp.lastSync, camp.status],
+        ["日期范围", camp.dateRange, "全部"],
+        ["缓存结果", camp.message, camp.status]
+      ].map(item => `
+        <div class="row">
+          <div><h4>${item[0]}</h4><p>${item[1]}</p></div>
+          <span class="status ${statusClass(item[2])}">${item[2]}</span>
+        </div>
+      `).join("");
+
+      document.getElementById("aiUaCampEndpoints").innerHTML = [
+        ["健康检查", "GET /api/ai-ua-expert/camp/health"],
+        ["触发同步", "POST /api/ai-ua-expert/camp/sync"],
+        ["同步进度", "GET /api/ai-ua-expert/camp/sync/:jobId"],
+        ["最新数据", "GET /api/ai-ua-expert/camp/latest"],
+        ["CSV 缓存", "GET /api/ai-ua-expert/camp/latest.csv"]
+      ].map(item => `
+        <div class="formula-node"><strong>${item[0]}</strong><span>${item[1]}</span></div>
+      `).join("");
+
+      document.getElementById("aiUaCampRules").innerHTML = renderReportTable([
+        { key: "rule", label: "规则" },
+        { key: "detail", label: "当前口径", wrap: true }
+      ], [
+        { rule: "产品", detail: "读取 BI 上线产品列表，选择全部产品，不固定单个产品。" },
+        { rule: "国家 / 渠道", detail: "默认均为全部，页面分析时再按国家、渠道、账号、campaign 下钻。" },
+        { rule: "分页", detail: "固定 400 条/页顺序拉取，避开 BI 的 export=true 慢路径。" },
+        { rule: "凭据", detail: "账号、密码、Cookie 只从本机环境变量读取，不写进项目文件。" }
+      ], { minWidth: 760 });
+    }
+
+    function simulateCampSync() {
+      const camp = { ...seedState.aiUaCamp, ...(state.aiUaCamp || {}) };
+      state.aiUaCamp = {
+        ...camp,
+        status: "同步中",
+        message: "正在按 400 条/页顺序拉取"
+      };
+      saveState();
+      renderAiUaExpert();
+      toast("Camp 同步已开始");
+      clearTimeout(simulateCampSync.timer);
+      simulateCampSync.timer = setTimeout(() => {
+        state.aiUaCamp = {
+          ...state.aiUaCamp,
+          status: "正常",
+          lastSync: "刚刚",
+          rows: 12938,
+          pages: 33,
+          message: "本地接口缓存已刷新"
+        };
+        saveState();
+        renderAiUaExpert();
+        toast("Camp 缓存已刷新");
+      }, 800);
+    }
+
     const dimensionLabels = {
       product: "产品",
       channel: "渠道",
@@ -7516,6 +7633,7 @@
       renderWatch();
       renderWorkflowPicker();
       renderWorkflowDetail();
+      renderAiUaExpert();
       renderActions();
       renderReminders();
       renderMessages();
@@ -7555,6 +7673,10 @@
       renderWorkflowDraft();
       renderWorkflowDetail();
       toast("已清空 Workflow 选择");
+    });
+
+    document.getElementById("syncCampPrototype").addEventListener("click", () => {
+      simulateCampSync();
     });
 
     document.getElementById("deepDiveBack").addEventListener("click", () => {
